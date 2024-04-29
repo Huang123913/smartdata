@@ -27,6 +27,8 @@ import { UsersModule } from '~/modules/users/users.module';
 import { AuthModule } from '~/modules/auth/auth.module';
 import { packageInfo } from '~/utils/packageVersion';
 
+import { SmartDataModule } from '~/modules/smartdata/smartdata.module';
+
 export const ceModuleConfig = {
   imports: [
     GlobalModule,
@@ -36,6 +38,7 @@ export const ceModuleConfig = {
     DatasModule,
     EventEmitterModule,
     JobsModule,
+    SmartDataModule,
     NestJsEventEmitter.forRoot(),
     ConfigModule.forRoot({
       load: [() => appConfig],
