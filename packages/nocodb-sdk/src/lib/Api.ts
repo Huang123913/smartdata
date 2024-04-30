@@ -11489,4 +11489,20 @@ export class Api<
         ...params,
       }),
   };
+  smartData = {
+    /**
+     * @description Train LLM
+     *
+     * @tags SmartData
+     * @name Train
+     * @summary Train LLM
+     * @request POST:/api/v2/smartdata/train
+     */
+    train: (params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/train`,
+        method: 'POST',
+        ...params,
+      }),
+  };
 }

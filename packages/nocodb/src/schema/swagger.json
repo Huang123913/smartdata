@@ -56,6 +56,12 @@
         "Org Tokens",
         "Org Users"
       ]
+    },
+    {
+      "name": "SmartData APIs",
+      "tags": [
+        "SmartData"
+      ]
     }
   ],
   "servers": [
@@ -17328,6 +17334,16 @@
           "$ref": "#/components/parameters/xc-auth"
         }
       ]
+    },
+    "/api/v2/smartdata/train": {
+      "post": {
+        "summary": "Train LLM",
+        "operationId": "train",
+        "description": "Train LLM",
+        "tags": [
+          "SmartData"
+        ]
+      }
     }
   },
   "components": {

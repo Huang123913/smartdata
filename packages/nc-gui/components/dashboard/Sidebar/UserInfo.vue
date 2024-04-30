@@ -29,7 +29,11 @@ const isAuthTokenCopied = ref(false)
 
 const isLoggingOut = ref(false)
 
+const isTraining = ref(false)
+
 const { isMobileMode } = useGlobal()
+
+const { train } = useSmartDataStore()
 
 const logout = async () => {
   isLoggingOut.value = true
@@ -54,6 +58,17 @@ const onCopy = async () => {
   } catch (e: any) {
     console.error(e)
     message.error(e.message)
+  }
+}
+
+const onTrain = async () => {
+  isTraining.value = true
+  try {
+    await train()
+  } catch (e) {
+    console.error(e)
+  } finally {
+    isTraining.value = false
   }
 }
 
@@ -198,6 +213,14 @@ onMounted(() => {
                 <span class="menu-btn"> {{ $t('title.docs') }} </span>
               </NcMenuItem>
             </a>
+
+            <NcDivider />
+
+            <NcMenuItem class="!text-red-500 !hover:bg-red-50" @click="onTrain">
+              <GeneralLoader v-if="isTraining" class="menu-icon mt-0.5 !text-red-500" />
+              <GeneralIcon v-else icon="databaseSync" class="menu-icon mt-0.5" />
+              <span class="menu-btn">重置数据 (LLM)</span>
+            </NcMenuItem>
 
             <NcDivider />
 
