@@ -68,7 +68,7 @@ watch(projectPageTab, () => {
 watch(
   () => openedProject.value?.title,
   () => {
-    useTitle(`${openedProject.value?.title ?? activeWorkspace.value?.title ?? 'NocoDB'}`)
+    useTitle(`${openedProject.value?.title ?? activeWorkspace.value?.title ?? 'SmartData'}`)
   },
 )
 </script>

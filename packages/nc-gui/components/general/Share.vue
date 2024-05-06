@@ -15,7 +15,7 @@ interface Props {
 const {
   url,
   socialMedias,
-  title = 'NocoDB',
+  title = 'SmartData',
   summary,
   hashTags = '',
   css = '',
@@ -33,7 +33,7 @@ const summaryArr = [
 
 const shareUrl = computed(() => encodeURIComponent(url))
 
-const encodedTitle = computed(() => encodeURIComponent(title || 'NocoDB'))
+const encodedTitle = computed(() => encodeURIComponent(title || 'SmartData'))
 
 const encodedSummary = computed(() => encodeURIComponent(summary || summaryArr[Math.floor(Math.random() * summaryArr.length)]))
 

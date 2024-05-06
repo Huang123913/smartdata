@@ -8,6 +8,6 @@ import { openLink } from '#imports'
     @click="openLink('https://github.com/nocodb/nocodb')"
   >
     <img src="~assets/img/brand/nocodb-logo.svg" alt="NocoDB" class="flex-none w-6 h-6" />
-    <div class="text-sm">NocoDB Forms</div>
+    <div class="text-sm">SmartData Forms</div>
   </div>
 </template>
