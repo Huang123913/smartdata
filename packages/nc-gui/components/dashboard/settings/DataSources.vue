@@ -290,6 +290,7 @@ const isEditBaseModalOpen = computed({
 <template>
   <div class="flex flex-row w-full h-full nc-data-sources-view">
     <div class="flex flex-col w-full overflow-auto">
+      <!--
       <div class="flex flex-row w-full justify-end mt-6 mb-5">
         <NcButton
           v-if="dataSourcesAwakened"
@@ -304,6 +305,7 @@ const isEditBaseModalOpen = computed({
           </div>
         </NcButton>
       </div>
+      -->
       <div
         class="overflow-y-auto nc-scrollbar-md"
         :style="{

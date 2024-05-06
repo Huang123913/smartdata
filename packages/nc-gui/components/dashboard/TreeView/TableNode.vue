@@ -340,7 +340,9 @@ watch(openedTableId, () => {
       :base-id="base.id"
     />
 
+    <!--
     <DashboardTreeViewViewsList v-if="isExpanded" :table-id="table.id" :base-id="base.id" />
+    -->
   </div>
 </template>
 

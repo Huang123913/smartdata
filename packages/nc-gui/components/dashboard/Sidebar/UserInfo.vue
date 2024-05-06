@@ -114,6 +114,7 @@ onMounted(() => {
               <span class="menu-btn"> {{ $t('general.logout') }}</span>
             </div>
           </NcMenuItem>
+          <!--
           <template v-if="!isMobileMode">
             <NcMenuItem @click="onCopy">
               <div v-e="['c:auth-token:copy']" class="flex gap-2 items-center">
@@ -161,6 +162,7 @@ onMounted(() => {
               <span class="menu-btn"> {{ $t('labels.twitter') }} </span>
             </NcMenuItem>
           </a>
+          -->
           <template v-if="!appInfo.ee">
             <NcDivider />
             <a-popover key="language" class="lang-menu !py-1.5" placement="rightBottom">
@@ -186,6 +188,7 @@ onMounted(() => {
           </template>
 
           <template v-if="!isMobileMode">
+            <!-- 
             <NcDivider />
 
             <a
@@ -213,6 +216,7 @@ onMounted(() => {
                 <span class="menu-btn"> {{ $t('title.docs') }} </span>
               </NcMenuItem>
             </a>
+            -->
 
             <NcDivider />
 
@@ -232,11 +236,13 @@ onMounted(() => {
       </template>
     </NcDropdown>
 
+    <!-- 
     <template v-if="isMobileMode"></template>
     <div v-else-if="appInfo.ee" class="text-gray-500 text-xs pl-3 mt-1">© 2023 NocoDB. Inc</div>
     <div v-else class="flex flex-row w-full justify-between pt-0.5 truncate">
       <GeneralJoinCloud />
     </div>
+    -->
   </div>
 </template>
 

@@ -8,6 +8,12 @@ export enum ClientType {
 }
 
 export enum Language {
+  en = 'English',
+  'zh-Hans' = '简体中文',
+}
+
+/**
+export enum Language {
   ar = 'العربية',
   bn_IN = 'বাংলা',
   cs = 'Czech',
@@ -43,6 +49,7 @@ export enum Language {
   'zh-Hans' = '简体中文',
   'zh-Hant' = '繁體中文',
 }
+*/
 
 export enum LanguageAlias {
   zn_CN = 'zh-Hans',

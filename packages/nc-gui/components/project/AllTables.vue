@@ -96,6 +96,7 @@ const onCreateBaseClick = () => {
         <GeneralIcon icon="addOutlineBox" />
         <div class="label">{{ $t('general.new') }} {{ $t('objects.table') }}</div>
       </div>
+      <!--
       <div
         v-if="isUIAllowed('tableCreate')"
         v-e="['c:table:import']"
@@ -127,6 +128,7 @@ const onCreateBaseClick = () => {
           <div class="label">{{ $t('labels.connectDataSource') }}</div>
         </div>
       </component>
+      -->
     </div>
     <div
       v-if="base?.isLoading"
