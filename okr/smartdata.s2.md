@@ -7,7 +7,7 @@
 3. 前端体验优化
 4. 支持单机部署
 
----
+-------------------------------------------------------------------------------
 
 ### 场景拆分:
 
@@ -50,7 +50,7 @@
 > 优先级: 🟢 高(16), 🟡 中(7), ⚪️ 低(13), ❔ 暂缓(18)
 
 - 数据操作接口
-   1. 🟢 List Table Records (**进行中**)
+   1. 🟢 List Table Records
    2. 🟢 Create Table Records
    3. 🟢 Update Table Records
    4. 🟢 Delete Table Records
@@ -116,6 +116,30 @@
    4. ⚪️ Update Sort
    5. ⚪️ Delete Sort
 
+-------------------------------------------------------------------------------
+
+## 接口实现 (第一阶段)
+> 目标: 能进入表页面查看
+> 🟢: 后端实现, 前端对接
+> 🟡: 前端实现
+
+### 进入: 项目 (查看)
+   - 🟢️ List Projects `/api/v1/db/meta/projects` **后端:已提供, 前端:对接中**
+   - 🟡 Get command palette suggestions `/api/v1/db/meta/audits/comments`
+   - 🟡 Get User Info `/api/v1/auth/user/me` **前端:进行中**
+   - 🟢 Get Base `/api/v1/db/meta/projects/{baseId}` **后端:已提供, 前端:未对接**
+   - 🟡 Get User Info `/api/v1/auth/user/me?base_id=`
+   - 🟢 List Tables `/api/v1/db/meta/projects/{baseId}/tables` **后端:进行中, 前端:未对接**
+   - 🟡 List Base Users `/api/v1/db/meta/projects/{baseId}/users`
+
+### 进入: 表格 (查看)
+   - 🟢 Read Table `/api/v1/db/meta/tables/{tableId}`
+   - 🟢 List Views `/api/v1/db/meta/tables/{tableId}/views`
+   - 🟢 List Columns In View `/api/v1/db/meta/views/{viewId}/columns`
+   - 🟢️ List Table View Rows `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}`
+   - 🟡️ Get View Filter `/api/v1/db/meta/views/{viewId}/filters`
+   - 🟡️ List View Sorts `/api/v1/db/meta/views/{viewId}/sorts`
+
 ## 5.6
 
 ### 前端
@@ -123,12 +147,8 @@
 > 目前已收到接口规范，明天看自尊把 nocodb 的接口拦截转换一下
 
    - 【进行中】迁移后端请求到 Nuxt 后端 
-   - 【进行中】发布模型时可选择发布至现有模型界面
-   - 【完成】发布模型是可设置数据更新频率 (先做界面)
-   - 【完成】分享页面时 OEM 信息调整
-   - 【完成】增加管理员重置训练数据入口 (未部署, 等后端合并迁移)
-   - 【完成】移除多语言选项中的协助翻译
-   - 【完成】新增表格、移除导入、新建数据源入口
+   - 【进行中】处理权限控制相关 (拦截器、权限校验前端模拟返回有权限) 
+   - 【进行中】发布模型时可选择发布至现有模型界面 (剩余字段映射逻辑)
 
 ### 后端
 1. 生成 DDL 接口-调整 （2024-04-28）
@@ -141,9 +161,14 @@
    - d.【完成】查询结果集中空列名的兜底处理（2024-04-29）
 
 3. 模型发布&保存接口-调整（2024-04-30）
-   - a.【进行中】支持删除模型表的发布功能
+   - a.【完成】支持删除模型表的发布功能
 
 4. 模型复制接口-新实现（2024-04-30）
    - a.【完成】支持模型的复制
    - b.支持模型复制的物理表结构发布
    - c.支持模型复制的物理表数据复制
+
+5 接口实现
+   - https://meta-apis-v1.nocodb.com/#tag/Base/operation/base-list ++**（联调中）**++
+   - https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-list ++**（开发中）**++
+   - https://meta-apis-v1.nocodb.com/#tag/Base/operation/base-read  **++（联调中）++**
