@@ -694,7 +694,7 @@
       "deletedField": "已删除的字段",
       "incompleteConfiguration": "配置不完整",
       "selectField": "请设置需要查询的字段",
-      "selectFieldLabel": "Begin by selecting a field to customise its properties and structure."
+      "selectFieldLabel": "首先选择一个字段以自定义其属性和结构。"
     },
     "appearanceSettings": "外观设置",
     "backgroundColor": "背景颜色",
@@ -975,7 +975,7 @@
     "clientCert": "选择 .cert 文件",
     "clientCA": "选择 CA 文件",
     "changeIconColour": "更改图标颜色",
-    "preFillFormInfo": "Generate share form URL with pre-filled field data. To get a pre-filled link, make sure you’ve filled the necessary fields in the form view builder.",
+    "preFillFormInfo": "生成带有预填充字段数据的共享表单URL。要获取预填充链接，请确保您已在表单视图构建器中填写了必要的字段。",
     "surveyFormInfo": "单页单表单字段模式"
   },
   "placeholder": {
@@ -1024,11 +1024,11 @@
     "value": "值",
     "key": "键",
     "createTable": "创建第一张数据表",
-    "createTableLabel": "Create your first table effortlessly, from scratch, or by importing/connecting to an external database.",
+    "createTableLabel": "轻松地从零开始创建您的第一张表格，或通过导入/连接到外部数据库。",
     "noTokenCreated": "没有创建 API 令牌",
-    "noTokenCreatedLabel": "Begin by creating API tokens to unlock advanced functionalities.",
+    "noTokenCreatedLabel": "首先创建API令牌以解锁高级功能。",
     "inviteYourTeam": "邀请成员到您的团队",
-    "inviteYourTeamLabel": "Streamline collaboration and productivity with your team – start by inviting them to join your workspace.",
+    "inviteYourTeamLabel": "通过邀请他们加入您的工作空间，简化与团队的协作和生产力。",
     "searchOptions": "搜索选项"
   },
   "msg": {
@@ -1137,7 +1137,7 @@
     "tooLargeFieldEntity": "字段太大，无法转换为 {entity}",
     "roleRequired": "角色要求",
     "warning": {
-      "calendarNoFields": "Calendar view requires a date or date time field to be setup. Try setting up a calendar view after adding a date / date time field!",
+      "calendarNoFields": "日历视图需要设置日期或日期时间字段。尝试在添加日期/日期时间字段后设置日历视图！",
       "kanbanNoFields": "看板视图需要添加一个选择字段",
       "mapNoFields": "地图视图需要添加一个位置字段",
       "dbValid": "请确保您尝试连接的数据库有效！此操作可能导致模式丢失",
