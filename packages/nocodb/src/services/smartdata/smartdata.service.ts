@@ -142,4 +142,12 @@ export class SmartDataService {
       return r.data;
     });
   }
+
+  async getBaseTables(baseId: string, sourceId: string) {
+    return await mcdm({
+      url: `/module-operation!executeOperation?operation=NocodbDBTableListTables&baseId=${baseId}`,
+    }).then((r) => {
+      return r.data;
+    });
+  }
 }

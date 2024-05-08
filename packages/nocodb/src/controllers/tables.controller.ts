@@ -18,10 +18,15 @@ import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { PagedResponseImpl } from '~/helpers/PagedResponse';
 import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
 
+import { SmartDataService } from '~/services/smartdata/smartdata.service';
+
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
 export class TablesController {
-  constructor(private readonly tablesService: TablesService) {}
+  constructor(
+    private readonly tablesService: TablesService,
+    private readonly smartdataService: SmartDataService,
+  ) {}
 
   @Get([
     '/api/v1/db/meta/projects/:baseId/tables',
@@ -36,6 +41,7 @@ export class TablesController {
     @Query('includeM2M') includeM2M: string,
     @Request() req,
   ) {
+    return await this.smartdataService.getBaseTables(baseId, sourceId);
     return new PagedResponseImpl(
       await this.tablesService.getAccessibleTables({
         baseId,
