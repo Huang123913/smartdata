@@ -12,6 +12,11 @@ const mcdm = axios.create({
   baseURL: 'http://databoard-test.yindangu.com',
 });
 
+const _mcdm = axios.create({
+  method: 'POST',
+  baseURL: 'http://192.168.0.158:9909',
+});
+
 @Injectable()
 export class SmartDataService {
   async train() {
@@ -123,6 +128,22 @@ export class SmartDataService {
       },
     }).then((r) => {
       return r.data.data?.ddl?.join('\n');
+    });
+  }
+
+  async getBases() {
+    return await _mcdm({
+      url: '/module-operation!executeOperation?operation=NocodbBaseListProjects',
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async getBase(baseId: string) {
+    return await _mcdm({
+      url: `/module-operation!executeOperation?operation=NocodbBaseGetBase&baseId=${baseId}`,
+    }).then((r) => {
+      return r.data;
     });
   }
 }

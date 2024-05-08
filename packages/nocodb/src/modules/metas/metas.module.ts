@@ -77,6 +77,8 @@ import { NotificationsGateway } from '~/gateways/notifications/notifications.gat
 import { CommandPaletteService } from '~/services/command-palette.service';
 import { CommandPaletteController } from '~/controllers/command-palette.controller';
 
+import { SmartDataService } from '~/services/smartdata/smartdata.service';
+
 export const metaModuleMetadata = {
   imports: [
     MulterModule.register({
@@ -169,6 +171,9 @@ export const metaModuleMetadata = {
     NotificationsService,
     NotificationsGateway,
     CommandPaletteService,
+
+    // SmartData
+    SmartDataService,
   ],
   exports: [
     TablesService,

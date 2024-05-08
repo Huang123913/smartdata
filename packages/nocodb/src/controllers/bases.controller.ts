@@ -24,16 +24,22 @@ import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { Filter } from '~/models';
 import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
 
+import { SmartDataService } from '~/services/smartdata/smartdata.service';
+
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
 @Controller()
 export class BasesController {
-  constructor(protected readonly projectsService: BasesService) {}
+  constructor(
+    protected readonly projectsService: BasesService,
+    protected readonly smartdataService: SmartDataService,
+  ) {}
 
   @Acl('baseList', {
     scope: 'org',
   })
   @Get(['/api/v1/db/meta/projects/', '/api/v2/meta/bases/'])
   async list(@Query() queryParams: Record<string, any>, @Req() req: Request) {
+    return await this.smartdataService.getBases();
     const bases = await this.projectsService.baseList({
       user: req.user,
       query: queryParams,
@@ -63,6 +69,7 @@ export class BasesController {
   @Acl('baseGet')
   @Get(['/api/v1/db/meta/projects/:baseId', '/api/v2/meta/bases/:baseId'])
   async baseGet(@Param('baseId') baseId: string) {
+    return await this.smartdataService.getBase(baseId);
     const base = await this.projectsService.getProjectWithInfo({
       baseId: baseId,
     });
