@@ -468,6 +468,7 @@ const projectDelete = () => {
 
           <NcDropdown v-if="!isSharedBase" v-model:visible="isOptionsOpen" :trigger="['click']">
             <NcButton
+              disabled
               v-e="['c:base:options']"
               class="nc-sidebar-node-btn"
               :class="{ '!text-black !opacity-100': isOptionsOpen }"
