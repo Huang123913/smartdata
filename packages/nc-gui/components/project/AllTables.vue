@@ -15,6 +15,8 @@ const isDataSourceLimitReached = computed(() => Number(openedProject.value?.sour
 
 const { isUIAllowed } = useRoles()
 
+const { navigateToPlayground } = useSmartDataStore()
+
 const { $e } = useNuxtApp()
 
 const isImportModalOpen = ref(false)
@@ -71,6 +73,10 @@ function openTableCreateDialog(baseIndex?: number | undefined) {
   }
 }
 
+const onCreateClick = () => {
+  navigateToPlayground()
+}
+
 const onCreateBaseClick = () => {
   if (isDataSourceLimitReached.value) return
 
@@ -91,12 +97,22 @@ const onCreateBaseClick = () => {
         role="button"
         class="nc-base-view-all-table-btn"
         data-testid="proj-view-btn__add-new-table"
-        @click="openTableCreateDialog()"
+        @click="onCreateClick()"
       >
         <GeneralIcon icon="addOutlineBox" />
         <div class="label">{{ $t('general.new') }} {{ $t('objects.table') }}</div>
       </div>
       <!--
+      <div
+        v-if="isUIAllowed('tableCreate')"
+        role="button"
+        class="nc-base-view-all-table-btn"
+        data-testid="proj-view-btn__add-new-table"
+        @click="openTableCreateDialog()"
+      >
+        <GeneralIcon icon="addOutlineBox" />
+        <div class="label">{{ $t('general.new') }} {{ $t('objects.table') }}</div>
+      </div>
       <div
         v-if="isUIAllowed('tableCreate')"
         v-e="['c:table:import']"
