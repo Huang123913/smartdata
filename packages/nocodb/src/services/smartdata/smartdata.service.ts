@@ -4,17 +4,13 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 
 const llm = axios.create({
-  baseURL: 'https://c538-14-123-253-17.ngrok-free.app/api/v0',
+  baseURL:
+    process.env.LLM_URL ?? `https://c538-14-123-253-17.ngrok-free.app/api/v0`,
 });
 
 const mcdm = axios.create({
   method: 'POST',
-  baseURL: 'http://databoard-test.yindangu.com',
-});
-
-const _mcdm = axios.create({
-  method: 'POST',
-  baseURL: 'http://192.168.0.158:9909',
+  baseURL: process.env.MCDM_URL ?? `http://databoard-test.yindangu.com`,
 });
 
 @Injectable()
@@ -132,7 +128,7 @@ export class SmartDataService {
   }
 
   async getBases() {
-    return await _mcdm({
+    return await mcdm({
       url: '/module-operation!executeOperation?operation=NocodbBaseListProjects',
     }).then((r) => {
       return r.data;
@@ -140,7 +136,7 @@ export class SmartDataService {
   }
 
   async getBase(baseId: string) {
-    return await _mcdm({
+    return await mcdm({
       url: `/module-operation!executeOperation?operation=NocodbBaseGetBase&baseId=${baseId}`,
     }).then((r) => {
       return r.data;
