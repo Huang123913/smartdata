@@ -124,31 +124,36 @@
 > 🟡: 前端实现
 
 ### 进入: 项目 (查看)
-   - 🟢️ List Projects `/api/v1/db/meta/projects` **后端:已提供, 前端:对接中**
-   - 🟡 Get command palette suggestions `/api/v1/db/meta/audits/comments`
-   - 🟡 Get User Info `/api/v1/auth/user/me` **前端:进行中**
-   - 🟢 Get Base `/api/v1/db/meta/projects/{baseId}` **后端:已提供, 前端:未对接**
-   - 🟡 Get User Info `/api/v1/auth/user/me?base_id=`
-   - 🟢 List Tables `/api/v1/db/meta/projects/{baseId}/tables` **后端:进行中, 前端:未对接**
-   - 🟡 List Base Users `/api/v1/db/meta/projects/{baseId}/users`
+   - 🟢️ List Projects `/api/v1/db/meta/projects` **完成**
+   - 🟡 Get command palette suggestions `/api/v1/db/meta/audits/comments`**完成**
+   - 🟡 Get User Info `/api/v1/auth/user/me` **完成**
+   - 🟢 Get Base `/api/v1/db/meta/projects/{baseId}` **完成**
+   - 🟡 Get User Info `/api/v1/auth/user/me?base_id=` **完成**
+   - 🟢 List Tables `/api/v1/db/meta/projects/{baseId}/tables` **完成**
+   - 🟡 List Base Users `/api/v1/db/meta/projects/{baseId}/users` **完成**
 
 ### 进入: 表格 (查看)
-   - 🟢 Read Table `/api/v1/db/meta/tables/{tableId}`
+   - 🟢 Read Table `/api/v1/db/meta/tables/{tableId}` **后端:已提供,前端:进行中**
    - 🟢 List Views `/api/v1/db/meta/tables/{tableId}/views`
    - 🟢 List Columns In View `/api/v1/db/meta/views/{viewId}/columns`
    - 🟢️ List Table View Rows `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}`
-   - 🟡️ Get View Filter `/api/v1/db/meta/views/{viewId}/filters`
-   - 🟡️ List View Sorts `/api/v1/db/meta/views/{viewId}/sorts`
+   - 🟡️ Get View Filter `/api/v1/db/meta/views/{viewId}/filters` **进行中**
+   - 🟡️ List View Sorts `/api/v1/db/meta/views/{viewId}/sorts` **进行中**
 
 ## 5.6
+> 正式环境: http://smartdata.yindangu.com
+> 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
-> 关于后端接口桥接: 后端接口按v的标准提供，前端需要按规范转换一下请求格式
-> 目前已收到接口规范，明天看自尊把 nocodb 的接口拦截转换一下
-
    - 【进行中】迁移后端请求到 Nuxt 后端 
-   - 【进行中】处理权限控制相关 (拦截器、权限校验前端模拟返回有权限) 
-   - 【进行中】发布模型时可选择发布至现有模型界面 (剩余字段映射逻辑)
+   - 【暂缓】发布模型时可选择发布至现有模型界面 (完成UI，未对接接口)
+   - 【完成】处理权限控制相关 (拦截器、权限校验前端模拟返回有权限) 
+   - 【完成】VSQL层面的报错不需要/repair
+   - 【完成】完成 `进入: 项目(查看)` 的 7 个接口联调 (部署到测试环境)
+
+### 平台
+   - 【进行中】V: 弹窗支持调用浏览器局部打印
+   - 【暂缓】V: 前端导出规则不要把隐藏的字段也导出来 (项目不急)
 
 ### 后端
 1. 生成 DDL 接口-调整 （2024-04-28）
@@ -167,8 +172,3 @@
    - a.【完成】支持模型的复制
    - b.支持模型复制的物理表结构发布
    - c.支持模型复制的物理表数据复制
-
-5 接口实现
-   - https://meta-apis-v1.nocodb.com/#tag/Base/operation/base-list ++**（联调中）**++
-   - https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-list ++**（开发中）**++
-   - https://meta-apis-v1.nocodb.com/#tag/Base/operation/base-read  **++（联调中）++**
