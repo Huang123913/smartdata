@@ -133,12 +133,12 @@
    - 🟡 List Base Users `/api/v1/db/meta/projects/{baseId}/users` **完成**
 
 ### 进入: 表格 (查看)
-   - 🟢 Read Table `/api/v1/db/meta/tables/{tableId}` **后端:已提供,前端:进行中**
-   - 🟢 List Views `/api/v1/db/meta/tables/{tableId}/views`
-   - 🟢 List Columns In View `/api/v1/db/meta/views/{viewId}/columns`
-   - 🟢️ List Table View Rows `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}`
-   - 🟡️ Get View Filter `/api/v1/db/meta/views/{viewId}/filters` **进行中**
-   - 🟡️ List View Sorts `/api/v1/db/meta/views/{viewId}/sorts` **进行中**
+   - 🟢 Read Table `/api/v1/db/meta/tables/{tableId}` **完成**
+   - 🟢 List Views `/api/v1/db/meta/tables/{tableId}/views` **完成**
+   - 🟢 List Columns In View `/api/v1/db/meta/views/{viewId}/columns` **完成**
+   - 🟢️ List Table View Rows `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}` **完成**
+   - 🟡️ Get View Filter `/api/v1/db/meta/views/{viewId}/filters` **模拟返回**
+   - 🟡️ List View Sorts `/api/v1/db/meta/views/{viewId}/sorts` **模拟返回**
 
 ## 5.6
 > 正式环境: http://smartdata.yindangu.com
@@ -147,9 +147,9 @@
 ### 前端
    - 【进行中】迁移后端请求到 Nuxt 后端 
    - 【暂缓】发布模型时可选择发布至现有模型界面 (完成UI，未对接接口)
-   - 【完成】处理权限控制相关 (拦截器、权限校验前端模拟返回有权限) 
-   - 【完成】VSQL层面的报错不需要/repair
+   - 【暂缓】新用户进入项目权限问题
    - 【完成】完成 `进入: 项目(查看)` 的 7 个接口联调 (部署到测试环境)
+   - 【完成】完成 `进入: 表格(查看)` 的 6 个接口联调 (部署到测试环境)
 
 ### 平台
    - 【进行中】V: 弹窗支持调用浏览器局部打印
