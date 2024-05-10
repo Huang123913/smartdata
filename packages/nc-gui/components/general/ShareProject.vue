@@ -50,6 +50,7 @@ const copySharedBase = async () => {
     class="nc-share-base-button flex flex-col justify-center h-full"
     data-testid="share-base-button"
     :data-sharetype="visibility"
+    hidden
   >
     <NcButton
       v-e="['c:share:open']"
