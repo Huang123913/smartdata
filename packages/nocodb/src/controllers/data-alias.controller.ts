@@ -19,10 +19,15 @@ import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { DatasService } from '~/services/datas.service';
 import { DataApiLimiterGuard } from '~/guards/data-api-limiter.guard';
 
+import { SmartDataService } from '~/services/smartdata/smartdata.service';
+
 @Controller()
 @UseGuards(DataApiLimiterGuard, GlobalGuard)
 export class DataAliasController {
-  constructor(private readonly datasService: DatasService) {}
+  constructor(
+    private readonly datasService: DatasService,
+    private readonly smartdataService: SmartDataService,
+  ) {}
 
   // todo: Handle the error case where view doesnt belong to model
   @Get([
@@ -38,6 +43,16 @@ export class DataAliasController {
     @Param('viewName') viewName: string,
     @Query('opt') opt: string,
   ) {
+    if (this.smartdataService.isMcdmRewrite()) {
+      const responseData = await this.smartdataService.getTableViewRows(
+        tableName,
+        viewName,
+        Number(req.query.offset),
+        Number(req.query.limit),
+      );
+      res.json(responseData);
+      return;
+    }
     const startTime = process.hrtime();
     const responseData = await this.datasService.dataList({
       query: req.query,

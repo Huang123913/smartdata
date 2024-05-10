@@ -41,7 +41,8 @@ export class TablesController {
     @Query('includeM2M') includeM2M: string,
     @Request() req,
   ) {
-    return await this.smartdataService.getBaseTables(baseId, sourceId);
+    if (this.smartdataService.isMcdmRewrite())
+      return await this.smartdataService.getBaseTables(baseId, sourceId);
     return new PagedResponseImpl(
       await this.tablesService.getAccessibleTables({
         baseId,
@@ -79,6 +80,8 @@ export class TablesController {
   @Get(['/api/v1/db/meta/tables/:tableId', '/api/v2/meta/tables/:tableId'])
   @Acl('tableGet')
   async tableGet(@Param('tableId') tableId: string, @Request() req) {
+    if (this.smartdataService.isMcdmRewrite())
+      return this.smartdataService.getTable(req.params.tableId);
     const table = await this.tablesService.getTableWithAccessibleViews({
       tableId: req.params.tableId,
       user: req.user,

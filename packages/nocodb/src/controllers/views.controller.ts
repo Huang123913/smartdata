@@ -19,10 +19,15 @@ import { ViewsService } from '~/services/views.service';
 import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
 
+import { SmartDataService } from '~/services/smartdata/smartdata.service';
+
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
 export class ViewsController {
-  constructor(private readonly viewsService: ViewsService) {}
+  constructor(
+    private readonly viewsService: ViewsService,
+    private readonly smartdataService: SmartDataService,
+  ) {}
 
   @Get([
     '/api/v1/db/meta/tables/:tableId/views',
@@ -30,6 +35,8 @@ export class ViewsController {
   ])
   @Acl('viewList')
   async viewList(@Param('tableId') tableId: string, @Req() req: Request) {
+    if (this.smartdataService.isMcdmRewrite())
+      return this.smartdataService.getTableViews(tableId);
     return new PagedResponseImpl(
       await this.viewsService.viewList({
         tableId,

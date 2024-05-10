@@ -1,20 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 
-import axios from 'axios';
-
-const llm = axios.create({
-  baseURL:
-    process.env.LLM_URL ?? `https://c538-14-123-253-17.ngrok-free.app/api/v0`,
-});
-
-const mcdm = axios.create({
-  method: 'POST',
-  baseURL: process.env.MCDM_URL ?? `http://databoard-test.yindangu.com`,
-});
+import axios, { type AxiosInstance } from 'axios';
 
 @Injectable()
 export class SmartDataService {
+  protected llm = axios.create({
+    baseURL:
+      process.env.LLM_URL ?? `https://c538-14-123-253-17.ngrok-free.app/api/v0`,
+  });
+
+  protected mcdm: AxiosInstance = axios.create({
+    method: 'POST',
+    baseURL: process.env.MCDM_URL ?? `http://databoard-test.yindangu.com`,
+  });
+
+  isMcdmRewrite() {
+    return process.env?.MCDM_URL == null ? false : true;
+  }
+
   async train() {
     await this.deleteTrainData();
 
@@ -57,7 +61,7 @@ export class SmartDataService {
   }
 
   async trainByDDL(ddl: string) {
-    return await llm({
+    return await this.llm({
       method: 'POST',
       url: `/train`,
       params: { id: uuidv4(), ddl, orgid: '1', projectid: '1' },
@@ -67,7 +71,7 @@ export class SmartDataService {
   }
 
   async trainByPrompt(sql: string, prompt: string) {
-    return await llm({
+    return await this.llm({
       method: 'POST',
       url: `/train`,
       params: {
@@ -84,7 +88,7 @@ export class SmartDataService {
 
   async deleteTrainData(types?: Array<'ddl' | 'sqlquestion' | 'doc'>) {
     const deftypes = ['ddl', 'sqlquestion'];
-    return await llm({
+    return await this.llm({
       method: 'POST',
       url: `/cleartrain`,
       params: {
@@ -98,7 +102,7 @@ export class SmartDataService {
   }
 
   async getEntity(entityId: string) {
-    return await mcdm({
+    return await this.mcdm({
       url: `/webapi/innersysapi/VMcdmDataServiceWebApi/findBizCustomEntity`,
       data: { entityIds: entityId },
     }).then((r) => {
@@ -107,7 +111,7 @@ export class SmartDataService {
   }
 
   async getEntities() {
-    return await mcdm({
+    return await this.mcdm({
       url: `/webapi/ydg_vmcdm_custom_api/getCustomCatalogEntityTree`,
       data: { isPublish: true },
     }).then((r) => {
@@ -116,7 +120,7 @@ export class SmartDataService {
   }
 
   async getDDL(entityId: string) {
-    return await mcdm({
+    return await this.mcdm({
       method: 'POST',
       url: `/webapi/innersysapi/VMcdmDataServiceWebApi/generateDDL`,
       data: {
@@ -128,7 +132,7 @@ export class SmartDataService {
   }
 
   async getBases() {
-    return await mcdm({
+    return await this.mcdm({
       url: '/module-operation!executeOperation?operation=NocodbBaseListProjects',
     }).then((r) => {
       return r.data;
@@ -136,7 +140,7 @@ export class SmartDataService {
   }
 
   async getBase(baseId: string) {
-    return await mcdm({
+    return await this.mcdm({
       url: `/module-operation!executeOperation?operation=NocodbBaseGetBase&baseId=${baseId}`,
     }).then((r) => {
       return r.data;
@@ -144,9 +148,62 @@ export class SmartDataService {
   }
 
   async getBaseTables(baseId: string, sourceId: string) {
-    return await mcdm({
+    return await this.mcdm({
       url: `/module-operation!executeOperation?operation=NocodbDBTableListTables&baseId=${baseId}`,
     }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async getTableViews(tableId: string) {
+    return await this.mcdm({
+      url: `/module-operation!executeOperation?operation=NocodbDBViewListViews&tableId=${tableId}`,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async getTable(tableId: string) {
+    // http://192.168.0.158:9909/module-operation!executeOperation?operation=NocodbDBTableReadTable&tableId=ab2258e4cdf9d412e1519d91343df4c7
+    return await this.mcdm({
+      url: `/module-operation!executeOperation?operation=NocodbDBTableReadTable&tableId=${tableId}`,
+    }).then((r) => {
+      r.data.columns.map((c) => {
+        c.pv = 1;
+        return c;
+      });
+      Object.keys(r.data.columnsById).forEach((k) => {
+        r.data.columnsById[k].pv = 1;
+      });
+      return r.data;
+    });
+  }
+
+  async getTableViewColumns(tableId: string) {
+    // http://192.168.0.158:9909/module-operation!executeOperation?operation=NocodbDBViewColumnListColumnsInView&viewId=ab2258e4cdf9d412e1519d91343df4c7
+    return await this.mcdm({
+      url: `/module-operation!executeOperation?operation=NocodbDBViewColumnListColumnsInView&viewId=${tableId}`,
+    }).then((r) => {
+      r.data.list = r.data.list.map((c) => {
+        c.show = 1;
+        c.fk_column_id = c.id;
+        return c;
+      });
+      return r.data;
+    });
+  }
+
+  async getTableViewRows(
+    tableName: string,
+    viewName: string,
+    offset: number = 0,
+    limit: number = 25,
+  ) {
+    return await this.mcdm({
+      url: `/module-operation!executeOperation?operation=NocodbDBViewRowListTableViewRows&tableName=${tableName}&viewName=${viewName}&offset=${offset}&limit=${limit}`,
+    }).then((r) => {
+      r.data.pageInfo.isLastPage = true;
+      r.data.pageInfo.pageSize = 25;
       return r.data;
     });
   }

@@ -17,10 +17,15 @@ import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
 import { NcRequest } from '~/interface/config';
 
+import { SmartDataService } from '~/services/smartdata/smartdata.service';
+
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
 export class ViewColumnsController {
-  constructor(private readonly viewColumnsService: ViewColumnsService) {}
+  constructor(
+    private readonly viewColumnsService: ViewColumnsService,
+    private readonly smartdataService: SmartDataService,
+  ) {}
 
   @Get([
     '/api/v1/db/meta/views/:viewId/columns/',
@@ -28,6 +33,9 @@ export class ViewColumnsController {
   ])
   @Acl('columnList')
   async columnList(@Param('viewId') viewId: string) {
+    // return { list: [] };
+    if (this.smartdataService.isMcdmRewrite())
+      return this.smartdataService.getTableViewColumns(viewId);
     return new PagedResponseImpl(
       await this.viewColumnsService.columnList({
         viewId,

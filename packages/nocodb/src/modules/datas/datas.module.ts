@@ -21,6 +21,8 @@ import { PublicDatasService } from '~/services/public-datas.service';
 import { CalendarDatasController } from '~/controllers/calendars-datas.controller';
 import { CalendarDatasService } from '~/services/calendar-datas.service';
 
+import { SmartDataService } from '~/services/smartdata/smartdata.service';
+
 export const dataModuleMetadata = {
   imports: [
     MulterModule.register({
@@ -55,6 +57,9 @@ export const dataModuleMetadata = {
     OldDatasService,
     PublicDatasService,
     PublicDatasExportService,
+
+    // SmartData
+    SmartDataService,
   ],
   exports: [
     DatasService,
