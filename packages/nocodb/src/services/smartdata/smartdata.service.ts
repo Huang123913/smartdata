@@ -193,4 +193,13 @@ export class SmartDataService {
       return r.data;
     });
   }
+
+  async updateData(tableName: string, rowId: string, body: unknown) {
+    return await this.mcdm({
+      url: `/module-operation!executeOperation?operation=NocodbDBViewRowUpdateTableViewRow&viewName=${tableName}&rowId=${rowId}`,
+      data: body,
+    }).then((r) => {
+      return r.data;
+    });
+  }
 }

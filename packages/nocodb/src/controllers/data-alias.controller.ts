@@ -169,6 +169,9 @@ export class DataAliasController {
     @Param('rowId') rowId: string,
     @Query('opt') opt: string,
   ) {
+    if (this.smartdataService.isMcdmRewrite()) {
+      return await this.smartdataService.updateData(tableName, rowId, req.body);
+    }
     return await this.datasService.dataUpdate({
       baseName: baseName,
       tableName: tableName,
