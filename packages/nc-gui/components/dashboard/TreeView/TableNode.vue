@@ -289,7 +289,7 @@ watch(openedTableId, () => {
             />
 
             <template #overlay>
-              <NcMenu>
+              <NcMenu disabled>
                 <NcMenuItem
                   v-if="isUIAllowed('tableRename', { roles: baseRole })"
                   :data-testid="`sidebar-table-rename-${table.title}`"
