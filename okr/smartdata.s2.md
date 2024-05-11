@@ -118,19 +118,16 @@
 
 -------------------------------------------------------------------------------
 
-## 接口实现 (第一阶段)
-> 目标: 能进入表页面查看
-> 🟢: 后端实现, 前端对接
-> 🟡: 前端实现
+## 接口实现
 
 ### 进入: 项目 (查看)
    - 🟢️ List Projects `/api/v1/db/meta/projects` **完成**
-   - 🟡 Get command palette suggestions `/api/v1/db/meta/audits/comments`**完成**
-   - 🟡 Get User Info `/api/v1/auth/user/me` **完成**
+   - 🟢 Get command palette suggestions `/api/v1/db/meta/audits/comments`**完成**
+   - 🟢 Get User Info `/api/v1/auth/user/me` **完成**
    - 🟢 Get Base `/api/v1/db/meta/projects/{baseId}` **完成**
-   - 🟡 Get User Info `/api/v1/auth/user/me?base_id=` **完成**
+   - 🟢 Get User Info `/api/v1/auth/user/me?base_id=` **完成**
    - 🟢 List Tables `/api/v1/db/meta/projects/{baseId}/tables` **完成**
-   - 🟡 List Base Users `/api/v1/db/meta/projects/{baseId}/users` **完成**
+   - 🟢 List Base Users `/api/v1/db/meta/projects/{baseId}/users` **完成**
 
 ### 进入: 表格 (查看)
    - 🟢 Read Table `/api/v1/db/meta/tables/{tableId}` **完成**
@@ -141,7 +138,7 @@
    - 🟡️ List View Sorts `/api/v1/db/meta/views/{viewId}/sorts` **模拟返回**
 
 ### 编辑: 表格数据
-- ⚪️ Update Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
+- 🟢️ Update Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}` **完成**
 - ⚪️ Delete Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
 - ⚪️ Update Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-update`
 - ⚪️ Delete Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-delete`
@@ -156,19 +153,20 @@
 - ⚪️ Update Column `/api/v1/db/meta/columns/{columnId}`
 - ⚪️ Create Column `/api/v1/db/meta/tables/{tableId}/columns`
 
-## 5.6
+## 5.11
 > 正式环境: http://smartdata.yindangu.com
 > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
    - 【进行中】迁移后端请求到 Nuxt 后端 
-   - 【暂缓】发布模型时可选择发布至现有模型界面 (完成UI，未对接接口)
+   - 【进行中】发布模型时可选择发布至现有模型界面 (对接接口中)
    - 【暂缓】新用户进入项目权限问题
    - 【完成】完成 `进入: 项目(查看)` 的 7 个接口联调 (部署到测试环境)
    - 【完成】完成 `进入: 表格(查看)` 的 6 个接口联调 (部署到测试环境)
+   - 【完成】完成 `编辑: 表格数据` 的 `Update Table View Row`
 
 ### 平台
-   - 【进行中】V: 弹窗支持调用浏览器局部打印
+   - 【完成】V: 弹窗支持调用浏览器局部打印
    - 【暂缓】V: 前端导出规则不要把隐藏的字段也导出来 (项目不急)
 
 ### 后端
