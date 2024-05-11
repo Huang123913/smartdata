@@ -168,13 +168,6 @@ export class SmartDataService {
     return await this.mcdm({
       url: `/module-operation!executeOperation?operation=NocodbDBTableReadTable&tableId=${tableId}`,
     }).then((r) => {
-      r.data.columns.map((c) => {
-        c.pv = 1;
-        return c;
-      });
-      Object.keys(r.data.columnsById).forEach((k) => {
-        r.data.columnsById[k].pv = 1;
-      });
       return r.data;
     });
   }
@@ -184,11 +177,6 @@ export class SmartDataService {
     return await this.mcdm({
       url: `/module-operation!executeOperation?operation=NocodbDBViewColumnListColumnsInView&viewId=${tableId}`,
     }).then((r) => {
-      r.data.list = r.data.list.map((c) => {
-        c.show = 1;
-        c.fk_column_id = c.id;
-        return c;
-      });
       return r.data;
     });
   }
