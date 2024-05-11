@@ -202,4 +202,12 @@ export class SmartDataService {
       return r.data;
     });
   }
+
+  async deleteData(tableName: string, rowId: string) {
+    return await this.mcdm({
+      url: `/module-operation!executeOperation?operation=NocodbDBViewRowDeleteTableViewRow&viewName=${tableName}&rowId=${rowId}`,
+    }).then((r) => {
+      return r.data;
+    });
+  }
 }

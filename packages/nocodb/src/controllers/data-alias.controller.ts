@@ -195,6 +195,9 @@ export class DataAliasController {
     @Param('viewName') viewName: string,
     @Param('rowId') rowId: string,
   ) {
+    if (this.smartdataService.isMcdmRewrite()) {
+      return await this.smartdataService.deleteData(tableName, rowId);
+    }
     return await this.datasService.dataDelete({
       baseName: baseName,
       tableName: tableName,
