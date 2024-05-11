@@ -126,6 +126,27 @@
 
 
 ## Data
+### DB Table Row
+- ⚪️ List Table Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-list`
+- ⚪️ Create Table Row `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-create`
+- ⚪️ Find One Table Row `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-find-one`
+- ⚪️ Group By Table Row `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-group-by`
+- ⚪️ Table Group by Column `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-grouped-data-list`
+- ⚪️ Get Table Row `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-read`
+- ⚪️ Update Table Row `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-update`
+- ⚪️ Delete Table Row `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-delete`
+- ⚪️ Does Table Row Exist `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-exist`
+- ⚪️ Bulk Insert Table Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-create`
+- ⚪️ Bulk Update Table Rows by IDs `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-update`
+- ⚪️ Bulk Delete Table Rows by IDs `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-delete`
+- ⚪️ Bulk Update Table Rows with Conditions `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-update-all`
+- ⚪️ Bulk Delete Table Rows with Conditions `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-delete-all`
+- ⚪️ Export Table View Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-csv-export`
+- ⚪️ List Nested Relations Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-nested-list`
+- ⚪️ Create Nested Relations Row `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-nested-add`
+- ⚪️ Delete Nested Relations Row `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-nested-remove`
+- ⚪️ Referenced Table Rows Excluding Current Record's Children / Parent `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-nested-children-excluded-list`
+
 ### DB View Row
 - ⚪️ Table Group by Column
 - 🟢️ List Table View Rows `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}`
@@ -138,6 +159,22 @@
 - ⚪️ Delete Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
 - ⚪️ Does Table View Row Exist
 - ⚪️ Export Table View Rows
+
+# V2
+
+## Data
+https://data-apis-v2.nocodb.com
+
+### Table Records
+- ⚪️ List Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-list`
+- ⚪️ Create Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-create`
+- ⚪️ Update Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-update`
+- ⚪️ Delete Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-delete`
+- ⚪️ Read Table Record `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-read`
+- ⚪️ Count Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-count`
+- ⚪️ List Linked Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-nested-list`
+- ⚪️ Link Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-nested-link`
+- ⚪️ Unlink Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-nested-unlink`
 
 ## 第一阶段 (能进入表页面)
 
@@ -161,6 +198,10 @@
 ### 编辑: 表格数据
 - ⚪️ Update Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
 - ⚪️ Delete Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
+- ⚪️ Update Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-update`
+- ⚪️ Delete Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-delete`
+- ⚪️ Bulk Update Table Rows by IDs `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-update`
+- ⚪️ Bulk Delete Table Rows by IDs `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-delete`
 - ⚪️ Create Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}`
 - ⚪️ Get Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
 - ⚪️ Count Table View Rows `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/count`

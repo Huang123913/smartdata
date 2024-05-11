@@ -143,6 +143,10 @@
 ### 编辑: 表格数据
 - ⚪️ Update Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
 - ⚪️ Delete Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
+- ⚪️ Update Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-update`
+- ⚪️ Delete Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-delete`
+- ⚪️ Bulk Update Table Rows by IDs `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-update`
+- ⚪️ Bulk Delete Table Rows by IDs `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-delete`
 - ⚪️ Create Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}`
 - ⚪️ Get Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
 - ⚪️ Count Table View Rows `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/count`
