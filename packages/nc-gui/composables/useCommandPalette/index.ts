@@ -111,6 +111,7 @@ export const useCommandPalette = createSharedComposable(() => {
   }
 
   async function loadScope() {
+    return
     if (activeScope.value.scope === 'disabled') {
       activeScope.value = { scope: activeScope.value.scope, data: activeScope.value.data }
       return
