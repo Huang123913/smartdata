@@ -190,8 +190,6 @@ export class SmartDataService {
     return await this.mcdm({
       url: `/module-operation!executeOperation?operation=NocodbDBViewRowListTableViewRows&tableName=${tableName}&viewName=${viewName}&offset=${offset}&limit=${limit}`,
     }).then((r) => {
-      r.data.pageInfo.isLastPage = true;
-      r.data.pageInfo.pageSize = 25;
       return r.data;
     });
   }
