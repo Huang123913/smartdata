@@ -140,6 +140,18 @@
    - 🟡️ Get View Filter `/api/v1/db/meta/views/{viewId}/filters` **模拟返回**
    - 🟡️ List View Sorts `/api/v1/db/meta/views/{viewId}/sorts` **模拟返回**
 
+### 编辑: 表格数据
+- ⚪️ Update Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
+- ⚪️ Delete Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
+- ⚪️ Create Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}`
+- ⚪️ Get Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
+- ⚪️ Count Table View Rows `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/count`
+
+### 编辑: 表格结构
+- ⚪️ Delete Column `/api/v1/db/meta/columns/{columnId}`
+- ⚪️ Update Column `/api/v1/db/meta/columns/{columnId}`
+- ⚪️ Create Column `/api/v1/db/meta/tables/{tableId}/columns`
+
 ## 5.6
 > 正式环境: http://smartdata.yindangu.com
 > 测试环境: http://smartdata-server.yindangu.com

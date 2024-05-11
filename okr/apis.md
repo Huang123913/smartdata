@@ -50,6 +50,15 @@
 - ⚪️ Duplicate Column
 - ⚪️ Reorder Table
 
+### DB Table Column
+- ⚪️ Create Column `/api/v1/db/meta/tables/{tableId}/columns`
+- ⚪️ Update Column `/api/v1/db/meta/columns/{columnId}`
+- ⚪️ Delete Column `/api/v1/db/meta/columns/{columnId}`
+- ⚪️ Get Column
+- ⚪️ Create Primary Value
+- ⚪️ Get columns hash for table
+- ⚪️ Bulk create-update-delete columns
+
 ### DB View
 - 🟢 List Views `/api/v1/db/meta/tables/{tableId}/views`
 - ⚪️ Update View
@@ -120,13 +129,13 @@
 ### DB View Row
 - ⚪️ Table Group by Column
 - 🟢️ List Table View Rows `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}`
-- ⚪️ Create Table View Row
+- ⚪️ Create Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}`
 - ⚪️ Find One Table View Row
 - ⚪️ Group By Table View Row
-- ⚪️ Count Table View Rows
-- ⚪️ Get Table View Row
-- ⚪️ Update Table View Row
-- ⚪️ Delete Table View Row
+- ⚪️ Count Table View Rows `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/count`
+- ⚪️ Get Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
+- ⚪️ Update Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
+- ⚪️ Delete Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
 - ⚪️ Does Table View Row Exist
 - ⚪️ Export Table View Rows
 
@@ -148,3 +157,15 @@
 - 🟢️ List Table View Rows `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}`
 - 🟡️ Get View Filter `/api/v1/db/meta/views/{viewId}/filters`
 - 🟡️ List View Sorts `/api/v1/db/meta/views/{viewId}/sorts`
+
+### 编辑: 表格数据
+- ⚪️ Update Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
+- ⚪️ Delete Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
+- ⚪️ Create Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}`
+- ⚪️ Get Table View Row `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/{rowId}`
+- ⚪️ Count Table View Rows `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/count`
+
+### 编辑: 表格结构
+- ⚪️ Delete Column `/api/v1/db/meta/columns/{columnId}`
+- ⚪️ Update Column `/api/v1/db/meta/columns/{columnId}`
+- ⚪️ Create Column `/api/v1/db/meta/tables/{tableId}/columns`
