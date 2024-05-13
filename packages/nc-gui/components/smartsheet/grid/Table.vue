@@ -1895,7 +1895,7 @@ onKeyStroke('ArrowDown', onDown)
               </div>
             </NcMenuItem>
 
-            <template v-if="contextMenuTarget && selectedRange.isSingleCell() && isUIAllowed('commentEdit') && !isMobileMode">
+            <!-- <template v-if="contextMenuTarget && selectedRange.isSingleCell() && isUIAllowed('commentEdit') && !isMobileMode">
               <NcDivider />
               <NcMenuItem class="nc-base-menu-item" @click="commentRow(contextMenuTarget.row)">
                 <div v-e="['a:row:comment']" class="flex gap-2 items-center">
@@ -1903,7 +1903,7 @@ onKeyStroke('ArrowDown', onDown)
                   {{ $t('general.comment') }}
                 </div>
               </NcMenuItem>
-            </template>
+            </template> -->
 
             <template v-if="hasEditPermission">
               <NcDivider v-if="!(!contextMenuClosing && !contextMenuTarget && data.some((r) => r.rowMeta.selected))" />
