@@ -17344,6 +17344,74 @@
           "SmartData"
         ]
       }
+    },
+    "/api/v2/smartdata/entities": {
+      "get": {
+        "summary": "entities MCDM ",
+        "operationId": "entities",
+        "description": "entities MCDM",
+        "tags": ["SmartData"]
+      }
+    },
+    "/api/v2/smartdata/entity": {
+      "get": {
+        "summary": "entity MCDM",
+        "operationId": "entity",
+        "description": "entity MCDM",
+        "tags": ["SmartData"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "entityId",
+            "in": "query",
+            "description": "entityId"
+          }
+        ]
+      }
+    },
+    "/api/v2/smartdata/getSql": {
+      "get": {
+        "summary": "getSql LLM",
+        "operationId": "getSql",
+        "description": "getSql LLM",
+        "tags": ["SmartData"],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "question",
+            "in": "query",
+            "description": "question"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "id",
+            "in": "query",
+            "description": "id"
+          },
+          {
+            "schema": {
+              "type": "any[]"
+            },
+            "name": "modelrange",
+            "in": "query",
+            "description": "modelrange"
+          }
+        ]
+      }
+    },
+    "/api/v2/smartdata/exeSql": {
+      "get": {
+        "summary": "exeSql MCDM",
+        "operationId": "exeSql",
+        "description": "exeSql MCDM",
+        "tags": ["SmartData"]
+      }
     }
   },
   "components": {

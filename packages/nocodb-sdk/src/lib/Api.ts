@@ -11504,5 +11504,83 @@ export class Api<
         method: 'POST',
         ...params,
       }),
+
+    /**
+     * @description entities MCDM
+     *
+     * @tags SmartData
+     * @name Entities
+     * @summary entities MCDM
+     * @request GET:/api/v2/smartdata/entities
+     */
+    entities: (params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/entities`,
+        method: 'GET',
+        ...params,
+      }),
+
+    /**
+     * @description entity MCDM
+     *
+     * @tags SmartData
+     * @name Entity
+     * @summary entity MCDM
+     * @request GET:/api/v2/smartdata/entity
+     */
+    entity: (
+      query?: {
+        /** entityId */
+        entityId?: string;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/entity`,
+        method: 'GET',
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * @description getSql LLM
+     *
+     * @tags SmartData
+     * @name GetSql
+     * @summary getSql LLM
+     * @request GET:/api/v2/smartdata/getSql
+     */
+    getSql: (
+      query?: {
+        /** question */
+        question?: string;
+        /** id */
+        id?: string;
+        /** modelrange */
+        modelrange?: any;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/getSql`,
+        method: 'GET',
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * @description exeSql MCDM
+     *
+     * @tags SmartData
+     * @name ExeSql
+     * @summary exeSql MCDM
+     * @request GET:/api/v2/smartdata/exeSql
+     */
+    exeSql: (params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/exeSql`,
+        method: 'GET',
+        ...params,
+      }),
   };
 }

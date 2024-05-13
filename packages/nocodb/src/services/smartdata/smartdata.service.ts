@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import axios, { type AxiosInstance } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
-import axios, { type AxiosInstance } from 'axios';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class SmartDataService {
@@ -104,7 +104,9 @@ export class SmartDataService {
   async getEntity(entityId: string) {
     return await this.mcdm({
       url: `/webapi/innersysapi/VMcdmDataServiceWebApi/findBizCustomEntity`,
-      data: { entityIds: entityId },
+      data: {
+        entityIds: entityId,
+      },
     }).then((r) => {
       return r.data.data.datas ?? [];
     });
@@ -128,6 +130,43 @@ export class SmartDataService {
       },
     }).then((r) => {
       return r.data.data?.ddl?.join('\n');
+    });
+  }
+
+  async getSql(question: string, id: string, modelrange: any[]) {
+    return await this.llm({
+      method: 'GET',
+      url: `/ask`,
+      params: {
+        question,
+        id,
+        orgid: 1,
+        projectid: 1,
+        modelrange: JSON.stringify(modelrange),
+      },
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+      },
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async exeSql(data: { sql: string; params?: object }) {
+    return await this.mcdm({
+      url: `/webapi/innersysapi/VMcdmDataServiceWebApi/queryBizCustomEntityData`,
+      data,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async saveModel(data: object) {
+    return await this.mcdm({
+      url: `/webapi/innersysapi/VMcdmDataServiceWebApi/saveBizCustomEntity`,
+      data,
+    }).then((r) => {
+      return r.data;
     });
   }
 

@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
-
 import { SmartDataService } from '~/services/smartdata/smartdata.service';
+
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 
 @Controller()
 export class SmartDataController {
@@ -33,5 +33,19 @@ export class SmartDataController {
   @Get(['/api/v2/smartdata/deleteTrainData'])
   async deleteTrainData() {
     return await this.smartdataService.deleteTrainData();
+  }
+
+  @Get(['/api/v2/smartdata/getSql'])
+  async getSql(
+    @Query('question') question: string,
+    @Query('id') id: string,
+    @Query('modelrange') modelrange: any[],
+  ) {
+    return await this.smartdataService.getSql(question, id, modelrange);
+  }
+
+  @Post(['/api/v2/smartdata/exeSql'])
+  async exeSql(@Body('data') data: { sql: string; params?: object }) {
+    return await this.smartdataService.exeSql(data);
   }
 }

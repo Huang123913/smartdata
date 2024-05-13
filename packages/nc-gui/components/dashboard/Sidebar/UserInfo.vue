@@ -170,8 +170,8 @@ onMounted(() => {
                 <div v-e="['c:translate:open']" class="flex gap-2 items-center">
                   <GeneralIcon icon="translate" class="group-hover:text-black nc-language ml-0.25 menu-icon" />
                   {{ $t('labels.language') }}
-                  <div class="flex items-center text-gray-400 text-xs">{{ $t('labels.community.communityTranslated') }}</div>
-                  <div class="flex-1" />
+                  <!-- <div class="flex items-center text-gray-400 text-xs">{{ $t('labels.community.communityTranslated') }}</div>
+                  <div class="flex-1" /> -->
 
                   <MaterialSymbolsChevronRightRounded
                     class="transform group-hover:(scale-115 text-accent) text-xl text-gray-400"
