@@ -19,10 +19,15 @@ import { parseHrtimeToMilliSeconds } from '~/helpers';
 import { DataApiLimiterGuard } from '~/guards/data-api-limiter.guard';
 import { GlobalGuard } from '~/guards/global/global.guard';
 
+import { SmartDataService } from '~/services/smartdata/smartdata.service';
+
 @Controller()
 @UseGuards(DataApiLimiterGuard, GlobalGuard)
 export class DataTableController {
-  constructor(private readonly dataTableService: DataTableService) {}
+  constructor(
+    private readonly dataTableService: DataTableService,
+    private readonly smartdataService: SmartDataService,
+  ) {}
 
   // todo: Handle the error case where view doesnt belong to model
   @Get('/api/v2/tables/:modelId/records')
@@ -86,6 +91,9 @@ export class DataTableController {
     @Query('viewId') viewId: string,
     @Param('rowId') _rowId: string,
   ) {
+    if (this.smartdataService.isMcdmRewrite()) {
+      return await this.smartdataService.batchUpdateData(modelId, req.body);
+    }
     return await this.dataTableService.dataUpdate({
       modelId: modelId,
       body: req.body,
@@ -102,6 +110,9 @@ export class DataTableController {
     @Query('viewId') viewId: string,
     @Param('rowId') _rowId: string,
   ) {
+    if (this.smartdataService.isMcdmRewrite()) {
+      return await this.smartdataService.batchDeleteData(modelId, req.body);
+    }
     return await this.dataTableService.dataDelete({
       modelId: modelId,
       cookie: req,

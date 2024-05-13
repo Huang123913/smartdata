@@ -194,6 +194,23 @@ export class SmartDataService {
     });
   }
 
+  async getTableRows(tableName: string, pks: unknown) {
+    return await this.mcdm({
+      url: `/module-operation!executeOperation?operation=NocodbDBTableRowListTableRows&tableName=${tableName}&pks=${pks}`,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async createData(tableName: string, body: unknown) {
+    return await this.mcdm({
+      url: `/module-operation!executeOperation?operation=NocodbDBViewRowCreateTableViewRow&viewName=${tableName}`,
+      data: body,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
   async readData(tableName: string, rowId: string) {
     return await this.mcdm({
       url: `/module-operation!executeOperation?operation=NocodbDBViewRowGetTableViewRow&viewName=${tableName}&rowId=${rowId}`,
@@ -211,6 +228,24 @@ export class SmartDataService {
     });
   }
 
+  async updateBlukData(tableName: string, body: unknown) {
+    return await this.mcdm({
+      url: `/module-operation!executeOperation?operation=NocodbDBTableRowBulkUpdateTableRowsByIDs&tableName=${tableName}`,
+      data: body,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async batchUpdateData(tableName: string, body: unknown) {
+    return await this.mcdm({
+      url: `/module-operation!executeOperation?operation=NocodbTableRecordsUpdateTableRecords&tableId=${tableName}`,
+      data: body,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
   async deleteData(tableName: string, rowId: string) {
     return await this.mcdm({
       url: `/module-operation!executeOperation?operation=NocodbDBViewRowDeleteTableViewRow&viewName=${tableName}&rowId=${rowId}`,
@@ -219,9 +254,27 @@ export class SmartDataService {
     });
   }
 
+  async deleteBlukData(tableName: string, body: unknown) {
+    return await this.mcdm({
+      url: `/module-operation!executeOperation?operation=NocodbDBTableRowBulkDeleteTableRowsByIDs&tableName=${tableName}`,
+      data: body,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async batchDeleteData(tableName: string, body: unknown) {
+    return await this.mcdm({
+      url: `/module-operation!executeOperation?operation=NocodbTableRecordsDeleteTableRecords&tableId=${tableName}`,
+      data: body,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
   async countData(tableName: string) {
     return await this.mcdm({
-      url: `/module-operation!executeOperation?operation=NocodbDBViewRowCountTableViewRows&viewName=${tableName}`,
+      url: `/module-operation!executeOperation?operation=NocodbTableRecordsUpdateTableRecords&tableId=${tableName}`,
     }).then((r) => {
       return r.data;
     });

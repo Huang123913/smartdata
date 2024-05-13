@@ -44,14 +44,23 @@ export class DataAliasController {
     @Query('opt') opt: string,
   ) {
     if (this.smartdataService.isMcdmRewrite()) {
-      const responseData = await this.smartdataService.getTableViewRows(
-        tableName,
-        viewName,
-        Number(req.query.offset),
-        Number(req.query.limit),
-      );
-      res.json(responseData);
-      return;
+      if (req.query.pks) {
+        const responseData = await this.smartdataService.getTableRows(
+          tableName,
+          req.query.pks,
+        );
+        res.json(responseData);
+        return;
+      } else {
+        const responseData = await this.smartdataService.getTableViewRows(
+          tableName,
+          viewName,
+          Number(req.query.offset),
+          Number(req.query.limit),
+        );
+        res.json(responseData);
+        return;
+      }
     }
     const startTime = process.hrtime();
     const responseData = await this.datasService.dataList({
@@ -151,6 +160,9 @@ export class DataAliasController {
     @Body() body: any,
     @Query('opt') opt: string,
   ) {
+    if (this.smartdataService.isMcdmRewrite()) {
+      return await this.smartdataService.createData(tableName, req.body);
+    }
     return await this.datasService.dataInsert({
       baseName: baseName,
       tableName: tableName,
