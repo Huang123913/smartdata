@@ -64,7 +64,7 @@ useMenuCloseOnEsc(open)
     class="!xs:hidden"
   >
     <div :class="{ 'nc-active-btn': filtersLength }">
-      <a-button v-e="['c:filter']" class="nc-filter-menu-btn nc-toolbar-btn txt-sm" :disabled="isLocked">
+      <a-button disabled v-e="['c:filter']" class="nc-filter-menu-btn nc-toolbar-btn txt-sm" :disabled="isLocked">
         <div class="flex items-center gap-2">
           <component :is="iconMap.filter" class="h-4 w-4" />
           <!-- Filter -->

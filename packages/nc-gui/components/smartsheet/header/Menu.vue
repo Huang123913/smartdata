@@ -310,7 +310,7 @@ const isDuplicateAllowed = computed(() => {
       <GeneralIcon icon="arrowDown" class="text-grey h-full text-grey nc-ui-dt-dropdown cursor-pointer outline-0 mr-2" />
     </div>
     <template #overlay>
-      <NcMenu class="flex flex-col gap-1 border-gray-200 nc-column-options">
+      <NcMenu disabled class="flex flex-col gap-1 border-gray-200 nc-column-options">
         <NcMenuItem @click="onEditPress">
           <div class="nc-column-edit nc-header-menu-item">
             <component :is="iconMap.ncEdit" class="text-gray-700" />

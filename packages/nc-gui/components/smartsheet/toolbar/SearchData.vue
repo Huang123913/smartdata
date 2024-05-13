@@ -102,6 +102,7 @@ watch(columns, () => {
         <component :is="iconMap.arrowDown" class="text-sm text-inherit" />
       </div>
       <a-select
+        disabled
         v-model:value="search.field"
         v-e="['c:search:field:select:open']"
         :open="isDropdownOpen"
@@ -130,6 +131,7 @@ watch(columns, () => {
     </div>
 
     <a-input
+      disabled
       v-model:value="search.query"
       size="small"
       class="text-xs w-40"

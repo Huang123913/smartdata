@@ -229,7 +229,7 @@ watch(meta, async () => {
     overlay-class-name="nc-dropdown-group-by-menu nc-toolbar-dropdown overflow-hidden"
   >
     <div :class="{ 'nc-active-btn': groupedByColumnIds?.length }">
-      <a-button v-e="['c:group-by']" class="nc-group-by-menu-btn nc-toolbar-btn" :disabled="isLocked">
+      <a-button disabled v-e="['c:group-by']" class="nc-group-by-menu-btn nc-toolbar-btn" :disabled="isLocked">
         <div class="flex items-center gap-2">
           <component :is="iconMap.group" class="h-4 w-4" />
 

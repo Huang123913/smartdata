@@ -444,6 +444,7 @@ watch(rowId, async (nRow) => {
 })
 
 const showRightSections = computed(() => {
+  return false
   return !isNew.value && commentsDrawer.value && isUIAllowed('commentList')
 })
 
@@ -562,6 +563,7 @@ export default {
           </div>
           <div class="flex gap-2">
             <NcButton
+              disabled
               v-if="!isNew && rowId"
               :disabled="isLoading"
               class="!<lg:hidden text-gray-700"

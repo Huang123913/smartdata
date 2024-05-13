@@ -126,7 +126,7 @@ onMounted(() => {
     overlay-class-name="nc-dropdown-sort-menu nc-toolbar-dropdown"
   >
     <div :class="{ 'nc-active-btn': sorts?.length }">
-      <a-button v-e="['c:sort']" class="nc-sort-menu-btn nc-toolbar-btn" :disabled="isLocked">
+      <a-button disabled v-e="['c:sort']" class="nc-sort-menu-btn nc-toolbar-btn" :disabled="isLocked">
         <div class="flex items-center gap-2">
           <component :is="iconMap.sort" class="h-4 w-4 text-inherit" />
 

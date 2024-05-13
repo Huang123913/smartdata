@@ -470,6 +470,7 @@ useMenuCloseOnEsc(open)
         </div>
         <div class="flex pr-4 mt-1 gap-2">
           <NcButton
+            disabled
             v-if="!filterQuery"
             class="nc-fields-show-all-fields !text-gray-500 !w-1/2"
             size="small"

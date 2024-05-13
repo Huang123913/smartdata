@@ -85,7 +85,7 @@ useMenuCloseOnEsc(open)
 <template>
   <a-dropdown v-model:visible="open" offset-y class="" :trigger="['click']" overlay-class-name="nc-dropdown-height-menu">
     <div>
-      <a-button v-e="['c:row-height']" class="nc-height-menu-btn nc-toolbar-btn" :disabled="isLocked">
+      <a-button disabled v-e="['c:row-height']" class="nc-height-menu-btn nc-toolbar-btn" :disabled="isLocked">
         <div class="flex items-center gap-0.5">
           <component :is="iconMap.rowHeight" class="!h-3.75 !w-3.75" />
           <!-- <span v-if="!isMobileMode" class="!text-sm !font-medium">{{ $t('objects.rowHeight') }}</span> -->
