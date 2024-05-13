@@ -221,6 +221,9 @@ export class DataAliasController {
     @Query('opt') opt: string,
     @Query('getHiddenColumn') getHiddenColumn: boolean,
   ) {
+    if (this.smartdataService.isMcdmRewrite()) {
+      return await this.smartdataService.readData(tableName, rowId);
+    }
     return await this.datasService.dataRead({
       baseName: baseName,
       tableName: tableName,
