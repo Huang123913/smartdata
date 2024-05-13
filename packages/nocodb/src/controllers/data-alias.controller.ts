@@ -122,6 +122,11 @@ export class DataAliasController {
     @Param('tableName') tableName: string,
     @Param('viewName') viewName: string,
   ) {
+    if (this.smartdataService.isMcdmRewrite()) {
+      const countResult = await this.smartdataService.countData(tableName);
+      res.json(countResult);
+      return;
+    }
     const countResult = await this.datasService.dataCount({
       query: req.query,
       baseName: baseName,

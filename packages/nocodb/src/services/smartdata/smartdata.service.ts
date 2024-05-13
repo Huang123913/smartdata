@@ -218,4 +218,12 @@ export class SmartDataService {
       return r.data;
     });
   }
+
+  async countData(tableName: string) {
+    return await this.mcdm({
+      url: `/module-operation!executeOperation?operation=NocodbDBViewRowDBViewRowCount&viewName=${tableName}`,
+    }).then((r) => {
+      return r.data;
+    });
+  }
 }
