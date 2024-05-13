@@ -168,6 +168,12 @@ export class SmartDataService {
     return await this.mcdm({
       url: `/module-operation!executeOperation?operation=NocodbDBTableReadTable&tableId=${tableId}`,
     }).then((r) => {
+      r.data.columns = r.data.columns.map((c) => {
+        if (c.uidt == 'ID') {
+          c.ai = 1;
+        }
+        return c;
+      });
       return r.data;
     });
   }
@@ -205,7 +211,7 @@ export class SmartDataService {
   async createData(tableName: string, body: unknown) {
     return await this.mcdm({
       url: `/module-operation!executeOperation?operation=NocodbDBViewRowCreateTableViewRow&viewName=${tableName}`,
-      data: body,
+      data: Object.assign({ id: null }, body),
     }).then((r) => {
       return r.data;
     });
