@@ -221,7 +221,7 @@ export class SmartDataService {
 
   async countData(tableName: string) {
     return await this.mcdm({
-      url: `/module-operation!executeOperation?operation=NocodbDBViewRowDBViewRowCount&viewName=${tableName}`,
+      url: `/module-operation!executeOperation?operation=NocodbDBViewRowCountTableViewRows&viewName=${tableName}`,
     }).then((r) => {
       return r.data;
     });
