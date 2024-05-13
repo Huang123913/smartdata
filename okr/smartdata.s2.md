@@ -142,10 +142,10 @@
 - 🟢️️ Delete Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-delete` **完成**
 - 🟢️️ List Table Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-list` **完成**
 - 🟢 Update Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-update` **完成**
-- ⚪️ Delete Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-delete`
+- 🟢️ Delete Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-delete`
 - 🟢️️ Bulk Update Table Rows by IDs `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-update` **完成**
 - 🟢 Bulk Delete Table Rows by IDs `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-delete` **完成**
-- ⚪️ Create Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-create`
+- 🟢️ Create Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-create` **完成**
 - 🟢 Get Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-read` **完成**
 - 🟢 Count Table View Rows `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-count` **完成**
 
@@ -154,20 +154,20 @@
 - ⚪️ Update Column `/api/v1/db/meta/columns/{columnId}`
 - ⚪️ Create Column `/api/v1/db/meta/tables/{tableId}/columns`
 
-## 5.11
+## 5.13
 > 正式环境: http://smartdata.yindangu.com
 > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
+   > 已知问题, 删除数据后 ctrl+z 或 cmd+z 回滚操作时报错, 初始判断删除需要做假删, 回滚的时候把状态恢复过来
    - 【进行中】迁移后端请求到 Nuxt 后端 
    - 【进行中】发布模型时可选择发布至现有模型界面 (对接接口中)
    - 【暂缓】新用户进入项目权限问题
-   - 【完成】完成 `进入: 项目(查看)` 的 7 个接口联调 (部署到测试环境)
-   - 【完成】完成 `进入: 表格(查看)` 的 6 个接口联调 (部署到测试环境)
-   - 【完成】完成 `编辑: 表格数据` 的 `Update Table View Row`
+   - 【完成】完成 `进入: 项目(查看)`
+   - 【完成】完成 `进入: 表格(查看)`
+   - 【完成】完成 `编辑: 表格数据`
 
 ### 平台
-   - 【完成】V: 弹窗支持调用浏览器局部打印
    - 【暂缓】V: 前端导出规则不要把隐藏的字段也导出来 (项目不急)
 
 ### 后端
