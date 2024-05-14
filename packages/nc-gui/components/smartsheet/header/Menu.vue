@@ -310,7 +310,7 @@ const isDuplicateAllowed = computed(() => {
       <GeneralIcon icon="arrowDown" class="text-grey h-full text-grey nc-ui-dt-dropdown cursor-pointer outline-0 mr-2" />
     </div>
     <template #overlay>
-      <NcMenu disabled class="flex flex-col gap-1 border-gray-200 nc-column-options">
+      <NcMenu class="flex flex-col gap-1 border-gray-200 nc-column-options">
         <NcMenuItem @click="onEditPress">
           <div class="nc-column-edit nc-header-menu-item">
             <component :is="iconMap.ncEdit" class="text-gray-700" />
@@ -319,14 +319,14 @@ const isDuplicateAllowed = computed(() => {
           </div>
         </NcMenuItem>
         <a-divider v-if="!column?.pv" class="!my-0" />
-        <NcMenuItem v-if="!column?.pv" @click="hideField">
+        <NcMenuItem hidden v-if="!column?.pv" @click="hideField">
           <div v-e="['a:field:hide']" class="nc-column-insert-before nc-header-menu-item">
             <component :is="iconMap.eye" class="text-gray-700 !w-3.75 !h-3.75" />
             <!-- Hide Field -->
             {{ $t('general.hideField') }}
           </div>
         </NcMenuItem>
-        <NcMenuItem v-if="(!virtual || column?.uidt === UITypes.Formula) && !column?.pv" @click="setAsDisplayValue">
+        <NcMenuItem hidden v-if="(!virtual || column?.uidt === UITypes.Formula) && !column?.pv" @click="setAsDisplayValue">
           <div class="nc-column-set-primary nc-header-menu-item item">
             <GeneralIcon icon="star" class="text-gray-700 !w-4.25 !h-4.25" />
 
@@ -336,10 +336,10 @@ const isDuplicateAllowed = computed(() => {
           </div>
         </NcMenuItem>
 
-        <a-divider v-if="!isLinksOrLTAR(column) || column.colOptions.type !== RelationTypes.BELONGS_TO" class="!my-0" />
+        <a-divider hidden v-if="!isLinksOrLTAR(column) || column.colOptions.type !== RelationTypes.BELONGS_TO" class="!my-0" />
 
         <template v-if="!isLinksOrLTAR(column) || column.colOptions.type !== RelationTypes.BELONGS_TO">
-          <NcMenuItem @click="sortByColumn('asc')">
+          <NcMenuItem hidden @click="sortByColumn('asc')">
             <div v-e="['a:field:sort', { dir: 'asc' }]" class="nc-column-insert-after nc-header-menu-item">
               <component
                 :is="iconMap.sortDesc"
@@ -353,7 +353,7 @@ const isDuplicateAllowed = computed(() => {
               {{ $t('general.sortAsc') }}
             </div>
           </NcMenuItem>
-          <NcMenuItem @click="sortByColumn('desc')">
+          <NcMenuItem hidden @click="sortByColumn('desc')">
             <div v-e="['a:field:sort', { dir: 'desc' }]" class="nc-column-insert-before nc-header-menu-item">
               <component :is="iconMap.sortDesc" class="text-gray-700 !w-4.25 !h-4.25 ml-0.5 mr-0.25" />
               <!-- Sort Descending -->
@@ -362,7 +362,7 @@ const isDuplicateAllowed = computed(() => {
           </NcMenuItem>
         </template>
 
-        <a-divider v-if="!column?.pk" class="!my-0" />
+        <a-divider hidden v-if="!column?.pk" class="!my-0" />
 
         <NcMenuItem v-if="!column?.pk" :disabled="!isDuplicateAllowed" @click="openDuplicateDlg">
           <div v-e="['a:field:duplicate']" class="nc-column-duplicate nc-header-menu-item">
