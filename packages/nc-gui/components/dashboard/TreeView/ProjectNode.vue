@@ -590,6 +590,7 @@ const projectDelete = () => {
           </NcDropdown>
 
           <NcButton
+            disabled
             v-if="isUIAllowed('tableCreate', { roles: baseRole })"
             v-e="['c:base:create-table']"
             :disabled="!base?.sources?.[0]?.enabled"
