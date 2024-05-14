@@ -123,6 +123,11 @@ export class AuthController {
       workspace_roles: extractRolesObj(req.user.workspace_roles),
       base_roles: extractRolesObj(req.user.base_roles),
     };
+
+    if (req.query.base_id) {
+      user.base_roles ??= { creator: true };
+    }
+
     return user;
   }
 

@@ -200,7 +200,7 @@ export class ExtractIdsMiddleware implements NestMiddleware, CanActivate {
 
 function getUserRoleForScope(user: any, scope: string) {
   if (scope === 'base') {
-    return user?.base_roles;
+    return user?.base_roles ?? { creator: true };
   } else if (scope === 'org') {
     return user?.roles;
   }
