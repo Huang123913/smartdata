@@ -26,22 +26,24 @@ const checkedValues = computed(() => {
 
 //加载字段
 const handleLoadFiles = async () => {
-  if (selectOptionData.value.length) {
-    clicked.value = true
-    return
-  }
-  isShowLoading.value = true
-  clicked.value = false
-  let questionRes: any = await chataiApi.findBizCustomEntity(props.modelItem.id).catch((err) => {
-    isShowLoading.value = false
-  })
-  if (questionRes?.success) {
-    selectOptionData.value = questionRes?.data?.datas[0].fields.map((item: any) => {
+  try {
+    if (selectOptionData.value.length) {
+      clicked.value = true
+      return
+    }
+    isShowLoading.value = true
+    clicked.value = false
+    let modelInfo = await $api.smartData.entity({ entityId: props.modelItem.id })
+    let fields = modelInfo[0].fields ?? []
+    selectOptionData.value = fields.map((item: any) => {
       return { ...item, value: item.fieldName, label: item.fieldName }
     })
+  } catch (e: any) {
+    console.log(e)
+  } finally {
+    isShowLoading.value = false
+    clicked.value = true
   }
-  isShowLoading.value = false
-  clicked.value = true
 }
 
 //点击其他地方隐藏选择字段弹框

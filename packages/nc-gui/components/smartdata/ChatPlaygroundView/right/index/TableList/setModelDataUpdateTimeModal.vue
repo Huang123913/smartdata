@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { ref } from '#imports'
+import { ChatPlaygroundViewStoreEvents, ref } from '#imports'
 
-// const { eventBus } = useSmartsheetStoreOrThrow()
 const props = defineProps<{
   handleOk: (value: string) => void
 }>()
-
+const store = useChatPlaygroundViewStore()
+const { eventBus } = store
 const updateTimeType = ref<number>(1) //定时类型
 const intervalTypeValue = ref<string>('hour') //每时/每分
 const visible = ref<boolean>(false)
@@ -31,11 +31,11 @@ const handleOkBySetUpdateTime = () => {
   props.handleOk(value)
 }
 
-// eventBus.on((event) => {
-//   if (event === SmartsheetStoreEvents.OPEN_SET_MODEL_DATA_UPDATE_TIME_MODAL) {
-//     visible.value = true
-//   }
-// })
+eventBus.on((event) => {
+  if (event === ChatPlaygroundViewStoreEvents.OPEN_SET_MODEL_DATA_UPDATE_TIME_MODAL) {
+    visible.value = true
+  }
+})
 
 const hanldeAfterClose = () => {
   updateTimeType.value = 1

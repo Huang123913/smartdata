@@ -1,10 +1,11 @@
 <script lang="ts" setup>
-import { useChatPlaygroundViewStore } from '../../../../../../store/chatPlaygroundView'
+import { ChatPlaygroundViewStoreEvents } from '#imports'
 
-// const { eventBus } = useSmartsheetStoreOrThrow()
+import { useChatPlaygroundViewStore } from '../../../../../../store/chatPlaygroundView'
 
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
+const { eventBus } = store
 const props = defineProps<{
   visible: boolean
   handleCancel: () => void
@@ -59,7 +60,7 @@ const handleModalOk = () => {
 }
 
 const handleChange = (value: string) => {
-  // value === 'regularUpdate' && eventBus.emit(SmartsheetStoreEvents.OPEN_SET_MODEL_DATA_UPDATE_TIME_MODAL)
+  value === 'regularUpdate' && eventBus.emit(ChatPlaygroundViewStoreEvents.OPEN_SET_MODEL_DATA_UPDATE_TIME_MODAL)
   value === 'realTimeView' && props.setUpdateTimeValue(value)
 }
 
@@ -235,4 +236,3 @@ const handleSelectSourceField = (option: any, targetFieldItem: any) => {
   }
 }
 </style>
-../../../../../store/ChatPlaygroundView

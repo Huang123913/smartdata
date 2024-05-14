@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { callRepairWithRetry, deepClone, getNowDate } from '#imports'
+import { deepClone, getNowDate } from '#imports'
 import { v4 as uuidv4 } from 'uuid'
 
 import { CloseOutlined, DeleteFilled, SearchOutlined, SendOutlined } from '@ant-design/icons-vue'
@@ -14,6 +14,7 @@ export interface SessionItem {
   tabledata: string
   tip: string
 }
+const { $api } = useNuxtApp()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
 const { setSessionItem, getCustomCatalogEntityTree, setChataiDataIsOpenMode, chataiApi } = store
@@ -106,11 +107,9 @@ const getModelrange = async () => {
     for (let i = 0; i < deepCloneData.length; i++) {
       let modelItem = deepCloneData[i]
       if (modelItem?.fields && modelItem.fields.length == 0) {
-        let questionRes: any = await chataiApi.findBizCustomEntity(modelItem.id).catch((err) => (isShowLoading.value = false))
-        if (questionRes?.success) {
-          let fields = questionRes?.data?.datas[0]?.fields
-          modelItem.fields = fields
-        }
+        let modelInfo = await $api.smartData.entity({ entityId: modelItem.id })
+        let fields = modelInfo[0].fields ?? []
+        modelItem.fields = fields
       }
     }
   }
@@ -128,64 +127,105 @@ const getModelrange = async () => {
 
 //发送按钮
 const handleSend = async () => {
-  if (!textAreaValue.value.trim()) return
-  isShowLoading.value = true
-  const id = uuidv4()
-  let modelrange = await getModelrange()
-  // 执行获取sql api
-  let getSqlRes = await chataiApi
-    .getSqlApi(`${textAreaValue.value}`, id, modelrange)
-    .catch((err) => (isShowLoading.value = false))
-  if (getSqlRes) {
-    let sql = getSqlRes.text
-    let sqlId = getSqlRes.id
-    if (sql.indexOf('SELECT') === -1) {
-      message.warning(getSqlRes.text)
-      isShowLoading.value = false
-      return
+  try {
+    if (!textAreaValue.value.trim()) return
+    isShowLoading.value = true
+    const id = uuidv4()
+    let modelrange = await getModelrange()
+    let getSqlParams = {
+      question: textAreaValue.value,
+      id,
+      orgid: '1',
+      projectid: '1',
+      modelrange: JSON.stringify(modelrange),
     }
-    sql = sql.replace(/;/g, '')
-    let queryBizCustomEntityData = await chataiApi.exeSql({ sql }).catch((err) => (isShowLoading.value = false))
-    if (!queryBizCustomEntityData?.success || !queryBizCustomEntityData?.data?.success) {
-      if (queryBizCustomEntityData?.exceptionType && queryBizCustomEntityData?.exceptionType.indexOf('VSQL') > -1) {
-        message.warning('抱歉，我不能理解你的问题，请调整后再重试')
-      } else {
-        let err_msg = queryBizCustomEntityData?.success
-          ? queryBizCustomEntityData?.data.errorDetail
-          : queryBizCustomEntityData?.data.errorDetail.allStackMsg
-        let newExeRes = await callRepairWithRetry(sqlId, err_msg, textAreaValue.value)
-        if (!newExeRes?.success || !newExeRes?.data.success) {
+    let getSqlRes = await $api.smartData.getSql(getSqlParams)
+    if (getSqlRes) {
+      let sql = getSqlRes.text
+      let sqlId = getSqlRes.id
+      if (sql.indexOf('SELECT') === -1) {
+        message.warning(getSqlRes.text)
+        isShowLoading.value = false
+        return
+      }
+      sql = sql.replace(/;/g, '')
+      let queryBizCustomEntityData = await $api.smartData.exeSql({ sql })
+      if (!queryBizCustomEntityData?.success || !queryBizCustomEntityData?.data?.success) {
+        if (queryBizCustomEntityData?.exceptionType && queryBizCustomEntityData?.exceptionType.indexOf('VSQL') > -1) {
           message.warning('抱歉，我不能理解你的问题，请调整后再重试')
+        } else {
+          let err_msg = queryBizCustomEntityData?.success
+            ? queryBizCustomEntityData?.data.errorDetail
+            : queryBizCustomEntityData?.data.errorDetail.allStackMsg
+          let newExeRes = await repeatRepair(sqlId, err_msg, textAreaValue.value)
+          if (!newExeRes?.success || !newExeRes?.data.success) {
+            message.warning('抱歉，我不能理解你的问题，请调整后再重试')
+          }
+          queryBizCustomEntityData = newExeRes
         }
-        queryBizCustomEntityData = newExeRes
+      }
+      if (queryBizCustomEntityData?.data) {
+        let fields = queryBizCustomEntityData?.data?.fields
+        let datas = queryBizCustomEntityData?.data?.datas
+        let newSessionItem = {
+          id,
+          textAreaValue: textAreaValue.value,
+          sql: queryBizCustomEntityData?.sql ? queryBizCustomEntityData?.sql : sql,
+          searchTime: getNowDate(),
+          selectedModel: chataiData.value.checkedModelData.length ? JSON.stringify(chataiData.value.checkedModelData) : '',
+          tabledata: JSON.stringify({ fields, datas }),
+          tip: textAreaValue.value,
+        }
+        sessionList.value.unshift(newSessionItem)
+        textAreaValue.value = ''
+        setSessionItem(newSessionItem)
+        selectedSessionItem.value = {
+          id: '',
+          textAreaValue: '',
+          sql: '',
+          selectedModel: '',
+          tabledata: '',
+          tip: '',
+        }
       }
     }
-    if (queryBizCustomEntityData?.data) {
-      let fields = queryBizCustomEntityData?.data?.fields
-      let datas = queryBizCustomEntityData?.data?.datas
-      let newSessionItem = {
-        id,
-        textAreaValue: textAreaValue.value,
-        sql: queryBizCustomEntityData?.sql ? queryBizCustomEntityData?.sql : sql,
-        searchTime: getNowDate(),
-        selectedModel: chataiData.value.checkedModelData.length ? JSON.stringify(chataiData.value.checkedModelData) : '',
-        tabledata: JSON.stringify({ fields, datas }),
-        tip: textAreaValue.value,
-      }
-      sessionList.value.unshift(newSessionItem)
-      textAreaValue.value = ''
-      setSessionItem(newSessionItem)
-      selectedSessionItem.value = {
-        id: '',
-        textAreaValue: '',
-        sql: '',
-        selectedModel: '',
-        tabledata: '',
-        tip: '',
-      }
-    }
+  } catch (e: any) {
+    console.log(e)
+  } finally {
     isShowLoading.value = false
   }
+}
+
+const repeatRepair = async (id: string, error_msg: string, question: string, maxRetries = 3) => {
+  let retriesCount = 0
+  let returnRes = null
+  while (retriesCount < maxRetries) {
+    try {
+      let response: any = await $api.smartData.repair({ id, orgid: '1', projectid: '1', error_msg, question })
+      if (response.text.indexOf('SELECT') > -1) {
+        let sql = response.text.replace(/;/g, '')
+        let result: any = await $api.smartData.exeSql({ sql })
+        if (result?.success && result?.data.success) {
+          result.sql = sql
+          return result
+        } else {
+          returnRes = result
+          retriesCount++
+        }
+      } else {
+        retriesCount++
+        returnRes = {
+          data: {
+            datas: [],
+            fields: [],
+          },
+        }
+      }
+    } catch (error) {
+      retriesCount++
+    }
+  }
+  return returnRes
 }
 </script>
 

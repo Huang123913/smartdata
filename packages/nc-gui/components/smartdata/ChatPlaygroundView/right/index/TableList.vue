@@ -6,6 +6,7 @@ import { CloseOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons-v
 
 import { useChatPlaygroundViewStore } from '../../../../../store/chatPlaygroundView'
 
+const { $api } = useNuxtApp()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
 const { getCustomCatalogEntityTree, setSessionItem, chataiApi } = store
@@ -119,132 +120,105 @@ const handleSaveBtn = () => {
 
 // 选择模型目录弹框确定事件
 const handleOk = async (selectedCatalog: object) => {
-  isShowSelectCatalogModal.value = false
-  isShowLoading.value = true
-  let tableData = chataiData.value.sessionItem?.tabledata.length ? JSON.parse(chataiData.value.sessionItem?.tabledata) : []
-  if (isPublishCatalog.value) {
-    let model = chataiData.value.sessionItem?.selectedModel ? JSON.parse(chataiData.value.sessionItem?.selectedModel) : []
-    let jsonValue = {
-      sql: chataiData.value.sessionItem.sql,
-    }
-    let jsonValue1 = {
-      question: chataiData.value.sessionItem.tip,
-    }
-    let tableFields = tableData.fields ? tableData.fields : []
-    let fields: any[] = []
-    fields = tableFields.map((item) => {
-      return {
+  try {
+    isShowSelectCatalogModal.value = false
+    isShowLoading.value = true
+    let tableData = chataiData.value.sessionItem?.tabledata.length ? JSON.parse(chataiData.value.sessionItem?.tabledata) : []
+    if (isPublishCatalog.value) {
+      let jsonValueOfSql = { sql: chataiData.value.sessionItem.sql }
+      let jsonValueOfQuestion = { question: chataiData.value.sessionItem.tip }
+      let tableFields = tableData.fields ? tableData.fields : []
+      let fields: any[] = []
+      fields = tableFields.map((item) => {
+        return {
+          id: uuidv4(),
+          fieldCode: item.code,
+          fieldName: item.name,
+          fieldName_cn: item.name_cn || item.name,
+          fieldSysDataType: item.sysDataType,
+          fieldPrecision: item.fieldPrecision,
+          scale: item.scale,
+        }
+      })
+      let name = `query_entity_${Date.now()}`
+      let entitieId = uuidv4()
+      let tableName = await $api.smartData.translateToTableName({
         id: uuidv4(),
-        fieldCode: item.code,
-        fieldName: item.name,
-        fieldName_cn: item.name_cn || item.name,
-        fieldSysDataType: item.sysDataType,
-        fieldPrecision: item.fieldPrecision,
-        scale: item.scale,
-      }
-    })
-    let name = `query_entity_${Date.now()}`
-    let entities = [
-      {
-        id: `${Date.now()}`,
-        name,
-        code: name,
-        name_cn: chataiData.value.sessionItem.textAreaValue,
-        belongCatalog: selectedCatalog.code,
-        props: [
-          {
-            name: 'belongSQL',
-            code: 'belongSQL',
-            jsonValue: JSON.stringify(jsonValue),
-          },
-          {
-            name: 'belongQuestion',
-            code: 'belongQuestion',
-            jsonValue: JSON.stringify(jsonValue1),
-          },
-        ],
-        fields,
-      },
-    ]
-    // 保存模型
-    let saveBizCustomEntity = await axios.post(
-      'http://databoard-test.yindangu.com/webapi/innersysapi/VMcdmDataServiceWebApi/saveBizCustomEntity',
-      {
-        entities: entities,
-      },
-    )
-    let entity = saveBizCustomEntity?.data.data.data?.insert?.entity
-    if (!entity) entity = saveBizCustomEntity?.data.data.data?.update?.entity
-    if (entity) {
-      let entityIds = entity.map((item) => item.id).join(',')
-      // 发布模型
-      let generateMDTableResutl = await axios.post(
-        'http://databoard-test.yindangu.com/webapi/innersysapi/VMcdmDataServiceWebApi/generateMDTable',
+        orgin: '1',
+        word: chataiData.value.sessionItem.textAreaValue,
+      })
+      tableName = tableName.replace(/\s/g, '')
+      let entities = [
         {
-          entityIds,
+          id: entitieId,
+          name: tableName,
+          code: name,
+          name_cn: chataiData.value.sessionItem.textAreaValue,
+          belongCatalog: selectedCatalog.code,
+          props: [
+            {
+              name: 'belongSQL',
+              code: 'belongSQL',
+              jsonValue: JSON.stringify(jsonValueOfSql),
+            },
+            {
+              name: 'belongQuestion',
+              code: 'belongQuestion',
+              jsonValue: JSON.stringify(jsonValueOfQuestion),
+            },
+          ],
+          fields,
         },
-      )
-      let tableInfo = generateMDTableResutl?.data?.data?.tableInfo[0]
-      if (tableInfo) {
-        let datas = tableData.datas.map((item, index) => {
-          return { ...item, id: `${Date.now()}${index}` }
+      ]
+      // 保存模型
+      await $api.smartData.saveModel({ entities: entities })
+      // 发布模型
+      let generateMDTableResutl = await $api.smartData.generateMdTable({ entityId: entitieId })
+      let tableInfo = generateMDTableResutl?.tableInfo[0]
+      if (tableInfo && tableData.datas.length) {
+        let datas = tableData.datas.map((item: object) => ({ ...item, id: uuidv4() }))
+        //往表里插数据
+        await $api.smartData.batchInsertOrUpdate({
+          componentCode: tableInfo.componentCode,
+          tableName: tableInfo.tableName,
+          datas: JSON.stringify(datas),
         })
-        await axios.post(
-          `http://databoard-test.yindangu.com/restapi/bizentity/data/${tableInfo.componentCode}/${tableInfo.tableName}/batchInsertOrUpdate`,
-          {
-            datas: datas,
-          },
-        )
       }
       // 生成ddl
-      let generateDDL = await axios.post(
-        'http://databoard-test.yindangu.com/webapi/innersysapi/VMcdmDataServiceWebApi/generateDDL',
-        {
-          entityIds: entityIds,
-          detail: false,
-        },
-      )
-      let ddl = generateDDL?.data?.data?.ddl
-      if (ddl) {
-        let ddlString = ddl?.join('\\')
-        await axios.post(
-          `https://a7aa-14-123-254-4.ngrok-free.app/api/v0/train?ddl=${encodeURIComponent(ddlString)}&id=${
-            chataiData.value.sessionItem.id
-          }&orgid=1&projectid=1`,
-        )
-        await axios.post(
-          `https://a7aa-14-123-254-4.ngrok-free.app/api/v0/train?&id=${chataiData.value.sessionItem.id}&orgid=1&projectid=1&question=${chataiData.value.sessionItem?.tip}&sql=${chataiData.value.sessionItem?.sql}`,
-        )
+      let generatedDDL = await $api.smartData.ddl({ entityId: entitieId })
+      if (generatedDDL) {
+        await $api.smartData.trainByDdl({ ddl: generatedDDL })
+        await $api.smartData.trainByPrompt({ prompt: chataiData.value.sessionItem?.tip, sql: chataiData.value.sessionItem?.sql })
       }
-    }
-  } else {
-    //发布至现有模型
-    let insertData: any[] = []
-    tableData.datas.map((item: any) => {
-      let data: {
-        [key: string]: any
-      } = {}
-      for (const key in selectedCatalog) {
-        if (selectedCatalog.hasOwnProperty(key)) {
-          data[key] = selectedCatalog[key] ? item[selectedCatalog[key]] : null
+    } else {
+      //发布至现有模型
+      let insertData: any[] = []
+      tableData.datas.map((item: any) => {
+        let data: { [key: string]: any } = {}
+        for (const key in selectedCatalog) {
+          if (selectedCatalog.hasOwnProperty(key)) {
+            data[key] = selectedCatalog[key] ? item[selectedCatalog[key]] : null
+          }
         }
+        insertData.push({ ...data, id: uuidv4() })
+      })
+      let findMdTableInfoRes = await $api.smartData.findMdTableInfo({ entityId: selectPublishMode.value.id })
+      let tableInfo = findMdTableInfoRes[0]
+      if (tableInfo) {
+        await $api.smartData.batchInsertOrUpdate({
+          componentCode: tableInfo.componentCode,
+          tableName: tableInfo.tableName,
+          datas: JSON.stringify(insertData),
+        })
       }
-      insertData.push({ ...data, id: uuidv4() })
-    })
-    let tableInfoRes = await chataiApi.findMDTableInfo(selectPublishMode.value.id)
-    let tableInfo = tableInfoRes?.data?.datas[0]
-    if (tableInfo) {
-      let insertRes = await axios.post(
-        `http://databoard-test.yindangu.com/restapi/bizentity/data/${tableInfo.componentCode}/${tableInfo.tableName}/batchInsertOrUpdate`,
-        {
-          datas: insertData,
-        },
-      )
     }
+    message.success('发布成功')
+  } catch (e: any) {
+    console.log(e)
+  } finally {
+    isShowLoading.value = false
+    await getCustomCatalogEntityTree()
   }
-  await getCustomCatalogEntityTree()
-  isShowLoading.value = false
-  message.success('发布成功')
 }
 
 // 选择模型目录弹框取消事件

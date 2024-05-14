@@ -7,7 +7,7 @@ import { Injectable } from '@nestjs/common';
 export class SmartDataService {
   protected llm = axios.create({
     baseURL:
-      process.env.LLM_URL ?? `https://c538-14-123-253-17.ngrok-free.app/api/v0`,
+      process.env.LLM_URL ?? `https://a7aa-14-123-254-4.ngrok-free.app/api/v0`,
   });
 
   protected mcdm: AxiosInstance = axios.create({
@@ -133,16 +133,21 @@ export class SmartDataService {
     });
   }
 
-  async getSql(question: string, id: string, modelrange: any[]) {
+  async getSql(
+    question: string,
+    id: string,
+    orgid: string,
+    projectid: string,
+    modelrange: string,
+  ) {
     return await this.llm({
-      method: 'GET',
       url: `/ask`,
       params: {
         question,
         id,
-        orgid: 1,
-        projectid: 1,
-        modelrange: JSON.stringify(modelrange),
+        orgid,
+        projectid,
+        modelrange: modelrange,
       },
       headers: {
         'ngrok-skip-browser-warning': 'true',
@@ -340,6 +345,81 @@ export class SmartDataService {
   async deleteColumn(columnId: string) {
     return await this.mcdm({
       url: `/module-operation!executeOperation?operation=NocodbDBTableColumnDeleteColumn&columnId=${columnId}`,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async generateMDTable(params: { entityId: string }) {
+    return await this.mcdm({
+      url: `/webapi/innersysapi/VMcdmDataServiceWebApi/generateMDTable`,
+      data: {
+        entityIds: params.entityId,
+      },
+    }).then((r) => {
+      return r.data.data ?? [];
+    });
+  }
+
+  async batchInsertOrUpdate(tableInfo: {
+    componentCode: string;
+    tableName: string;
+    datas: string;
+  }) {
+    return await this.mcdm({
+      url: `/restapi/bizentity/data/${tableInfo.componentCode}/${tableInfo.tableName}/batchInsertOrUpdate`,
+      data: {
+        datas: JSON.parse(tableInfo.datas),
+      },
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async findMDTableInfo(entityId: string) {
+    return await this.mcdm({
+      url: `/webapi/innersysapi/VMcdmDataServiceWebApi/findMDTableInfo`,
+      data: {
+        entityIds: entityId,
+      },
+    }).then((r) => {
+      return r.data.data.datas ?? [];
+    });
+  }
+
+  async repair(
+    id: string,
+    orgid: string,
+    projectid: string,
+    error_msg: string,
+    question: string,
+  ) {
+    return await this.llm({
+      url: `/repair`,
+      params: {
+        id,
+        orgid,
+        projectid,
+        error_msg,
+        question,
+      },
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+      },
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async translateToTableName(id: string, orgid: string, word: string) {
+    return await this.llm({
+      method: 'POST',
+      url: '/translate',
+      params: {
+        id,
+        orgid,
+        word,
+      },
     }).then((r) => {
       return r.data;
     });

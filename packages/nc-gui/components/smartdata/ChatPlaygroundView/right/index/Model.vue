@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from '#imports'
+import { ChatPlaygroundViewStoreEvents, ref } from '#imports'
 
 import { CloseOutlined, SearchOutlined } from '@ant-design/icons-vue'
 
@@ -12,7 +12,7 @@ import { useChatPlaygroundViewStore } from '../../../../../store/chatPlaygroundV
 // const { eventBus } = useSmartsheetStoreOrThrow()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
-const { getCheckedModelData, setChataiDataIsOpenMode } = store
+const { getCheckedModelData, setChataiDataIsOpenMode, eventBus } = store
 const searchModelText = ref<string>('') //搜索模型文本
 const isShowModelResult = ref<boolean>(false) //是否显示搜索模型的结果
 const searchModelResult = ref<any[]>([]) //搜索模型的结果
@@ -158,13 +158,13 @@ const uncheckChildren = (children: any) => {
 }
 
 //删除已选模型发射的事件
-// eventBus.on((event, id) => {
-//   if (event === SmartsheetStoreEvents.DELETE_MODE) {
-//     checkedKeys.value = checkedKeys.value.filter((item) => item !== id && item !== '0-0')
-//     const node = chataiData.value.modelData.find((item) => item.id === id)
-//     cancelParentNode(node.parentId)
-//   }
-// })
+eventBus.on((event, id) => {
+  if (event === ChatPlaygroundViewStoreEvents.DELETE_MODE) {
+    checkedKeys.value = checkedKeys.value.filter((item) => item !== id && item !== '0-0')
+    const node = chataiData.value.modelData.find((item) => item.id === id)
+    cancelParentNode(node.parentId)
+  }
+})
 
 //取消勾选父节点
 const cancelParentNode = (nodeId: string) => {

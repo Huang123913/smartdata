@@ -1,21 +1,19 @@
 <script lang="ts" setup>
-import { ref } from '#imports'
+import { ChatPlaygroundViewStoreEvents, ref } from '#imports'
 
 import { CloseOutlined, DownOutlined } from '@ant-design/icons-vue'
 
 import { useChatPlaygroundViewStore } from '../../../../../store/chatPlaygroundView'
 
-// const { eventBus } = useSmartsheetStoreOrThrow()
-
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
-const { deleteFile, deleteModel } = store
+const { deleteFile, deleteModel, eventBus } = store
 const visible = ref<boolean>(false)
 const clicked = ref<boolean>(false) //是否显示选择字段弹框
 // 删除模型
 const handleDeleteModelItem = (item: any) => {
   deleteModel(item.id)
-  // eventBus.emit(SmartsheetStoreEvents.DELETE_MODE, item.id)
+  eventBus.emit(ChatPlaygroundViewStoreEvents.DELETE_MODE, item.id)
 }
 
 //删除字段

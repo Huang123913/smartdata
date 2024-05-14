@@ -87,6 +87,9 @@ export enum SmartsheetStoreEvents {
   FIELD_ADD = 'field-add',
   MAPPED_BY_COLUMN_CHANGE = 'mapped-by-column-change',
   CLEAR_NEW_ROW = 'clear-new-row',
+}
+
+export enum ChatPlaygroundViewStoreEvents {
   DELETE_FILE = 'delete-file',
   DELETE_MODE = 'delete-model',
   OPEN_SET_MODEL_DATA_UPDATE_TIME_MODAL = 'open-set-model-data-update-time-modal',

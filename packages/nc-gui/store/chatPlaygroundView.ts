@@ -1,5 +1,7 @@
 import { reactive } from 'vue'
 
+import type { ChatPlaygroundViewStoreEvents } from '#imports'
+import { useEventBus, useNuxtApp } from '#imports'
 import { defineStore } from 'pinia'
 
 import chataiApi from '../api/chatai'
@@ -44,6 +46,8 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     modelFields: {}, //选择了的字段映射到对应模型
     isOpenModel: false,
   })
+
+  const eventBus = useEventBus<ChatPlaygroundViewStoreEvents>(Symbol('chatPlaygroundView'))
 
   //获取模型数据
   const getCustomCatalogEntityTree = async () => {
@@ -145,5 +149,6 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     setModelFields,
     buildTree,
     setChataiDataIsOpenMode,
+    eventBus,
   }
 })
