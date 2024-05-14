@@ -319,7 +319,7 @@ export class SmartDataService {
 
   async countData(tableName: string) {
     return await this.mcdm({
-      url: `/module-operation!executeOperation?operation=NocodbTableRecordsUpdateTableRecords&tableId=${tableName}`,
+      url: `/module-operation!executeOperation?operation=NocodbDBViewRowCountTableViewRows&viewName=${tableName}`,
     }).then((r) => {
       return r.data;
     });
