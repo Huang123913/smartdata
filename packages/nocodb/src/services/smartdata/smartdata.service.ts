@@ -318,4 +318,30 @@ export class SmartDataService {
       return r.data;
     });
   }
+
+  async addColumn(tableName: string, body: unknown) {
+    return await this.mcdm({
+      url: `/module-operation!executeOperation?operation=DBTableColumnCreateColumn&tableId=${tableName}`,
+      data: body,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async updateColumn(columnId: string, body: unknown) {
+    return await this.mcdm({
+      url: `/module-operation!executeOperation?operation=DBTableColumnUpdateColumn&columnId=${columnId}`,
+      data: body,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async deleteColumn(columnId: string) {
+    return await this.mcdm({
+      url: `/module-operation!executeOperation?operation=NocodbDBTableColumnDeleteColumn&columnId=${columnId}`,
+    }).then((r) => {
+      return r.data;
+    });
+  }
 }

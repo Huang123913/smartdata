@@ -18,10 +18,15 @@ import { ColumnsService } from '~/services/columns.service';
 import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
 
+import { SmartDataService } from '~/services/smartdata/smartdata.service';
+
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
 export class ColumnsController {
-  constructor(private readonly columnsService: ColumnsService) {}
+  constructor(
+    private readonly columnsService: ColumnsService,
+    private readonly smartdataService: SmartDataService,
+  ) {}
 
   @Post([
     '/api/v1/db/meta/tables/:tableId/columns/',
@@ -34,6 +39,9 @@ export class ColumnsController {
     @Body() body: ColumnReqType,
     @Req() req: Request,
   ) {
+    if (this.smartdataService.isMcdmRewrite()) {
+      return await this.smartdataService.addColumn(tableId, body);
+    }
     return await this.columnsService.columnAdd({
       tableId,
       column: body,
@@ -52,6 +60,9 @@ export class ColumnsController {
     @Body() body: ColumnReqType,
     @Req() req: Request,
   ) {
+    if (this.smartdataService.isMcdmRewrite()) {
+      return await this.smartdataService.updateColumn(columnId, body);
+    }
     return await this.columnsService.columnUpdate({
       columnId: columnId,
       column: body,
@@ -66,6 +77,9 @@ export class ColumnsController {
   ])
   @Acl('columnDelete')
   async columnDelete(@Param('columnId') columnId: string, @Req() req: Request) {
+    if (this.smartdataService.isMcdmRewrite()) {
+      return await this.smartdataService.deleteColumn(columnId);
+    }
     return await this.columnsService.columnDelete({
       columnId,
       req,
