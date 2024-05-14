@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-import type { ColumnReqType, ColumnType } from 'nocodb-sdk'
-import { UITypes, isLinksOrLTAR, isSelfReferencingTableColumn, isSystemColumn, isVirtualCol } from 'nocodb-sdk'
 import {
   IsFormInj,
   IsKanbanInj,
@@ -22,8 +20,10 @@ import {
   useNuxtApp,
   watchEffect,
 } from '#imports'
-import MdiMinusIcon from '~icons/mdi/minus-circle-outline'
+import type { ColumnReqType, ColumnType } from 'nocodb-sdk'
+import { UITypes, isLinksOrLTAR, isSelfReferencingTableColumn, isSystemColumn, isVirtualCol } from 'nocodb-sdk'
 import MdiIdentifierIcon from '~icons/mdi/identifier'
+import MdiMinusIcon from '~icons/mdi/minus-circle-outline'
 
 const props = defineProps<{
   preload?: Partial<ColumnType>
@@ -103,7 +103,7 @@ const geoDataToggleCondition = (t: { name: UITypes }) => {
 const showDeprecated = ref(false)
 
 const uiTypesOptions = computed<typeof uiTypes>(() => {
-  return [
+  let data = [
     ...uiTypes
       .filter((t) => geoDataToggleCondition(t) && (!isEdit.value || !t.virtual) && (!t.deprecated || showDeprecated.value))
       .filter((t) => !(t.name === UITypes.SpecificDBType && isXcdbBase(meta.value?.source_id))),
@@ -117,6 +117,10 @@ const uiTypesOptions = computed<typeof uiTypes>(() => {
         ]
       : []),
   ]
+  data = data.map((item) => {
+    return { ...item, translate: `fieldType.${item.name}` }
+  })
+  return data
 })
 
 const reloadMetaAndData = async () => {
@@ -310,7 +314,7 @@ if (props.fromTableExplorer) {
               <a-select-option v-for="opt of uiTypesOptions" :key="opt.name" :value="opt.name" v-bind="validateInfos.uidt">
                 <div class="flex gap-2 items-center">
                   <component :is="opt.icon" class="text-gray-700 w-4 h-4" />
-                  <div class="flex-1">{{ opt.name }}</div>
+                  <div class="flex-1">{{ $t(`${opt.translate}`) }}</div>
                   <span v-if="opt.deprecated" class="!text-xs !text-gray-300">({{ $t('general.deprecated') }})</span>
                   <component
                     :is="iconMap.check"
