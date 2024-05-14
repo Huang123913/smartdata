@@ -321,7 +321,7 @@ export class SmartDataService {
 
   async addColumn(tableName: string, body: unknown) {
     return await this.mcdm({
-      url: `/module-operation!executeOperation?operation=DBTableColumnCreateColumn&tableId=${tableName}`,
+      url: `/module-operation!executeOperation?operation=NocodbDBTableColumnCreateColumn&tableId=${tableName}`,
       data: body,
     }).then((r) => {
       return r.data;
@@ -330,7 +330,7 @@ export class SmartDataService {
 
   async updateColumn(columnId: string, body: unknown) {
     return await this.mcdm({
-      url: `/module-operation!executeOperation?operation=DBTableColumnUpdateColumn&columnId=${columnId}`,
+      url: `/module-operation!executeOperation?operation=NocodbDBTableColumnUpdateColumn&columnId=${columnId}`,
       data: body,
     }).then((r) => {
       return r.data;

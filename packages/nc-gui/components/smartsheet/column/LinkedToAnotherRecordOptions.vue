@@ -96,6 +96,7 @@ const oneToOneEnabled = ref(false)
     </div>
     <template v-if="!isXcdbBase || isLinks">
       <div
+        hidden
         class="text-xs cursor-pointer text-grey nc-more-options my-2 flex items-center gap-1 justify-end"
         @click="advancedOptions = !advancedOptions"
       >

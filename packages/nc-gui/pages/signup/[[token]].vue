@@ -220,14 +220,14 @@ onMounted(async () => {
                 </a>
               </div>
 
-              <div v-if="!appInfo.disableEmailAuth" class="flex items-center gap-2">
+              <!-- <div v-if="!appInfo.disableEmailAuth" class="flex items-center gap-2">
                 <a-switch
                   v-model:checked="subscribe"
                   size="small"
                   class="my-1 hover:(ring ring-accent ring-opacity-100) focus:(!ring !ring-accent ring-opacity-100)"
                 />
                 <div class="prose-xs text-gray-500">{{ $t('msg.subscribeToOurWeeklyNewsletter') }}</div>
-              </div>
+              </div> -->
 
               <div class="text-end prose-sm">
                 {{ $t('msg.info.signUp.alreadyHaveAccount') }}
@@ -240,7 +240,12 @@ onMounted(async () => {
 
         <div class="prose-sm mt-4 text-gray-500">
           {{ $t('msg.bySigningUp') }}
-          <a class="prose-sm !text-gray-500 underline" target="_blank" href="https://nocodb.com/policy-nocodb" rel="noopener">
+          <a
+            class="prose-sm !text-gray-500 underline"
+            target="_blank"
+            href="http://www.yindangu.com/module-operation!executeOperation?componentCode=yindangu_officialwebsite&windowCode=Form_Privacy#%7B%22variable%22%3A%7B%22formulaOpenMode%22%3A%22locationHref%22%7D%2C%22windowCode%22%3A%22Form_Privacy%22%2C%22componentCode%22%3A%22yindangu_officialwebsite%22%7D"
+            rel="noopener"
+          >
             {{ $t('title.termsOfService') }}</a
           >
         </div>

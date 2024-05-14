@@ -391,6 +391,7 @@ if (props.fromTableExplorer) {
         </div>
 
         <div
+          hidden
           v-if="!props.hideAdditionalOptions && !isVirtualCol(formState.uidt)&&!(!appInfo.ee && isAttachment(formState)) && (!appInfo.ee || (appInfo.ee && !isXcdbBase(meta!.source_id) && formState.uidt === UITypes.SpecificDBType))"
           class="text-xs cursor-pointer text-gray-400 nc-more-options mb-1 mt-4 flex items-center gap-1 justify-end"
           @click="advancedOptions = !advancedOptions"
