@@ -1486,7 +1486,7 @@
   },
   "fieldType": {
     "Lookup": "查找",
-    "SingleLineText": "单线文本",
+    "SingleLineText": "单行文本",
     "LongText": "长文本",
     "Attachment": "附件",
     "Checkbox": "复选框",
