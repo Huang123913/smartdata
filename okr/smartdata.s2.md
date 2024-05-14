@@ -141,8 +141,9 @@
 - 🟢️ Update Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-update` **完成**
 - 🟢️️ Delete Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-delete` **完成**
 - 🟢️️ List Table Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-list` **完成**
+- ⚪️ Create Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-create` **未开始**
 - 🟢 Update Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-update` **完成**
-- 🟢️ Delete Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-delete`
+- 🟢️ Delete Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-delete` **完成**
 - 🟢️️ Bulk Update Table Rows by IDs `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-update` **完成**
 - 🟢 Bulk Delete Table Rows by IDs `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-delete` **完成**
 - 🟢️ Create Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-create` **完成**
@@ -150,21 +151,25 @@
 - 🟢 Count Table View Rows `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-count` **完成**
 
 ### 编辑: 表格结构
-- ⚪️ Delete Column `/api/v1/db/meta/columns/{columnId}`
-- ⚪️ Update Column `/api/v1/db/meta/columns/{columnId}`
-- ⚪️ Create Column `/api/v1/db/meta/tables/{tableId}/columns`
+- 🟢️ Delete Column `/api/v1/db/meta/columns/{columnId}` **完成**
+- ⚪️ Update Column `/api/v1/db/meta/columns/{columnId}` **进行中**
+- 🟡 Create Column `/api/v1/db/meta/tables/{tableId}/columns` **完成: 部分类型**
 
-## 5.13
+### 显示: 排序&过滤
+> 正在整理
+
+## 5.14
 > 正式环境: http://smartdata.yindangu.com
 > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
-   - 【进行中】迁移后端请求到 Nuxt 后端 
-   - 【进行中】发布模型时可选择发布至现有模型界面 (对接接口中)
-   - 【暂缓】新用户进入项目权限问题
-   - 【完成】完成 `进入: 项目(查看)`
-   - 【完成】完成 `进入: 表格(查看)`
-   - 【完成】完成 `编辑: 表格数据`
+   - 【进行中】屏蔽部分未支持的字段类型
+   - 【未开始】新增字段时对字段名进行翻译 
+   - 【未开始】表格可按目录分类 
+   - 【完成】迁移后端请求到 Nuxt 后端 
+   - 【完成】发布模型时可选择发布至现有模型界面
+   - 【完成】新用户进入项目权限问题
+   - 【完成】`编辑: 表格数据` (新增字段、删除字段)
 
 ### 平台
    - 【暂缓】V: 前端导出规则不要把隐藏的字段也导出来 (项目不急)
