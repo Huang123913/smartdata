@@ -2001,7 +2001,7 @@ onKeyStroke('ArrowDown', onDown)
                       {{ $t('labels.addRowGrid') }}
                     </div>
                   </div>
-                  <!-- <div
+                  <div
                     v-e="['c:row:add:form']"
                     class="px-4 py-3 flex flex-col select-none gap-y-2 cursor-pointer rounded-md hover:bg-gray-100 text-gray-600 nc-new-record-with-form group"
                     @click="onNewRecordToFormClick"
@@ -2017,7 +2017,7 @@ onKeyStroke('ArrowDown', onDown)
                     <div class="flex flex-row text-xs text-gray-400 ml-7.05">
                       {{ $t('labels.addRowForm') }}
                     </div>
-                  </div> -->
+                  </div>
                 </div>
               </div>
             </template>
