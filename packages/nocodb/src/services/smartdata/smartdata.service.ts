@@ -2,6 +2,7 @@ import axios, { type AxiosInstance } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Injectable } from '@nestjs/common';
+import { Request } from 'express';
 
 @Injectable()
 export class SmartDataService {
@@ -17,6 +18,18 @@ export class SmartDataService {
 
   isMcdmRewrite() {
     return process.env?.MCDM_URL == null ? false : true;
+  }
+
+  async mcdmRewrite(operation: string, req: Request) {
+    return await this.mcdm({
+      url: '/module-operation!executeOperation',
+      params: {
+        operation,
+        ...req.params,
+        ...req.query,
+      },
+      data: req.body,
+    }).then((r) => r.data);
   }
 
   async train() {
@@ -225,36 +238,6 @@ export class SmartDataService {
     });
   }
 
-  async getTableViewRows(
-    tableName: string,
-    viewName: string,
-    offset: number = 0,
-    limit: number = 25,
-  ) {
-    return await this.mcdm({
-      url: `/module-operation!executeOperation?operation=NocodbDBViewRowListTableViewRows&tableName=${tableName}&viewName=${viewName}&offset=${offset}&limit=${limit}`,
-    }).then((r) => {
-      return r.data;
-    });
-  }
-
-  async getTableRows(tableName: string, pks: unknown) {
-    return await this.mcdm({
-      url: `/module-operation!executeOperation?operation=NocodbDBTableRowListTableRows&tableName=${tableName}&pks=${pks}`,
-    }).then((r) => {
-      return r.data;
-    });
-  }
-
-  async createData(tableName: string, body: unknown) {
-    return await this.mcdm({
-      url: `/module-operation!executeOperation?operation=NocodbDBViewRowCreateTableViewRow&viewName=${tableName}`,
-      data: body,
-    }).then((r) => {
-      return r.data;
-    });
-  }
-
   async readData(tableName: string, rowId: string) {
     return await this.mcdm({
       url: `/module-operation!executeOperation?operation=NocodbDBViewRowGetTableViewRow&viewName=${tableName}&rowId=${rowId}`,
@@ -311,14 +294,6 @@ export class SmartDataService {
     return await this.mcdm({
       url: `/module-operation!executeOperation?operation=NocodbTableRecordsDeleteTableRecords&tableId=${tableName}`,
       data: body,
-    }).then((r) => {
-      return r.data;
-    });
-  }
-
-  async countData(tableName: string) {
-    return await this.mcdm({
-      url: `/module-operation!executeOperation?operation=NocodbDBViewRowCountTableViewRows&viewName=${tableName}`,
     }).then((r) => {
       return r.data;
     });

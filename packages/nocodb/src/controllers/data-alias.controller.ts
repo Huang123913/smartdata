@@ -45,18 +45,16 @@ export class DataAliasController {
   ) {
     if (this.smartdataService.isMcdmRewrite()) {
       if (req.query.pks) {
-        const responseData = await this.smartdataService.getTableRows(
-          tableName,
-          req.query.pks,
+        const responseData = await this.smartdataService.mcdmRewrite(
+          'NocodbDBTableRowListTableRows',
+          req,
         );
         res.json(responseData);
         return;
       } else {
-        const responseData = await this.smartdataService.getTableViewRows(
-          tableName,
-          viewName,
-          Number(req.query.offset),
-          Number(req.query.limit),
+        const responseData = await this.smartdataService.mcdmRewrite(
+          'NocodbDBViewRowListTableViewRows',
+          req,
         );
         res.json(responseData);
         return;
@@ -132,7 +130,10 @@ export class DataAliasController {
     @Param('viewName') viewName: string,
   ) {
     if (this.smartdataService.isMcdmRewrite()) {
-      const countResult = await this.smartdataService.countData(tableName);
+      const countResult = await this.smartdataService.mcdmRewrite(
+        'NocodbDBViewRowCountTableViewRows',
+        req,
+      );
       res.json(countResult);
       return;
     }
@@ -161,7 +162,10 @@ export class DataAliasController {
     @Query('opt') opt: string,
   ) {
     if (this.smartdataService.isMcdmRewrite()) {
-      return await this.smartdataService.createData(tableName, req.body);
+      return await this.smartdataService.mcdmRewrite(
+        'NocodbDBViewRowCreateTableViewRow',
+        req,
+      );
     }
     return await this.datasService.dataInsert({
       baseName: baseName,
