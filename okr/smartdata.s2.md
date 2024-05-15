@@ -156,15 +156,23 @@
 - 🟡 Create Column `/api/v1/db/meta/tables/{tableId}/columns` **完成: 部分类型**
 
 ### 显示: 排序&过滤
-> 正在整理
+- ⚪️ List View Sorts
+- ⚪️ Update View Sort
+- ⚪️ Get Sort
+- ⚪️ Update Sort
+- ⚪️ Delete Sort
 
 ## 5.15
 > 正式环境: http://smartdata.yindangu.com
 > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
+> 完成了实时搜索 (表格右上角可以选择单个字段进行搜索)
+> 因为有了简化版的实时搜索，所以优先做后台过滤
    - 【进行中】屏蔽部分未支持的字段类型
    - 【进行中】表格可按目录分类
+   - 【进行中】排序接口对接
+   - 【未启动】excel 导入
    - 【完成】表格数据实时过滤
    - 【完成】新增字段时对字段名进行翻译
    - 【完成】发布模型时对名字进行翻译
