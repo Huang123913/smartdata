@@ -324,7 +324,11 @@ export class SmartDataService {
     });
   }
 
-  async addColumn(tableName: string, body: unknown) {
+  async addColumn(tableName: string, body: any) {
+    const updatedColumnName: string = await this.translate(body.column_name);
+    body.column_name = updatedColumnName
+      .replace(/\s/g, '')
+      .replace(/^\S/, (s) => s.toLowerCase());
     return await this.mcdm({
       url: `/module-operation!executeOperation?operation=NocodbDBTableColumnCreateColumn&tableId=${tableName}`,
       data: body,
@@ -423,5 +427,9 @@ export class SmartDataService {
     }).then((r) => {
       return r.data;
     });
+  }
+
+  async translate(text: string) {
+    return await this.translateToTableName(uuidv4(), '1', text);
   }
 }
