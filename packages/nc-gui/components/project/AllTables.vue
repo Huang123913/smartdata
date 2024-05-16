@@ -118,6 +118,7 @@ const onCreateBaseClick = () => {
         role="button"
         class="nc-base-view-all-table-btn"
         data-testid="proj-view-btn__import-data"
+        @click="isImportModalOpen = true"
       >
         <GeneralIcon icon="download" />
         <div class="label">{{ $t('activity.import') }} {{ $t('general.data') }}</div>
