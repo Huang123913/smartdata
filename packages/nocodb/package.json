@@ -163,6 +163,7 @@
     "slash": "^3.0.0",
     "slug": "^8.2.3",
     "socket.io": "^4.7.5",
+    "socks-proxy-agent": "^8.0.3",
     "sql-query-identifier": "^2.6.0",
     "sqlite3": "^5.1.7",
     "tedious": "^16.6.1",

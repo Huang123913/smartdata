@@ -1,4 +1,5 @@
 import axios, { type AxiosInstance } from 'axios';
+import { SocksProxyAgent } from 'socks-proxy-agent';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Injectable } from '@nestjs/common';
@@ -9,6 +10,13 @@ export class SmartDataService {
   protected llm = axios.create({
     baseURL:
       process.env.LLM_URL ?? `https://a7aa-14-123-254-4.ngrok-free.app/api/v0`,
+
+    httpAgent: process.env.LLM_PROXY
+      ? new SocksProxyAgent(process.env.LLM_PROXY)
+      : undefined,
+    httpsAgent: process.env.LLM_PROXY
+      ? new SocksProxyAgent(process.env.LLM_PROXY)
+      : undefined,
   });
 
   protected mcdm: AxiosInstance = axios.create({
