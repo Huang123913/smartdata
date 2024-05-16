@@ -97,17 +97,6 @@ const onCreateBaseClick = () => {
         role="button"
         class="nc-base-view-all-table-btn"
         data-testid="proj-view-btn__add-new-table"
-        @click="onCreateClick()"
-      >
-        <GeneralIcon icon="addOutlineBox" />
-        <div class="label">{{ $t('general.new') }} {{ $t('objects.table') }}</div>
-      </div>
-      <!--
-      <div
-        v-if="isUIAllowed('tableCreate')"
-        role="button"
-        class="nc-base-view-all-table-btn"
-        data-testid="proj-view-btn__add-new-table"
         @click="openTableCreateDialog()"
       >
         <GeneralIcon icon="addOutlineBox" />
@@ -115,15 +104,25 @@ const onCreateBaseClick = () => {
       </div>
       <div
         v-if="isUIAllowed('tableCreate')"
+        role="button"
+        class="nc-base-view-all-table-btn"
+        data-testid="proj-view-btn__add-new-table"
+        @click="onCreateClick()"
+      >
+        <GeneralIcon icon="magic1" />
+        <div class="label">提问 建表</div>
+      </div>
+      <div
+        v-if="isUIAllowed('tableCreate')"
         v-e="['c:table:import']"
         role="button"
         class="nc-base-view-all-table-btn"
         data-testid="proj-view-btn__import-data"
-        @click="isImportModalOpen = true"
       >
         <GeneralIcon icon="download" />
         <div class="label">{{ $t('activity.import') }} {{ $t('general.data') }}</div>
       </div>
+      <!--
       <component :is="isDataSourceLimitReached ? NcTooltip : 'div'" v-if="isUIAllowed('sourceCreate')">
         <template #title>
           <div>

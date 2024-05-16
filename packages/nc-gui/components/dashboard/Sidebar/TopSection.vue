@@ -53,6 +53,24 @@ const navigateToSettings = () => {
       -->
 
       <NcButton
+        type="text"
+        size="small"
+        class="nc-sidebar-top-button !xs:hidden"
+        data-testid="nc-sidebar-team-settings-btn"
+        :centered="false"
+        :class="{
+          '!text-brand-500 !bg-brand-50 !hover:bg-brand-50': isWorkspaceSettingsPageOpened,
+          '!hover:bg-gray-200': !isWorkspaceSettingsPageOpened,
+        }"
+        @click="navigateToSettings"
+      >
+        <div class="flex items-center gap-2">
+          <GeneralIcon icon="cloud" class="!h-4" />
+          <div>企业控制台</div>
+        </div>
+      </NcButton>
+
+      <NcButton
         v-if="isUIAllowed('workspaceSettings')"
         v-e="['c:team:settings']"
         type="text"

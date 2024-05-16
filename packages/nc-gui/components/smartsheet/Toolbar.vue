@@ -73,6 +73,8 @@ const { allowCSVDownload } = useSharedView()
 
         <LazySmartsheetToolbarExport v-if="isPublic && allowCSVDownload" />
 
+        <LazySmartsheetToolbarAIButton />
+
         <div class="flex-1" />
       </template>
 

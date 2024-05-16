@@ -118,6 +118,14 @@ watch(
           </template>
           <ProjectAllTables />
         </a-tab-pane>
+        <a-tab-pane v-if="isUIAllowed('sourceCreate')" key="data-source">
+          <template #tab>
+            <div class="tab-title">
+              <GeneralIcon icon="magic" />
+              <div>数据分析</div>
+            </div>
+          </template>
+        </a-tab-pane>
         <!-- <a-tab-pane v-if="defaultBase" key="erd" tab="Base ERD" force-render class="pt-4 pb-12">
           <ErdView :source-id="defaultBase!.id" class="!h-full" />
         </a-tab-pane> -->
