@@ -50,8 +50,8 @@ hooks.hook('page:finish', () => {
               {{ currentVersion }}
             </template>
             <div class="flex items-center gap-2">
-              <img v-if="!isDashboard" width="120" alt="NocoDB" src="~/assets/img/brand/nocodb-full.png" />
-              <img v-else width="25" alt="NocoDB" src="~/assets/img/icons/256x256.png" />
+              <img v-if="!isDashboard" class="img-logo" alt="SmartData" src="~/assets/img/icons/256x256.png" />
+              <img v-else class="img-logo" alt="SmartData" src="~/assets/img/icons/256x256.png" />
             </div>
           </a-tooltip>
         </div>
@@ -140,6 +140,10 @@ hooks.hook('page:finish', () => {
 </template>
 
 <style lang="scss">
+.img-logo {
+  height: 40px;
+  width: 'auto';
+}
 .nc-lang-btn {
   @apply color-transition flex items-center justify-center fixed bottom-10 right-10 z-99 w-12 h-12 rounded-full shadow-md shadow-gray-500 p-2 !bg-primary text-white ring-opacity-100 active:(ring ring-accent) hover:(ring ring-accent);
 

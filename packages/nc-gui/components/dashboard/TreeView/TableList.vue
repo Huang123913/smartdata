@@ -133,7 +133,7 @@ const availableTables = computed(() => {
 <template>
   <div class="border-none sortable-list">
     <template v-if="base">
-      <div
+      <!-- <div
         v-if="availableTables.length === 0"
         class="py-0.5 text-gray-500"
         :class="{
@@ -142,7 +142,7 @@ const availableTables = computed(() => {
         }"
       >
         {{ $t('general.empty') }}
-      </div>
+      </div> -->
       <div
         v-if="base.sources?.[sourceIndex] && base!.sources[sourceIndex].enabled"
         ref="menuRefs"

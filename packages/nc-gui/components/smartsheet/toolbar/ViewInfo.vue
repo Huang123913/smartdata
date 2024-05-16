@@ -57,7 +57,7 @@ const openedBaseUrl = computed(() => {
               }"
             />
             <div
-              class="hidden !2xl:(flex truncate ml-1)"
+              class="!2xl:(flex truncate ml-1)"
               :class="{
                 '!flex': isSharedBase && !isMobileMode,
               }"
@@ -71,6 +71,33 @@ const openedBaseUrl = computed(() => {
       </NuxtLink>
       <div class="px-1.75 text-gray-500">/</div>
     </template>
+
+    <!-- 父级目录 -->
+    <template v-if="activeTable?.parentCatalog">
+      <NcTooltip class="truncate nc-active-table-title max-w-full" show-on-truncate-only>
+        <template #title>
+          {{ activeTable?.parentCatalog }}
+        </template>
+        <span
+          class="text-ellipsis overflow-hidden text-gray-500 xs:ml-2"
+          :class="{
+            'text-gray-500': !isMobileMode,
+            'text-gray-800 font-medium': isMobileMode || activeView?.is_default,
+          }"
+          :style="{
+            wordBreak: 'keep-all',
+            whiteSpace: 'nowrap',
+            display: 'inline',
+          }"
+        >
+          <template v-if="activeView?.is_default">
+            {{ activeTable?.parentCatalog }}
+          </template>
+        </span>
+      </NcTooltip>
+      <div class="px-1.75 text-gray-500">/</div>
+    </template>
+
     <template v-if="!(isMobileMode && !activeView?.is_default)">
       <LazyGeneralEmojiPicker v-if="isMobileMode" :emoji="activeTable?.meta?.icon" readonly size="xsmall">
         <template #default>

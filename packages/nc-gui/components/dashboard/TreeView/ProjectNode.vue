@@ -389,6 +389,12 @@ const projectDelete = () => {
   isProjectDeleteDialogVisible.value = true
   $e('c:project:delete')
 }
+
+const isLoadingModel = ref(false)
+
+const setIsLoadingModel = (value: boolean) => {
+  isLoadingModel.value = value
+}
 </script>
 
 <template>
@@ -425,7 +431,11 @@ const projectDelete = () => {
 
           <div class="flex items-center mr-1" @click="onProjectClick(base)">
             <div class="flex items-center select-none w-6 h-full">
-              <a-spin v-if="base.isLoading" class="!ml-1.25 !flex !flex-row !items-center !my-0.5 w-8" :indicator="indicator" />
+              <a-spin
+                v-if="base.isLoading || isLoadingModel"
+                class="!ml-1.25 !flex !flex-row !items-center !my-0.5 w-8"
+                :indicator="indicator"
+              />
 
               <div v-else>
                 <GeneralBaseIconColorPicker
@@ -742,6 +752,9 @@ const projectDelete = () => {
             </div>
           </div>
         </template>
+        <div class="model-list-container" v-if="base.id">
+          <DashboardTreeViewModelList :base="base" :setIsLoadingModel="setIsLoadingModel" />
+        </div>
       </div>
     </div>
     <template v-if="!isSharedBase" #overlay>

@@ -48,7 +48,13 @@ const [useProvideColumnCreateStore, useColumnCreateStore] = createInjectionState
 
     const { $e } = useNuxtApp()
 
-    const sqlUi = ref(meta.value?.source_id ? sqlUis.value[meta.value?.source_id] : Object.values(sqlUis.value)[0])
+    const sqlUi = ref(
+      meta.value?.source_id
+        ? sqlUis.value[meta.value?.source_id]
+          ? sqlUis.value[meta.value?.source_id]
+          : Object.values(sqlUis.value)[0]
+        : Object.values(sqlUis.value)[0],
+    )
 
     const { activeView } = storeToRefs(useViewsStore())
 

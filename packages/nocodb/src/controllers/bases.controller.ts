@@ -39,8 +39,8 @@ export class BasesController {
   })
   @Get(['/api/v1/db/meta/projects/', '/api/v2/meta/bases/'])
   async list(@Query() queryParams: Record<string, any>, @Req() req: Request) {
-    if (this.smartdataService.isMcdmRewrite())
-      return await this.smartdataService.getBases();
+    // if (this.smartdataService.isMcdmRewrite())
+    //   return await this.smartdataService.getBases();
     const bases = await this.projectsService.baseList({
       user: req.user,
       query: queryParams,

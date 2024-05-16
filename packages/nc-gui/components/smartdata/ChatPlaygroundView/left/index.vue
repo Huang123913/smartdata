@@ -47,12 +47,15 @@ onMounted(async () => {
     tabledata: '',
     tip: '',
   })
-  isShowLoading.value = true
-  // 获取模型数据
-  await getCustomCatalogEntityTree().catch((err: any) => {
+  try {
+    isShowLoading.value = true
+    // 获取模型数据
+    if (!chataiData.value.modelData.length) await getCustomCatalogEntityTree()
+  } catch (e: any) {
+    console.log(e)
+  } finally {
     isShowLoading.value = false
-  })
-  isShowLoading.value = false
+  }
 })
 
 //删除所有会话

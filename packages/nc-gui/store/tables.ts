@@ -18,6 +18,7 @@ export const useTablesStore = defineStore('tablesStore', () => {
   // const baseStore = useBase()
 
   const workspaceStore = useWorkspace()
+  const chatPlaygroundViewStore = useChatPlaygroundViewStore()
 
   const activeTableId = computed(() => route.value.params.viewId as string | undefined)
 
@@ -32,8 +33,7 @@ export const useTablesStore = defineStore('tablesStore', () => {
     if (!tables) return []
 
     const openedProjectBasesMap = basesStore.openedProjectBasesMap
-
-    return tables.filter((t) => !t.source_id || openedProjectBasesMap.get(t.source_id)?.enabled)
+    return tables.filter((t) => t?.isModel || t.source_id || openedProjectBasesMap.get(t.source_id)?.enabled)
   })
 
   const activeTable = computed(() => {
@@ -76,6 +76,25 @@ export const useTablesStore = defineStore('tablesStore', () => {
     const tables = await api.dbTable.list(baseId, {
       includeM2M: includeM2M.value,
     })
+
+    if (chatPlaygroundViewStore.chataiData.modelData)
+      chatPlaygroundViewStore.chataiData.modelData.map((item) => {
+        if (!item.isCatalog) {
+          let parent = chatPlaygroundViewStore.chataiData.modelData.find((item1) => item1.id === item.parentId)
+          tables.list.push({
+            ...item,
+            base_id: baseId,
+            id: item.id,
+            table_name: item.name,
+            title: item.name_cn,
+            type: 'table',
+            source_id: `${item.parentId}`,
+            parentCatalog: parent.name_cn !== '模型目录' ? parent.name_cn : '',
+            isModel: true,
+            created_at: item.customDateTime,
+          })
+        }
+      })
 
     tables.list?.forEach((t) => {
       let meta = t.meta
