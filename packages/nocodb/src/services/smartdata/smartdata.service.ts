@@ -52,23 +52,23 @@ export class SmartDataService {
     const entities = await this.getEntity(entityId);
     if (!entities.length) return undefined;
 
-    const entity = entities[0];
     const ddl = await this.getDDL(entityId);
     await this.trainByDDL(ddl);
     result.ddl = ddl;
 
-    const props = entity.props;
-    const sqlProp = props.find((p) => p.code == 'belongSQL');
-    const promptProp = props.find((p) => p.code == 'belongQuestion');
-    if (sqlProp && promptProp) {
-      try {
-        const sql = JSON.parse(sqlProp.jsonValue).sql;
-        const prompt = JSON.parse(promptProp.jsonValue).question;
-        await this.trainByPrompt(sql, prompt);
-        result.sql = sql;
-        result.prompt = prompt;
-      } catch {}
-    }
+    // const entity = entities[0];
+    // const props = entity.props;
+    // const sqlProp = props.find((p) => p.code == 'belongSQL');
+    // const promptProp = props.find((p) => p.code == 'belongQuestion');
+    // if (sqlProp && promptProp) {
+    //   try {
+    //     const sql = JSON.parse(sqlProp.jsonValue).sql;
+    //     const prompt = JSON.parse(promptProp.jsonValue).question;
+    //     await this.trainByPrompt(sql, prompt);
+    //     result.sql = sql;
+    //     result.prompt = prompt;
+    //   } catch {}
+    // }
 
     return result;
   }
