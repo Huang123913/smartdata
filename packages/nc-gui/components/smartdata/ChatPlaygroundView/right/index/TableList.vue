@@ -188,7 +188,7 @@ const handleOk = async (selectedCatalog: object) => {
       let generatedDDL = await $api.smartData.ddl({ entityId: entitieId })
       if (generatedDDL) {
         await $api.smartData.trainByDdl({ ddl: generatedDDL })
-        await $api.smartData.trainByPrompt({ prompt: chataiData.value.sessionItem?.tip, sql: chataiData.value.sessionItem?.sql })
+        // await $api.smartData.trainByPrompt({ prompt: chataiData.value.sessionItem?.tip, sql: chataiData.value.sessionItem?.sql })
       }
     } else {
       //发布至现有模型
