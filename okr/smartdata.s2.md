@@ -152,8 +152,15 @@
 
 ### 编辑: 表格结构
 - 🟢️ Delete Column `/api/v1/db/meta/columns/{columnId}` **完成**
-- ⚪️ Update Column `/api/v1/db/meta/columns/{columnId}` **进行中**
+- 🟡️ Update Column `/api/v1/db/meta/columns/{columnId}` **完成: 部分类型**
 - 🟡 Create Column `/api/v1/db/meta/tables/{tableId}/columns` **完成: 部分类型**
+- ⚪️ Create Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-create` **未开始**
+- ⚪️ Update Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-update` **未开始**
+- ⚪️ Delete Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-delete` **未开始**
+- ⚪️ Duplicate Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-duplicate` **未开始**
+- ⚪️ Duplicate Column `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/duplicate-column` **未开始**
+- ⚪️ Reorder Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-reorder` **未开始**
+- ⚪️ Update Grid Column `https://meta-apis-v1.nocodb.com/#tag/DB-View/operation/db-view-grid-column-update` **未开始**
 
 ### 显示: 排序&过滤
 - ⚪️ List View Sorts
@@ -167,15 +174,11 @@
 > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
-> 完成了实时搜索 (表格右上角可以选择单个字段进行搜索)
-> 因为有了简化版的实时搜索，所以优先做后台过滤
    - 【进行中】屏蔽部分未支持的字段类型
    - 【进行中】表格可按目录分类
    - 【进行中】排序接口对接
    - 【未启动】excel 导入
-   - 【完成】表格数据实时过滤
-   - 【完成】新增字段时对字段名进行翻译
-   - 【完成】发布模型时对名字进行翻译
+   - 【完成】请求 LLM 接口时使用代理
 
 ### 平台
    - 【暂缓】V: 前端导出规则不要把隐藏的字段也导出来 (项目不急)
