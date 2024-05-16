@@ -32,7 +32,7 @@ const isCanResverSession = computed(() => {
       !searchModelResult.value.every((item) => checkedKeys.value.includes(item.id))
     )
   } else {
-    return checkedKeys.value.length && chataiData.value.modelData.length !== checkedKeys.value.length
+    return checkedKeys.value.length && !checkedKeys.value.includes('0-0')
   }
 })
 

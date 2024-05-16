@@ -242,15 +242,13 @@ const handleSelectExistingModel = async (item: any) => {
     targetField.value = existingModelField.value[item.id]
   } else {
     isShowLoading.value = true
-    let questionRes: any = await chataiApi.findBizCustomEntity(item.id).catch((err) => {
-      isShowLoading.value = false
+    let modelInfo = await $api.smartData.entity({ entityId: item.id })
+    let fields = modelInfo[0].fields ?? []
+    targetField.value = fields.map((item: any) => {
+      return { ...item, value: item.fieldName, label: item.fieldName }
     })
-    if (questionRes?.success) {
-      targetField.value = questionRes?.data?.datas[0].fields.map((item: any) => {
-        return { ...item, value: item.fieldName, label: item.fieldName }
-      })
-      existingModelField.value[item.id] = targetField.value
-    }
+    existingModelField.value[item.id] = targetField.value
+
     isShowLoading.value = false
   }
   isShowSelectCatalogModal.value = true
