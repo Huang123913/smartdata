@@ -12,109 +12,38 @@
 ### 场景拆分:
 
 #### 1. 数据模型接口对接 (**?人日**)
-> 目标: `数据模型`相关特性对接至自建服务 (Meta, Data)
-1. 表数据操作接口 `10个`, 预计至少实现其中 `10个`
-2. 表结构操作接口 `25个`, 预计至少实现其中 `9个`
-3. 数据导入接口
+   > 目标: `数据模型`相关特性对接至自建服务 (Meta, Data)
+   1. 表数据操作接口 `10个`, 预计至少实现其中 `10个`
+   2. 表结构操作接口 `25个`, 预计至少实现其中 `9个`
+   3. 数据导入接口
 
 #### 2. 菜单目录接口对接 (**?人日**)
-> 目标: `菜单目录`相关特性对接至自建服务 (Base, Project)
-1. 菜单相关接口 `21个`, 预计至少实现其中 `3个`
+   > 目标: `菜单目录`相关特性对接至自建服务 (Base, Project)
+   1. 菜单相关接口 `21个`, 预计至少实现其中 `3个`
 
 #### 3. 前端功能
-> 目标: 完善操作体验、报错重试等逻辑，提供可被外部嵌入的独立页面
-1. 模型树增加: 全选、反选 (**1**)
-   > 完成
-2. 生成结果失败时自动重试 3 次 (**2**)
-   > 完成
-3. 单独提供`数据导入`页 (**2**)
-4. 单独提供`数据查看`页 (**5**)
-5. 单独提供`现有模型训练`页, 管理员主动触发 (**2**)
-   > 接口: 完成, 页面: 完成, 未部署
-6. 发布模型时可设置: 定时更新, 实时获取
-   > 前端: 完成, 接口: 未提供
-7. 发布模型时可选择发布至现有模型 (**3**)
-8. VSQL层面的报错不需要/repair (**1**)
-9. 多语言翻译完善 (**1**)  
-   > 进行中
+   > 目标: 完善操作体验、报错重试等逻辑，提供可被外部嵌入的独立页面
+   1. 模型树增加: 全选、反选 (**1**)
+      > 完成
+   2. 生成结果失败时自动重试 3 次 (**2**)
+      > 完成
+   3. 单独提供`数据导入`页 (**2**)
+   4. 单独提供`数据查看`页 (**5**)
+   5. 单独提供`现有模型训练`页, 管理员主动触发 (**2**)
+      > 接口: 完成, 页面: 完成, 未部署
+   6. 发布模型时可设置: 定时更新, 实时获取
+      > 前端: 完成, 接口: 未提供
+   7. 发布模型时可选择发布至现有模型 (**3**)
+   8. VSQL层面的报错不需要/repair (**1**)
+   9. 多语言翻译完善 (**1**)  
+      > 进行中
 
 #### 4. Docker 部署
-> 目标: 把前后端两个服务打包在一起，生成独立的部署包
-1. 把前端的请求都按标准封装到 Nuxt 的后台 (**3**)
-   > 进行中
-2. 生成 Docker 部署包 (**3**)
-3. 服务闪退问题
-
-#### 5. APIs 桥接
-> 目标: 桥接最基础的接口: 操作数据、操作表结构、操作目录(Base,Project)
-> 优先级: 🟢 高(16), 🟡 中(7), ⚪️ 低(13), ❔ 暂缓(18)
-
-- 数据操作接口
-   1. 🟢 List Table Records
-   2. 🟢 Create Table Records
-   3. 🟢 Update Table Records
-   4. 🟢 Delete Table Records
-   5. 🟢 Read Table Record
-   6. 🟢 Count Table Records
-   7. ❔ List Linked Records
-   8. ❔ Link Records
-   9. ❔ Unlink Records
-   10: 🟢 Attachment Upload
-
-- Base
-   1. 🟢 Get Base info
-   2. ❔ Get UI ACL
-   3. ❔ Create UI ACL
-   4. 🟢 List Bases
-   5. 🟢 Create Base
-   6. Duplicate Base Source
-   7. Duplicate Base
-   8. 🟢 Get Base
-   9. 🟡 Delete Base
-   10. 🟡 Update Base
-   11. ❔ Base user meta update
-   12. ❔ Get Base Shared Base
-   13. ❔ Delete Base Shared Base
-   14. ❔ Create Base Shared Base
-   15. ❔ Update Base Shared Base
-   16. ❔ Base Cost
-   17. ❔ Sync Meta
-   18. ❔ Meta Diff
-   19. ❔ List Empty & Null Filter
-   20. ❔ List Audits in Base
-
-- DB Table
-   1. 🟢 Create Table
-   2. 🟢 List Tables
-   3. 🟢 Read Table
-   4. 🟡 Update Table
-   5. 🟡 Delete Table
-   6. ⚪️ Duplicate Table
-   7. ❔ Reorder Table
-
-- DB Table Column
-   1. 🟢 Create Column
-   2. 🟢 Update Column
-   3. 🟡 Delete Column
-   4. 🟡 Get Column
-   5. 🟡 Create Primary Value
-   6. ❔ Get columns hash for table
-   7. ❔ Bulk create-update-delete columns
-
-- DB Table Filter
-   1. ⚪️ Get View Filter
-   2. ⚪️ Create View Filter
-   3. ⚪️ Get Filter
-   4. ⚪️ Update Filter
-   5. ⚪️ Delete Filter
-   6. ⚪️ Get Filter Group Children
-
-- DB Table Sort
-   1. ⚪️ List View Sorts
-   2. ⚪️ Update View Sort
-   3. ⚪️ Get Sort
-   4. ⚪️ Update Sort
-   5. ⚪️ Delete Sort
+   > 目标: 把前后端两个服务打包在一起，生成独立的部署包
+   1. 把前端的请求都按标准封装到 Nuxt 的后台 (**3**)
+      > 进行中
+   2. 生成 Docker 部署包 (**3**)
+   3. 服务闪退问题
 
 -------------------------------------------------------------------------------
 
@@ -138,40 +67,40 @@
    - 🟡️ List View Sorts `/api/v1/db/meta/views/{viewId}/sorts` **模拟返回**
 
 ### 编辑: 表格数据
-- 🟢️ Update Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-update` **完成**
-- 🟢️️ Delete Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-delete` **完成**
-- 🟢️️ List Table Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-list` **完成**
-- ⚪️ Create Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-create` **未开始**
-- 🟢 Update Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-update` **完成**
-- 🟢️ Delete Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-delete` **完成**
-- 🟢️️ Bulk Update Table Rows by IDs `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-update` **完成**
-- 🟢 Bulk Delete Table Rows by IDs `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-delete` **完成**
-- 🟢️ Create Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-create` **完成**
-- 🟢 Get Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-read` **完成**
-- 🟢 Count Table View Rows `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-count` **完成**
+   - 🟢️ Update Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-update` **完成**
+   - 🟢️️ Delete Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-delete` **完成**
+   - 🟢️️ List Table Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-list` **完成**
+   - ⚪️ Create Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-create` **未开始**
+   - 🟢 Update Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-update` **完成**
+   - 🟢️ Delete Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-delete` **完成**
+   - 🟢️️ Bulk Update Table Rows by IDs `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-update` **完成**
+   - 🟢 Bulk Delete Table Rows by IDs `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-delete` **完成**
+   - 🟢️ Create Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-create` **完成**
+   - 🟢 Get Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-read` **完成**
+   - 🟢 Count Table View Rows `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-count` **完成**
 
 ### 编辑: 表格结构
-- 🟢️ Delete Column `/api/v1/db/meta/columns/{columnId}` **完成**
-- 🟡️ Update Column `/api/v1/db/meta/columns/{columnId}` **完成: 部分类型**
-- 🟡 Create Column `/api/v1/db/meta/tables/{tableId}/columns` **完成: 部分类型**
-- ⚪️ Create Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-create` **未开始**
-- ⚪️ Update Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-update` **未开始**
-- ⚪️ Delete Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-delete` **未开始**
-- ⚪️ Duplicate Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-duplicate` **未开始**
-- ⚪️ Duplicate Column `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/duplicate-column` **未开始**
-- ⚪️ Reorder Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-reorder` **未开始**
-- ⚪️ Update Grid Column `https://meta-apis-v1.nocodb.com/#tag/DB-View/operation/db-view-grid-column-update` **未开始**
+   - 🟢️ Delete Column `/api/v1/db/meta/columns/{columnId}` **完成**
+   - 🟡️ Update Column `/api/v1/db/meta/columns/{columnId}` **完成: 部分类型**
+   - 🟡 Create Column `/api/v1/db/meta/tables/{tableId}/columns` **完成: 部分类型**
+   - ⚪️ Create Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-create` **未开始**
+   - ⚪️ Update Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-update` **未开始**
+   - ⚪️ Delete Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-delete` **未开始**
+   - ⚪️ Duplicate Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-duplicate` **未开始**
+   - ⚪️ Duplicate Column `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/duplicate-column` **未开始**
+   - ⚪️ Reorder Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-reorder` **未开始**
+   - ⚪️ Update Grid Column `https://meta-apis-v1.nocodb.com/#tag/DB-View/operation/db-view-grid-column-update` **未开始**
 
 ### 显示: 排序&过滤
-- ⚪️ List View Sorts
-- ⚪️ Update View Sort
-- ⚪️ Get Sort
-- ⚪️ Update Sort
-- ⚪️ Delete Sort
+   - ⚪️ List View Sorts
+   - ⚪️ Update View Sort
+   - ⚪️ Get Sort
+   - ⚪️ Update Sort
+   - ⚪️ Delete Sort
 
 ## 5.15
-> 正式环境: http://smartdata.yindangu.com
-> 测试环境: http://smartdata-server.yindangu.com
+   > 正式环境: http://smartdata.yindangu.com
+   > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
    - 【进行中】屏蔽部分未支持的字段类型
