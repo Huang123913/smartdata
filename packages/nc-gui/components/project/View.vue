@@ -118,18 +118,9 @@ watch(
           </template>
           <ProjectAllTables />
         </a-tab-pane>
-        <a-tab-pane v-if="isUIAllowed('sourceCreate')" key="data-source">
-          <template #tab>
-            <div class="tab-title">
-              <GeneralIcon icon="magic" />
-              <div>数据分析</div>
-            </div>
-          </template>
-        </a-tab-pane>
         <!-- <a-tab-pane v-if="defaultBase" key="erd" tab="Base ERD" force-render class="pt-4 pb-12">
           <ErdView :source-id="defaultBase!.id" class="!h-full" />
         </a-tab-pane> -->
-        <!--
         <a-tab-pane v-if="isUIAllowed('newUser', { roles: baseRoles })" key="collaborator">
           <template #tab>
             <div class="tab-title" data-testid="proj-view-tab__access-settings">
@@ -149,6 +140,7 @@ watch(
           </template>
           <ProjectAccessSettings />
         </a-tab-pane>
+        <!--
         <a-tab-pane v-if="isUIAllowed('sourceCreate')" key="data-source">
           <template #tab>
             <div class="tab-title" data-testid="proj-view-tab__data-sources">
@@ -169,6 +161,14 @@ watch(
           <DashboardSettingsDataSources v-model:state="baseSettingsState" />
         </a-tab-pane>
         -->
+        <a-tab-pane v-if="isUIAllowed('sourceCreate')" key="data-source">
+          <template #tab>
+            <div class="tab-title">
+              <GeneralIcon icon="magic" />
+              <div>数据分析</div>
+            </div>
+          </template>
+        </a-tab-pane>
       </a-tabs>
     </div>
   </div>

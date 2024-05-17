@@ -478,7 +478,6 @@ const setIsLoadingModel = (value: boolean) => {
 
           <NcDropdown v-if="!isSharedBase" v-model:visible="isOptionsOpen" :trigger="['click']">
             <NcButton
-              disabled
               v-e="['c:base:options']"
               class="nc-sidebar-node-btn"
               :class="{ '!text-black !opacity-100': isOptionsOpen }"
@@ -507,6 +506,7 @@ const setIsLoadingModel = (value: boolean) => {
                     </div>
                   </NcMenuItem>
 
+                  <!--
                   <NcMenuItem
                     v-if="isUIAllowed('baseDuplicate', { roles: [stringifyRolesObj(orgRoles), baseRole].join() })"
                     data-testid="nc-sidebar-base-duplicate"
@@ -519,8 +519,9 @@ const setIsLoadingModel = (value: boolean) => {
                   </NcMenuItem>
 
                   <NcDivider v-if="['baseDuplicate', 'baseRename'].some((permission) => isUIAllowed(permission))" />
-
+                  -->
                   <!-- Copy Project Info -->
+                  <!--
                   <NcMenuItem
                     v-if="!isEeUI"
                     key="copy"
@@ -532,8 +533,10 @@ const setIsLoadingModel = (value: boolean) => {
                       {{ $t('activity.account.projInfo') }}
                     </div>
                   </NcMenuItem>
+                  -->
 
                   <!-- ERD View -->
+                  <!--
                   <NcMenuItem
                     v-if="base?.sources?.[0]?.enabled"
                     key="erd"
@@ -545,8 +548,10 @@ const setIsLoadingModel = (value: boolean) => {
                       {{ $t('title.relations') }}
                     </div>
                   </NcMenuItem>
+                  -->
 
                   <!-- Swagger: Rest APIs -->
+                  <!--
                   <NcMenuItem
                     v-if="isUIAllowed('apiDocs')"
                     key="api"
@@ -563,8 +568,10 @@ const setIsLoadingModel = (value: boolean) => {
                       {{ $t('activity.account.swagger') }}
                     </div>
                   </NcMenuItem>
+                  -->
                 </template>
 
+                <!--
                 <template v-if="base?.sources?.[0]?.enabled && showBaseOption">
                   <NcDivider />
                   <DashboardTreeViewBaseOptions v-model:base="base" :source="base.sources[0]" />
@@ -595,6 +602,7 @@ const setIsLoadingModel = (value: boolean) => {
                     {{ $t('general.delete') }}
                   </div>
                 </NcMenuItem>
+                -->
               </NcMenu>
             </template>
           </NcDropdown>
