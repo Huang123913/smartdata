@@ -67,6 +67,7 @@ export class DataTableController {
   @Post(['/api/v2/tables/:modelId/records'])
   @HttpCode(200)
   @Acl('dataInsert')
+  @UseInterceptors(MCDMRewrite('NocodbTableRecordsCreateTableRecords'))
   async dataInsert(
     @Req() req: Request,
     @Param('modelId') modelId: string,
