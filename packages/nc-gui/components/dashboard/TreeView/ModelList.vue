@@ -23,6 +23,7 @@ const { getCustomCatalogEntityTree } = store
 const { setMenuContext } = inject(TreeViewInj)!
 const { openTable: _openTable } = useTableNew({ baseId: props.base.id! })
 const route = useRoute()
+const expandedKeys = ref([])
 const openedTableId = computed(() => route.params.viewId)
 const showModelTree = computed(() => {
   return chataiData.value.modelTree.length ? chataiData.value.modelTree[0].children : []
@@ -38,14 +39,30 @@ const onClickToTableView = (item: any) => {
     type: 'table',
   })
 }
+
+const handleExpand = (expandedKeys1: any, e: any) => {
+  if (e.expanded) {
+    expandedKeys.value.push(e.node.id)
+  } else {
+    expandedKeys.value = expandedKeys.value.filter((item) => item !== e.node.id)
+  }
+}
+
+const handleClickCatalog = (catalog: any) => {
+  if (expandedKeys.value.includes(catalog.id)) {
+    expandedKeys.value = expandedKeys.value.filter((item) => item !== catalog.id)
+  } else {
+    expandedKeys.value.push(catalog.id)
+  }
+}
 </script>
 
 <template>
   <div class="model-list nc-sidebar-node pl-11 mb-0.25 rounded-md h-7.1 w-full">
-    <a-tree :tree-data="showModelTree" blockNode>
+    <a-tree :tree-data="showModelTree" blockNode :expandedKeys="expandedKeys" @expand="handleExpand">
       <template #title="item">
         <a-tooltip :title="item.title">
-          <div v-if="item.isCatalog" class="model-text-content">
+          <div v-if="item.isCatalog" class="model-text-content" @click="handleClickCatalog(item)">
             <img :src="catalog" width="16" height="16" class="catlog-img" />
             <span class="mode-text"> {{ item.title }}</span>
           </div>
