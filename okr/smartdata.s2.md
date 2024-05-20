@@ -70,7 +70,7 @@
    - 🟢️ Update Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-update` **完成**
    - 🟢️️ Delete Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-delete` **完成**
    - 🟢️️ List Table Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-list` **完成**
-   - ⚪️ Create Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-create` **未开始**
+   - 🟢️️ Create Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-create` **完成**
    - 🟢 Update Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-update` **完成**
    - 🟢️ Delete Table Records `https://data-apis-v2.nocodb.com/#tag/Table-Records/operation/db-data-table-row-delete` **完成**
    - 🟢️️ Bulk Update Table Rows by IDs `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-update` **完成**
@@ -92,22 +92,23 @@
    - ⚪️ Update Grid Column `https://meta-apis-v1.nocodb.com/#tag/DB-View/operation/db-view-grid-column-update` **未开始**
 
 ### 显示: 排序&过滤
-   - ⚪️ List View Sorts
+   - 🟢️️ List View Sorts **完成**
    - ⚪️ Update View Sort
-   - ⚪️ Get Sort
-   - ⚪️ Update Sort
-   - ⚪️ Delete Sort
+   - 🟢️ Get Sort **完成**
+   - 🟢️️ Update Sort **完成**
+   - 🟢️ Delete Sort **完成**
+   - ⚪️ 查询接口从过滤元信息中获取过滤条件并进行数据过滤
 
 ## 5.17
    > 正式环境: http://smartdata.yindangu.com
    > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
-   - 【进行中】排序接口对接
-   - 【进行中】同步 nocodb v0.207.1
+   - 【进行中】过滤接口对接
+   - 【进行中】同步 nocodb v0.207.2
    - 【未启动】excel 导入
-   - 【完成】表格可按目录分类
-   - 【完成】恢复项目的权限控制功能
+   - 【完成】对接过滤接口
+   - 【完成】修复 nocodb 与 mcdm 数据不匹配导致的无法 undo&redo 问题
    - 【暂缓】屏蔽部分未支持的字段类型
 
 ### 平台
