@@ -11551,13 +11551,17 @@ export class Api<
      * @request GET:/api/v2/smartdata/getSql
      */
     getSql: (
-      query?: {
+      query: {
         /** question */
         question?: string;
         /** id */
         id?: string;
+        /** orgid */
+        orgid?: string;
+        /** projectid */
+        projectid?: string;
         /** modelrange */
-        modelrange?: any;
+        modelrange: string;
       },
       params: RequestParams = {}
     ) =>
@@ -11574,12 +11578,190 @@ export class Api<
      * @tags SmartData
      * @name ExeSql
      * @summary exeSql MCDM
-     * @request GET:/api/v2/smartdata/exeSql
+     * @request POST:/api/v2/smartdata/exeSql
      */
-    exeSql: (params: RequestParams = {}) =>
+    exeSql: (data: object, params: RequestParams = {}) =>
       this.request<any, any>({
         path: `/api/v2/smartdata/exeSql`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description saveModel MCDM
+     *
+     * @tags SmartData
+     * @name SaveModel
+     * @summary saveModel MCDM
+     * @request POST:/api/v2/smartdata/saveModel
+     */
+    saveModel: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/saveModel`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description generateMDTable MCDM
+     *
+     * @tags SmartData
+     * @name GenerateMdTable
+     * @summary generateMDTable MCDM
+     * @request POST:/api/v2/smartdata/generateMDTable
+     */
+    generateMdTable: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/generateMDTable`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description batchInsertOrUpdate MCDM
+     *
+     * @tags SmartData
+     * @name BatchInsertOrUpdate
+     * @summary batchInsertOrUpdate MCDM
+     * @request POST:/api/v2/smartdata/batchInsertOrUpdate
+     */
+    batchInsertOrUpdate: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/batchInsertOrUpdate`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description findMDTableInfo MCDM
+     *
+     * @tags SmartData
+     * @name FindMdTableInfo
+     * @summary findMDTableInfo MCDM
+     * @request GET:/api/v2/smartdata/findMDTableInfo
+     */
+    findMdTableInfo: (
+      query?: {
+        /** entityId */
+        entityId?: string;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/findMDTableInfo`,
         method: 'GET',
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * @description ddl MCDM
+     *
+     * @tags SmartData
+     * @name Ddl
+     * @summary ddl MCDM
+     * @request GET:/api/v2/smartdata/ddl
+     */
+    ddl: (
+      query?: {
+        /** entityId */
+        entityId?: string;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/ddl`,
+        method: 'GET',
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * @description trainByPrompt LLM
+     *
+     * @tags SmartData
+     * @name TrainByPrompt
+     * @summary trainByPrompt LLM
+     * @request POST:/api/v2/smartdata/trainByPrompt
+     */
+    trainByPrompt: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/trainByPrompt`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description trainByDDL LLM
+     *
+     * @tags SmartData
+     * @name TrainByDdl
+     * @summary trainByDDL LLM
+     * @request POST:/api/v2/smartdata/trainByDDL
+     */
+    trainByDdl: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/trainByDDL`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description repair LLM
+     *
+     * @tags SmartData
+     * @name Repair
+     * @summary repair LLM
+     * @request GET:/api/v2/smartdata/repair
+     */
+    repair: (
+      query: {
+        /** id */
+        id?: string;
+        /** orgid */
+        orgid?: string;
+        /** projectid */
+        projectid?: string;
+        /** error_msg */
+        error_msg: string;
+        /** question */
+        question?: string;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/repair`,
+        method: 'GET',
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * @description translateToTableName LLM
+     *
+     * @tags SmartData
+     * @name TranslateToTableName
+     * @summary translateToTableName LLM
+     * @request POST:/api/v2/smartdata/translateToTableName
+     */
+    translateToTableName: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/translateToTableName`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
   };
