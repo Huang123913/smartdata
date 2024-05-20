@@ -17,25 +17,21 @@ import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
 import { NcRequest } from '~/interface/config';
 
-import { SmartDataService } from '~/services/smartdata/smartdata.service';
+import { UseInterceptors } from '@nestjs/common';
+import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
 
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
 export class ViewColumnsController {
-  constructor(
-    private readonly viewColumnsService: ViewColumnsService,
-    private readonly smartdataService: SmartDataService,
-  ) {}
+  constructor(private readonly viewColumnsService: ViewColumnsService) {}
 
   @Get([
     '/api/v1/db/meta/views/:viewId/columns/',
     '/api/v2/meta/views/:viewId/columns/',
   ])
   @Acl('columnList')
+  @UseInterceptors(MCDMRewrite('NocodbDBViewColumnListColumnsInView'))
   async columnList(@Param('viewId') viewId: string) {
-    // return { list: [] };
-    if (this.smartdataService.isMcdmRewrite())
-      return this.smartdataService.getTableViewColumns(viewId);
     return new PagedResponseImpl(
       await this.viewColumnsService.columnList({
         viewId,

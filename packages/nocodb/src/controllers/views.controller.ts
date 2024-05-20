@@ -19,24 +19,21 @@ import { ViewsService } from '~/services/views.service';
 import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
 
-import { SmartDataService } from '~/services/smartdata/smartdata.service';
+import { UseInterceptors } from '@nestjs/common';
+import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
 
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
 export class ViewsController {
-  constructor(
-    private readonly viewsService: ViewsService,
-    private readonly smartdataService: SmartDataService,
-  ) {}
+  constructor(private readonly viewsService: ViewsService) {}
 
   @Get([
     '/api/v1/db/meta/tables/:tableId/views',
     '/api/v2/meta/tables/:tableId/views',
   ])
   @Acl('viewList')
+  @UseInterceptors(MCDMRewrite('NocodbDBViewListViews'))
   async viewList(@Param('tableId') tableId: string, @Req() req: Request) {
-    if (this.smartdataService.isMcdmRewrite())
-      return this.smartdataService.getTableViews(tableId);
     return new PagedResponseImpl(
       await this.viewsService.viewList({
         tableId,

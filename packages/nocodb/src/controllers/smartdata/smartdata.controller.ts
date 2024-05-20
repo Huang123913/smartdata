@@ -1,10 +1,16 @@
-import { SmartDataService } from '~/services/smartdata/smartdata.service';
-
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+
+import { SmartDataService } from '~/services/smartdata/smartdata.service';
+import { LLMService } from '~/services/smartdata/llm.service';
+import { MCDMService } from '~/services/smartdata/mcdm.service';
 
 @Controller()
 export class SmartDataController {
-  constructor(private readonly smartdataService: SmartDataService) {}
+  constructor(
+    private readonly smartdataService: SmartDataService,
+    private readonly llm: LLMService,
+    private readonly mcdm: MCDMService,
+  ) {}
 
   @Get(['/api/v2/smartdata/entity'])
   async getEntity(@Query('entityId') entityId: string) {
@@ -18,21 +24,21 @@ export class SmartDataController {
 
   @Get(['/api/v2/smartdata/ddl'])
   async getDDL(@Query('entityId') entityId: string) {
-    return await this.smartdataService.getDDL(entityId);
+    return await this.mcdm.getDDL(entityId);
   }
 
   @Post('/api/v2/smartdata/train')
   async train(@Body('ddl') ddl: string | undefined) {
     if (ddl) {
-      return await this.smartdataService.trainByDDL(ddl);
+      return await this.llm.trainByDDL(ddl);
     }
 
-    return await this.smartdataService.train();
+    return await this.llm.train();
   }
 
   @Get(['/api/v2/smartdata/deleteTrainData'])
   async deleteTrainData() {
-    return await this.smartdataService.deleteTrainData();
+    return await this.llm.deleteTrainData();
   }
 
   @Get(['/api/v2/smartdata/getSql'])
@@ -81,12 +87,12 @@ export class SmartDataController {
 
   @Post(['/api/v2/smartdata/trainByPrompt'])
   async trainByPrompt(@Body() data: { sql: string; prompt: string }) {
-    return await this.smartdataService.trainByPrompt(data.sql, data.prompt);
+    return await this.llm.trainByPrompt(data.sql, data.prompt);
   }
 
   @Post('/api/v2/smartdata/trainByDDL')
   async trainByDDL(@Body() data: { ddl: string | undefined }) {
-    return await this.smartdataService.trainByDDL(data.ddl);
+    return await this.llm.trainByDDL(data.ddl);
   }
 
   @Get(['/api/v2/smartdata/repair'])

@@ -18,15 +18,13 @@ import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { PagedResponseImpl } from '~/helpers/PagedResponse';
 import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
 
-import { SmartDataService } from '~/services/smartdata/smartdata.service';
+import { UseInterceptors } from '@nestjs/common';
+import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
 
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
 export class TablesController {
-  constructor(
-    private readonly tablesService: TablesService,
-    private readonly smartdataService: SmartDataService,
-  ) {}
+  constructor(private readonly tablesService: TablesService) {}
 
   @Get([
     '/api/v1/db/meta/projects/:baseId/tables',
@@ -35,14 +33,13 @@ export class TablesController {
     '/api/v2/meta/bases/:baseId/:sourceId/tables',
   ])
   @Acl('tableList')
+  @UseInterceptors(MCDMRewrite('NocodbDBTableListTables'))
   async tableList(
     @Param('baseId') baseId: string,
     @Param('sourceId') sourceId: string,
     @Query('includeM2M') includeM2M: string,
     @Request() req,
   ) {
-    if (this.smartdataService.isMcdmRewrite())
-      return await this.smartdataService.getBaseTables(baseId, sourceId);
     return new PagedResponseImpl(
       await this.tablesService.getAccessibleTables({
         baseId,
@@ -79,9 +76,8 @@ export class TablesController {
 
   @Get(['/api/v1/db/meta/tables/:tableId', '/api/v2/meta/tables/:tableId'])
   @Acl('tableGet')
+  @UseInterceptors(MCDMRewrite('NocodbDBTableReadTable'))
   async tableGet(@Param('tableId') tableId: string, @Request() req) {
-    if (this.smartdataService.isMcdmRewrite())
-      return this.smartdataService.getTable(req.params.tableId);
     const table = await this.tablesService.getTableWithAccessibleViews({
       tableId: req.params.tableId,
       user: req.user,

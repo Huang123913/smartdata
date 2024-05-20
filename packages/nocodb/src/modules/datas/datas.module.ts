@@ -21,7 +21,7 @@ import { PublicDatasService } from '~/services/public-datas.service';
 import { CalendarDatasController } from '~/controllers/calendars-datas.controller';
 import { CalendarDatasService } from '~/services/calendar-datas.service';
 
-import { SmartDataService } from '~/services/smartdata/smartdata.service';
+import { MCDMService } from '~/services/smartdata/mcdm.service';
 
 export const dataModuleMetadata = {
   imports: [
@@ -59,7 +59,7 @@ export const dataModuleMetadata = {
     PublicDatasExportService,
 
     // SmartData
-    SmartDataService,
+    MCDMService,
   ],
   exports: [
     DatasService,

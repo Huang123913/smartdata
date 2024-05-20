@@ -16,15 +16,13 @@ import { BulkDataAliasService } from '~/services/bulk-data-alias.service';
 import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { DataApiLimiterGuard } from '~/guards/data-api-limiter.guard';
 
-import { SmartDataService } from '~/services/smartdata/smartdata.service';
+import { UseInterceptors } from '@nestjs/common';
+import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
 
 @Controller()
 @UseGuards(DataApiLimiterGuard, GlobalGuard)
 export class BulkDataAliasController {
-  constructor(
-    private bulkDataAliasService: BulkDataAliasService,
-    private readonly smartdataService: SmartDataService,
-  ) {}
+  constructor(private bulkDataAliasService: BulkDataAliasService) {}
 
   @Post(['/api/v1/db/data/bulk/:orgs/:baseName/:tableName'])
   @HttpCode(200)
@@ -48,15 +46,13 @@ export class BulkDataAliasController {
 
   @Patch(['/api/v1/db/data/bulk/:orgs/:baseName/:tableName'])
   @Acl('bulkDataUpdate')
+  @UseInterceptors(MCDMRewrite('NocodbDBTableRowBulkUpdateTableRowsByIDs'))
   async bulkDataUpdate(
     @Req() req: Request,
     @Param('baseName') baseName: string,
     @Param('tableName') tableName: string,
     @Body() body: any,
   ) {
-    if (this.smartdataService.isMcdmRewrite()) {
-      return await this.smartdataService.updateBlukData(tableName, req.body);
-    }
     return await this.bulkDataAliasService.bulkDataUpdate({
       body: body,
       cookie: req,
@@ -85,15 +81,13 @@ export class BulkDataAliasController {
 
   @Delete(['/api/v1/db/data/bulk/:orgs/:baseName/:tableName'])
   @Acl('bulkDataDelete')
+  @UseInterceptors(MCDMRewrite('NocodbDBTableRowBulkDeleteTableRowsByIDs'))
   async bulkDataDelete(
     @Req() req: Request,
     @Param('baseName') baseName: string,
     @Param('tableName') tableName: string,
     @Body() body: any,
   ) {
-    if (this.smartdataService.isMcdmRewrite()) {
-      return await this.smartdataService.deleteBlukData(tableName, req.body);
-    }
     return await this.bulkDataAliasService.bulkDataDelete({
       body: body,
       cookie: req,

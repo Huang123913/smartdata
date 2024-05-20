@@ -24,23 +24,20 @@ import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { Filter } from '~/models';
 import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
 
-import { SmartDataService } from '~/services/smartdata/smartdata.service';
+import { UseInterceptors } from '@nestjs/common';
+import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
 
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
 @Controller()
 export class BasesController {
-  constructor(
-    protected readonly projectsService: BasesService,
-    protected readonly smartdataService: SmartDataService,
-  ) {}
+  constructor(protected readonly projectsService: BasesService) {}
 
   @Acl('baseList', {
     scope: 'org',
   })
   @Get(['/api/v1/db/meta/projects/', '/api/v2/meta/bases/'])
+  // @UseInterceptors(createInterceptor('NocodbBaseListProjects'))
   async list(@Query() queryParams: Record<string, any>, @Req() req: Request) {
-    // if (this.smartdataService.isMcdmRewrite())
-    //   return await this.smartdataService.getBases();
     const bases = await this.projectsService.baseList({
       user: req.user,
       query: queryParams,
@@ -69,9 +66,8 @@ export class BasesController {
 
   @Acl('baseGet')
   @Get(['/api/v1/db/meta/projects/:baseId', '/api/v2/meta/bases/:baseId'])
+  @UseInterceptors(MCDMRewrite('NocodbBaseGetBase'))
   async baseGet(@Param('baseId') baseId: string) {
-    if (this.smartdataService.isMcdmRewrite())
-      return await this.smartdataService.getBase(baseId);
     const base = await this.projectsService.getProjectWithInfo({
       baseId: baseId,
     });

@@ -77,7 +77,8 @@ import { NotificationsGateway } from '~/gateways/notifications/notifications.gat
 import { CommandPaletteService } from '~/services/command-palette.service';
 import { CommandPaletteController } from '~/controllers/command-palette.controller';
 
-import { SmartDataService } from '~/services/smartdata/smartdata.service';
+import { MCDMService } from '~/services/smartdata/mcdm.service';
+import { LLMService } from '~/services/smartdata/llm.service';
 
 export const metaModuleMetadata = {
   imports: [
@@ -173,7 +174,8 @@ export const metaModuleMetadata = {
     CommandPaletteService,
 
     // SmartData
-    SmartDataService,
+    MCDMService,
+    LLMService,
   ],
   exports: [
     TablesService,

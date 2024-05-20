@@ -18,6 +18,9 @@ import { FiltersService } from '~/services/filters.service';
 import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
 
+import { UseInterceptors } from '@nestjs/common';
+import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
+
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
 export class FiltersController {
@@ -28,6 +31,7 @@ export class FiltersController {
     '/api/v2/meta/views/:viewId/filters',
   ])
   @Acl('filterList')
+  @UseInterceptors(MCDMRewrite('NocodbDBTableFilterGetViewFilter'))
   async filterList(@Param('viewId') viewId: string) {
     return new PagedResponseImpl(
       await this.filtersService.filterList({
@@ -42,6 +46,7 @@ export class FiltersController {
   ])
   @HttpCode(200)
   @Acl('filterCreate')
+  @UseInterceptors(MCDMRewrite('NocodbDBTableFilterCreateViewFilter'))
   async filterCreate(
     @Param('viewId') viewId: string,
     @Body() body: FilterReqType,
@@ -87,6 +92,7 @@ export class FiltersController {
     '/api/v2/meta/filters/:filterParentId/children',
   ])
   @Acl('filterChildrenList')
+  @UseInterceptors(MCDMRewrite('NocodbDBTableFilterGetFilterGroupChildren'))
   async filterChildrenRead(@Param('filterParentId') filterParentId: string) {
     return new PagedResponseImpl(
       await this.filtersService.filterChildrenList({
@@ -100,6 +106,7 @@ export class FiltersController {
     '/api/v2/meta/filters/:filterId',
   ])
   @Acl('filterUpdate')
+  @UseInterceptors(MCDMRewrite('NocodbDBTableFilterUpdateFilter'))
   async filterUpdate(
     @Param('filterId') filterId: string,
     @Body() body: FilterReqType,
@@ -119,6 +126,7 @@ export class FiltersController {
     '/api/v2/meta/filters/:filterId',
   ])
   @Acl('filterDelete')
+  @UseInterceptors(MCDMRewrite('NocodbDBTableFilterDeleteFilter'))
   async filterDelete(@Param('filterId') filterId: string, @Req() req: Request) {
     const filter = await this.filtersService.filterDelete({
       req,

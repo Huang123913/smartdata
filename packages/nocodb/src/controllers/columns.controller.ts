@@ -18,15 +18,14 @@ import { ColumnsService } from '~/services/columns.service';
 import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
 
-import { SmartDataService } from '~/services/smartdata/smartdata.service';
+import { UseInterceptors } from '@nestjs/common';
+import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
+import { CreateColumn } from '~/modules/smartdata/interceptors/meta/DBTableColumn/CreateColumn';
 
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
 export class ColumnsController {
-  constructor(
-    private readonly columnsService: ColumnsService,
-    private readonly smartdataService: SmartDataService,
-  ) {}
+  constructor(private readonly columnsService: ColumnsService) {}
 
   @Post([
     '/api/v1/db/meta/tables/:tableId/columns/',
@@ -34,14 +33,12 @@ export class ColumnsController {
   ])
   @HttpCode(200)
   @Acl('columnAdd')
+  @UseInterceptors(CreateColumn, MCDMRewrite('NocodbDBTableColumnCreateColumn'))
   async columnAdd(
     @Param('tableId') tableId: string,
     @Body() body: ColumnReqType,
     @Req() req: Request,
   ) {
-    if (this.smartdataService.isMcdmRewrite()) {
-      return await this.smartdataService.addColumn(tableId, body);
-    }
     return await this.columnsService.columnAdd({
       tableId,
       column: body,
@@ -55,14 +52,12 @@ export class ColumnsController {
     '/api/v2/meta/columns/:columnId',
   ])
   @Acl('columnUpdate')
+  @UseInterceptors(MCDMRewrite('NocodbDBTableColumnUpdateColumn'))
   async columnUpdate(
     @Param('columnId') columnId: string,
     @Body() body: ColumnReqType,
     @Req() req: Request,
   ) {
-    if (this.smartdataService.isMcdmRewrite()) {
-      return await this.smartdataService.updateColumn(columnId, body);
-    }
     return await this.columnsService.columnUpdate({
       columnId: columnId,
       column: body,
@@ -76,10 +71,8 @@ export class ColumnsController {
     '/api/v2/meta/columns/:columnId',
   ])
   @Acl('columnDelete')
+  @UseInterceptors(MCDMRewrite('NocodbDBTableColumnDeleteColumn'))
   async columnDelete(@Param('columnId') columnId: string, @Req() req: Request) {
-    if (this.smartdataService.isMcdmRewrite()) {
-      return await this.smartdataService.deleteColumn(columnId);
-    }
     return await this.columnsService.columnDelete({
       columnId,
       req,

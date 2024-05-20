@@ -19,15 +19,14 @@ import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { DatasService } from '~/services/datas.service';
 import { DataApiLimiterGuard } from '~/guards/data-api-limiter.guard';
 
-import { SmartDataService } from '~/services/smartdata/smartdata.service';
+import { UseInterceptors } from '@nestjs/common';
+import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
+import { MCDMJsonRewrite } from '~/modules/smartdata/interceptors/MCDMJsonInterceptor';
 
 @Controller()
 @UseGuards(DataApiLimiterGuard, GlobalGuard)
 export class DataAliasController {
-  constructor(
-    private readonly datasService: DatasService,
-    private readonly smartdataService: SmartDataService,
-  ) {}
+  constructor(private readonly datasService: DatasService) {}
 
   // todo: Handle the error case where view doesnt belong to model
   @Get([
@@ -35,6 +34,14 @@ export class DataAliasController {
     '/api/v1/db/data/:orgs/:baseName/:tableName/views/:viewName',
   ])
   @Acl('dataList')
+  @UseInterceptors(
+    MCDMJsonRewrite('NocodbDBTableRowListTableRows', {
+      isSkip: (req) => req.params.viewName != null,
+    }),
+    MCDMJsonRewrite('NocodbDBViewRowListTableViewRows', {
+      isSkip: (req) => req.params.viewName == null,
+    }),
+  )
   async dataList(
     @Req() req: Request,
     @Res() res: Response,
@@ -43,23 +50,6 @@ export class DataAliasController {
     @Param('viewName') viewName: string,
     @Query('opt') opt: string,
   ) {
-    if (this.smartdataService.isMcdmRewrite()) {
-      if (req.query.pks) {
-        const responseData = await this.smartdataService.mcdmRewrite(
-          'NocodbDBTableRowListTableRows',
-          req,
-        );
-        res.json(responseData);
-        return;
-      } else {
-        const responseData = await this.smartdataService.mcdmRewrite(
-          'NocodbDBViewRowListTableViewRows',
-          req,
-        );
-        res.json(responseData);
-        return;
-      }
-    }
     const startTime = process.hrtime();
     const responseData = await this.datasService.dataList({
       query: req.query,
@@ -122,6 +112,7 @@ export class DataAliasController {
     '/api/v1/db/data/:orgs/:baseName/:tableName/views/:viewName/count',
   ])
   @Acl('dataCount')
+  @UseInterceptors(MCDMJsonRewrite('NocodbDBViewRowCountTableViewRows'))
   async dataCount(
     @Req() req: Request,
     @Res() res: Response,
@@ -129,14 +120,6 @@ export class DataAliasController {
     @Param('tableName') tableName: string,
     @Param('viewName') viewName: string,
   ) {
-    if (this.smartdataService.isMcdmRewrite()) {
-      const countResult = await this.smartdataService.mcdmRewrite(
-        'NocodbDBViewRowCountTableViewRows',
-        req,
-      );
-      res.json(countResult);
-      return;
-    }
     const countResult = await this.datasService.dataCount({
       query: req.query,
       baseName: baseName,
@@ -153,6 +136,7 @@ export class DataAliasController {
   ])
   @HttpCode(200)
   @Acl('dataInsert')
+  @UseInterceptors(MCDMRewrite('NocodbDBViewRowCreateTableViewRow'))
   async dataInsert(
     @Req() req: Request,
     @Param('baseName') baseName: string,
@@ -161,12 +145,6 @@ export class DataAliasController {
     @Body() body: any,
     @Query('opt') opt: string,
   ) {
-    if (this.smartdataService.isMcdmRewrite()) {
-      return await this.smartdataService.mcdmRewrite(
-        'NocodbDBViewRowCreateTableViewRow',
-        req,
-      );
-    }
     return await this.datasService.dataInsert({
       baseName: baseName,
       tableName: tableName,
@@ -182,6 +160,7 @@ export class DataAliasController {
     '/api/v1/db/data/:orgs/:baseName/:tableName/views/:viewName/:rowId',
   ])
   @Acl('dataUpdate')
+  @UseInterceptors(MCDMRewrite('NocodbDBViewRowUpdateTableViewRow'))
   async dataUpdate(
     @Req() req: Request,
     @Param('baseName') baseName: string,
@@ -190,9 +169,6 @@ export class DataAliasController {
     @Param('rowId') rowId: string,
     @Query('opt') opt: string,
   ) {
-    if (this.smartdataService.isMcdmRewrite()) {
-      return await this.smartdataService.updateData(tableName, rowId, req.body);
-    }
     return await this.datasService.dataUpdate({
       baseName: baseName,
       tableName: tableName,
@@ -209,6 +185,7 @@ export class DataAliasController {
     '/api/v1/db/data/:orgs/:baseName/:tableName/views/:viewName/:rowId',
   ])
   @Acl('dataDelete')
+  @UseInterceptors(MCDMRewrite('NocodbDBViewRowDeleteTableViewRow'))
   async dataDelete(
     @Req() req: Request,
     @Param('baseName') baseName: string,
@@ -216,9 +193,6 @@ export class DataAliasController {
     @Param('viewName') viewName: string,
     @Param('rowId') rowId: string,
   ) {
-    if (this.smartdataService.isMcdmRewrite()) {
-      return await this.smartdataService.deleteData(tableName, rowId);
-    }
     return await this.datasService.dataDelete({
       baseName: baseName,
       tableName: tableName,
@@ -233,6 +207,7 @@ export class DataAliasController {
     '/api/v1/db/data/:orgs/:baseName/:tableName/views/:viewName/:rowId',
   ])
   @Acl('dataRead')
+  @UseInterceptors(MCDMRewrite('NocodbDBViewRowGetTableViewRow'))
   async dataRead(
     @Req() req: Request,
     @Param('baseName') baseName: string,
@@ -242,9 +217,6 @@ export class DataAliasController {
     @Query('opt') opt: string,
     @Query('getHiddenColumn') getHiddenColumn: boolean,
   ) {
-    if (this.smartdataService.isMcdmRewrite()) {
-      return await this.smartdataService.readData(tableName, rowId);
-    }
     return await this.datasService.dataRead({
       baseName: baseName,
       tableName: tableName,
