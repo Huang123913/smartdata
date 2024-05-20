@@ -153,13 +153,13 @@ export const useUndoRedo = createSharedComposable(() => {
   const defineViewScope = (param: { view?: ViewType; base_id?: string; model_id?: string; title?: string; id?: string }) => {
     if (param.view) {
       return [
-        { key: 'baseId', param: param.view.base_id! },
+        // { key: 'baseId', param: param.view.base_id! },
         { key: 'viewId', param: param.view.fk_model_id! },
         { key: 'viewTitle', param: [param.view.title, param.view.id!] },
       ]
     } else {
       return [
-        { key: 'baseId', param: param.base_id! },
+        // { key: 'baseId', param: param.base_id! },
         { key: 'viewId', param: param.model_id! },
         { key: 'viewTitle', param: [param.title!, param.id!] },
       ]
