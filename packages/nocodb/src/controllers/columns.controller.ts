@@ -92,6 +92,7 @@ export class ColumnsController {
   ])
   @HttpCode(200)
   @Acl('columnSetAsPrimary')
+  @UseInterceptors(MCDMRewrite('NocodbDBTableColumnCreatePrimaryValue'))
   async columnSetAsPrimary(@Param('columnId') columnId: string) {
     return await this.columnsService.columnSetAsPrimary({ columnId });
   }

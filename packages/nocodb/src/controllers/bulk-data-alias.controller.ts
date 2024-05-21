@@ -27,6 +27,7 @@ export class BulkDataAliasController {
   @Post(['/api/v1/db/data/bulk/:orgs/:baseName/:tableName'])
   @HttpCode(200)
   @Acl('bulkDataInsert')
+  @UseInterceptors(MCDMRewrite('NocodbDBTableRowBulkInsertTableRows'))
   async bulkDataInsert(
     @Req() req: Request,
     @Res() res: Response,
