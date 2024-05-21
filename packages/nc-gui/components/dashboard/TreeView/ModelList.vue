@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { TreeViewInj } from '#imports'
 import type { BaseType } from 'nocodb-sdk'
 
 import catalog from '../../../assets/img/catalog.svg'
@@ -20,7 +19,6 @@ const { loadProjectTables } = useTablesStore()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
 const { getCustomCatalogEntityTree } = store
-const { setMenuContext } = inject(TreeViewInj)!
 const { openTable: _openTable } = useTableNew({ baseId: props.base.id! })
 const route = useRoute()
 const expandedKeys = ref([])
@@ -58,8 +56,8 @@ const handleClickCatalog = (catalog: any) => {
 </script>
 
 <template>
-  <div class="model-list nc-sidebar-node pl-11 mb-0.25 rounded-md h-7.1 w-full">
-    <a-tree :tree-data="showModelTree" blockNode :expandedKeys="expandedKeys" @expand="handleExpand">
+  <div class="model-list nc-sidebar-node mb-0.25 rounded-md h-7.1 w-full">
+    <a-tree :tree-data="showModelTree" :expandedKeys="expandedKeys" @expand="handleExpand">
       <template #title="item">
         <a-tooltip :title="item.title">
           <div v-if="item.isCatalog" class="model-text-content" @click="handleClickCatalog(item)">
@@ -71,7 +69,6 @@ const handleClickCatalog = (catalog: any) => {
             class="model-text-content hover-set"
             :class="{ 'background-set': openedTableId === item.id }"
             @click="onClickToTableView(item)"
-            @contextmenu="setMenuContext('table', item)"
           >
             <div class="table-name">
               <GeneralTableIcon :meta="item" class="text-gray-500" />
@@ -109,11 +106,31 @@ const handleClickCatalog = (catalog: any) => {
   ::v-deep .ant-tree {
     background-color: transparent;
   }
+  ::v-deep .ant-tree-treenode {
+    width: 100% !important;
+    padding-left: 44px;
+    padding-bottom: 0;
+    border-radius: 6px;
+    margin: 2px 0;
+  }
+
+  ::v-deep .ant-tree-treenode:has(.hover-set) {
+    &:hover {
+      --tw-bg-opacity: 1;
+      background-color: rgba(231, 231, 233, var(--tw-bg-opacity));
+    }
+  }
+
+  ::v-deep .ant-tree-treenode:has(.background-set) {
+    background-color: #edf1ff !important;
+  }
+
   ::v-deep .ant-tree-node-content-wrapper {
     padding: 0;
     font-size: 14px;
     color: rgb(0, 0, 0);
     overflow: hidden;
+    flex: 1;
   }
   ::v-deep .ant-tree-switcher {
     top: -1px !important;
@@ -131,12 +148,18 @@ const handleClickCatalog = (catalog: any) => {
     border-radius: 4px;
     position: relative;
     .more-action-btn {
-      position: absolute;
-      right: 0;
+      // position: absolute;
+      // right: 0;
+      width: 24px;
+      margin-left: 16px;
     }
     .table-name {
       display: flex;
       align-items: center;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .catlog-img {
       position: relative;
@@ -144,21 +167,11 @@ const handleClickCatalog = (catalog: any) => {
       margin-right: 6px;
     }
     .mode-text {
-      width: 82%;
+      flex: 1;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-  }
-  .hover-set {
-    justify-content: space-between;
-    &:hover {
-      background-color: #f5f5f5;
-    }
-  }
-  .background-set {
-    background-color: #edf1ff !important;
-    overflow: hidden;
   }
 }
 </style>
