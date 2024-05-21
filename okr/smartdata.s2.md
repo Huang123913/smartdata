@@ -83,9 +83,9 @@
    - 🟢️ Delete Column `/api/v1/db/meta/columns/{columnId}` **完成**
    - 🟡️ Update Column `/api/v1/db/meta/columns/{columnId}` **完成: 部分类型**
    - 🟡 Create Column `/api/v1/db/meta/tables/{tableId}/columns` **完成: 部分类型**
-   - ⚪️ Create Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-create` **未开始**
+   - ⚪️ Create Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-create` **联调中**
    - ⚪️ Update Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-update` **未开始**
-   - ⚪️ Delete Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-delete` **未开始**
+   - ⚪️ Delete Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-delete` **进行中**
    - ⚪️ Duplicate Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-duplicate` **未开始**
    - ⚪️ Duplicate Column `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/duplicate-column` **未开始**
    - ⚪️ Reorder Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-reorder` **未开始**
@@ -93,22 +93,28 @@
 
 ### 显示: 排序&过滤
    - 🟢️️ List View Sorts **完成**
-   - ⚪️ Update View Sort
+   - 🟢️ Update View Sort **完成**
    - 🟢️ Get Sort **完成**
    - 🟢️️ Update Sort **完成**
    - 🟢️ Delete Sort **完成**
    - ⚪️ 查询接口从过滤元信息中获取过滤条件并进行数据过滤
+
+### 导入: Excel
+   > 已有表导入数据
+   - ⚪️ Bulk Insert Table Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-create`
+   > 导入数据到新表
+   - ⚪️ Create Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-create` **联调中**
+   - ⚪️ Create Primary Value `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Column/operation/db-table-column-primary-column-set`
 
 ## 5.17
    > 正式环境: http://smartdata.yindangu.com
    > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
-   - 【进行中】过滤接口对接
    - 【进行中】同步 nocodb v0.207.2
-   - 【未启动】excel 导入
+   - 【进行中】excel 导入
+   - 【进行中】对接建表接口
    - 【完成】对接过滤接口
-   - 【完成】修复 nocodb 与 mcdm 数据不匹配导致的无法 undo&redo 问题
    - 【暂缓】屏蔽部分未支持的字段类型
 
 ### 平台
