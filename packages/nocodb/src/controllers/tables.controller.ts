@@ -20,6 +20,7 @@ import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
 
 import { UseInterceptors } from '@nestjs/common';
 import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
+import { CreateTable } from '~/modules/smartdata/interceptors/meta/DBTable/CreateTable';
 
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
@@ -58,6 +59,7 @@ export class TablesController {
   ])
   @HttpCode(200)
   @Acl('tableCreate')
+  @UseInterceptors(CreateTable, MCDMRewrite('NocodbDBTableCreateTable'))
   async tableCreate(
     @Param('baseId') baseId: string,
     @Param('sourceId') sourceId: string,
