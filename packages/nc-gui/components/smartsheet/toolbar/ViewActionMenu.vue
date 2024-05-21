@@ -146,7 +146,6 @@ const onDelete = async () => {
 
 <template>
   <NcMenu
-    disabled
     v-if="view"
     :data-testid="`view-sidebar-view-actions-${view!.alias || view!.title}`"
     class="!min-w-70"
