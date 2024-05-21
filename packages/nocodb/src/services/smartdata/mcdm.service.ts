@@ -35,7 +35,12 @@ export class MCDMService {
       },
       data: req.body,
       headers: {
-        'v-auth': JSON.stringify(req.user, ['id']),
+        'v-auth': JSON.stringify(req.user, [
+          'id',
+          'display_name',
+          'user_name',
+          'email',
+        ]),
       },
     };
     return await this.mcdm(config)
