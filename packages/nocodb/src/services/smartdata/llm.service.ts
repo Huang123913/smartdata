@@ -20,7 +20,23 @@ export class LLMService {
       : undefined,
   });
 
-  constructor(protected readonly mcdm: MCDMService) {}
+  constructor(protected readonly mcdm: MCDMService) {
+    if (!process.env.LLM_URL) {
+      throw new Error(
+        `找不到环境变量 'LLM_URL', 请在 'packages/nocodb/.env' 中指定`,
+      );
+    }
+
+    this.llm.interceptors.response.use(
+      (r) => r,
+      (r) => {
+        const message = r.response.data;
+        const request = r.config;
+        this.logger.error(r.message, { message, request });
+        throw r;
+      },
+    );
+  }
 
   async train() {
     await this.deleteTrainData();

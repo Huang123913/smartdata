@@ -12,10 +12,27 @@ export class MCDMService {
 
   protected mcdm: AxiosInstance = axios.create({
     method: 'POST',
-    baseURL: process.env.MCDM_URL ?? `http://databoard-test.yindangu.com`,
+    baseURL: process.env.MCDM_URL,
   });
 
-  constructor() {}
+  constructor() {
+    if (!this.isRewrite()) {
+      this.logger.error(
+        `找不到环境变量 'MCDM_URL', 请在 'packages/nocodb/.env' 中指定`,
+      );
+      return;
+    }
+
+    this.mcdm.interceptors.response.use(
+      (r) => r,
+      (r) => {
+        const message = r.response.data;
+        const request = r.config;
+        this.logger.error(r.message, { message, request });
+        throw r;
+      },
+    );
+  }
 
   isRewrite() {
     return process.env?.MCDM_URL == null ? false : true;
@@ -43,15 +60,7 @@ export class MCDMService {
         ]),
       },
     };
-    return await this.mcdm(config)
-      .then((r) => {
-        return r.data;
-      })
-      .catch((reason) => {
-        this.logger.error(reason);
-        this.logger.error(config);
-        throw reason;
-      });
+    return await this.mcdm(config).then((r) => r.data);
   }
 
   async getEntity(entityId: string) {
