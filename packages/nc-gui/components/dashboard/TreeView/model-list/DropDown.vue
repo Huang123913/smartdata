@@ -53,7 +53,6 @@ const handleCopy = (item: any) => {
     <template #overlay>
       <NcMenu>
         <NcMenuItem
-          disabled
           v-if="isUIAllowed('tableRename', { roles: baseRole })"
           :data-testid="`sidebar-table-rename-${item.title}`"
           @click="handleRename(item)"

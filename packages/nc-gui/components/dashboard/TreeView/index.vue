@@ -57,7 +57,8 @@ const setMenuContext = (type: 'base' | 'source' | 'table' | 'main' | 'layout', v
 }
 
 function openRenameTableDialog(table: TableType, _ = false) {
-  if (!table || !table.source_id) return
+  if (!table) return
+  // if (!table || !table.source_id) return
 
   $e('c:table:rename')
 

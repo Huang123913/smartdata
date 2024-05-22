@@ -21,6 +21,7 @@ import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
 import { UseInterceptors } from '@nestjs/common';
 import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
 import { CreateTable } from '~/modules/smartdata/interceptors/meta/DBTable/CreateTable';
+import { UpdateTable } from '~/modules/smartdata/interceptors/meta/DBTable/UpdateTable';
 
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
@@ -90,6 +91,7 @@ export class TablesController {
 
   @Patch(['/api/v1/db/meta/tables/:tableId', '/api/v2/meta/tables/:tableId'])
   @Acl('tableUpdate')
+  @UseInterceptors(UpdateTable, MCDMRewrite('NocodbDBTableUpdateTable'))
   async tableUpdate(
     @Param('tableId') tableId: string,
     @Body() body: TableReqType,
