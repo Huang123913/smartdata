@@ -58,13 +58,13 @@ const handleClickCatalog = (catalog: any) => {
     <a-tree :tree-data="showModelTree" :expandedKeys="expandedKeys" @expand="handleExpand">
       <template #title="item">
         <a-tooltip :title="item.title">
-          <div v-if="item.isCatalog" class="model-text-content" @click="handleClickCatalog(item)">
+          <div v-if="item.isCatalog" class="model-text-content pr-1" @click="handleClickCatalog(item)">
             <img :src="catalog" width="16" height="16" class="catlog-img" />
             <span class="mode-text"> {{ item.title }}</span>
           </div>
           <div
             v-else
-            class="model-text-content hover-set"
+            class="model-text-content hover-set pr-1"
             :class="{ 'background-set': openedTableId === item.id }"
             @click="onClickToTableView(item)"
           >
@@ -72,7 +72,7 @@ const handleClickCatalog = (catalog: any) => {
               <GeneralTableIcon :meta="item" class="text-gray-500" />
               <span class="mode-text"> {{ item.title }}</span>
             </div>
-            <div class="more-action-btn">
+            <div class="flex more-action-btn">
               <DashboardTreeViewModelListDropDown
                 :item="{
                   ...item,
