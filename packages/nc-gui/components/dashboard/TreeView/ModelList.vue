@@ -11,14 +11,12 @@ const props = defineProps<{
 
 onMounted(async () => {
   props.setIsLoadingModel(true)
-  if (!chataiData.value.modelTree.length) await getCustomCatalogEntityTree()
   await loadProjectTables(props.base.id as string)
   props.setIsLoadingModel(false)
 })
 const { loadProjectTables } = useTablesStore()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
-const { getCustomCatalogEntityTree } = store
 const { openTable: _openTable } = useTableNew({ baseId: props.base.id! })
 const route = useRoute()
 const expandedKeys = ref([])

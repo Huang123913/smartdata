@@ -1,3 +1,4 @@
+import type { TableType } from 'nocodb-sdk'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import type { TableType } from 'nocodb-sdk'
 import { useTitle } from '@vueuse/core'
@@ -9,7 +10,7 @@ export const useTablesStore = defineStore('tablesStore', () => {
   const { $e, $api } = useNuxtApp()
   const { addUndo, defineProjectScope } = useUndoRedo()
   const { refreshCommandPalette } = useCommandPalette()
-
+  const { getCustomCatalogEntityTree } = useChatPlaygroundViewStore()
   const router = useRouter()
   const route = router.currentRoute
 
@@ -73,10 +74,12 @@ export const useTablesStore = defineStore('tablesStore', () => {
       return
     }
 
-    const tables = await api.dbTable.list(baseId, {
-      includeM2M: includeM2M.value,
-    })
+    // const tables = await api.dbTable.list(baseId, {
+    //   includeM2M: includeM2M.value,
+    // })
 
+    const tables: { list: any[] } = { list: [] }
+    await getCustomCatalogEntityTree()
     if (chatPlaygroundViewStore.chataiData.modelData)
       chatPlaygroundViewStore.chataiData.modelData.map((item) => {
         if (!item.isCatalog) {
