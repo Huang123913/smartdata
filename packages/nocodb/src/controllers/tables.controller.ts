@@ -107,6 +107,7 @@ export class TablesController {
 
   @Delete(['/api/v1/db/meta/tables/:tableId', '/api/v2/meta/tables/:tableId'])
   @Acl('tableDelete')
+  @UseInterceptors(MCDMRewrite('NocodbDBTableDeleteTable'))
   async tableDelete(@Param('tableId') tableId: string, @Request() req) {
     const result = await this.tablesService.tableDelete({
       tableId: req.params.tableId,
