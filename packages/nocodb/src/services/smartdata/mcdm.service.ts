@@ -1,5 +1,6 @@
-import axios, { type AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios, { type AxiosRequestConfig, type AxiosInstance } from 'axios';
 import { Request } from 'express';
+import { SocksProxyAgent } from 'socks-proxy-agent';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Injectable, Logger } from '@nestjs/common';
@@ -15,6 +16,14 @@ export class MCDMService {
   protected mcdm: AxiosInstance = axios.create({
     method: 'POST',
     baseURL: process.env.MCDM_URL,
+
+    httpAgent: process.env.MCDM_PROXY
+      ? new SocksProxyAgent(process.env.MCDM_PROXY)
+      : undefined,
+
+    httpsAgent: process.env.MCDM_PROXY
+      ? new SocksProxyAgent(process.env.MCDM_PROXY)
+      : undefined,
   });
 
   constructor() {
