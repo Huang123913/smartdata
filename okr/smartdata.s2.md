@@ -83,9 +83,9 @@
    - 🟢️ Delete Column `/api/v1/db/meta/columns/{columnId}` **完成**
    - 🟡️ Update Column `/api/v1/db/meta/columns/{columnId}` **完成: 部分类型**
    - 🟡 Create Column `/api/v1/db/meta/tables/{tableId}/columns` **完成: 部分类型**
-   - ⚪️ Create Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-create` **联调中**
-   - ⚪️ Update Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-update` **未开始**
-   - ⚪️ Delete Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-delete` **进行中**
+   - 🟢️ Create Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-create` **完成**
+   - 🟢 Update Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-update` **完成**
+   - 🟢️ Delete Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-delete` **完成**
    - ⚪️ Duplicate Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-duplicate` **未开始**
    - ⚪️ Duplicate Column `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/duplicate-column` **未开始**
    - ⚪️ Reorder Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-reorder` **未开始**
@@ -101,21 +101,26 @@
 
 ### 导入: Excel
    > 已有表导入数据
-   - ⚪️ Bulk Insert Table Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-create`
+   - ⚪️ Bulk Insert Table Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-create` **联调中**
    > 导入数据到新表
-   - ⚪️ Create Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-create` **联调中**
+   - 🟢 Create Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-create` **完成**
    - ⚪️ Create Primary Value `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Column/operation/db-table-column-primary-column-set`
+
+### 导出: Excel, CSV
+   > 导出数据
+   - ⚪️ Export Table View Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-csv-export`
 
 ## 5.17
    > 正式环境: http://smartdata.yindangu.com
    > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
-   - 【进行中】同步 nocodb v0.207.2
    - 【进行中】excel 导入
-   - 【进行中】对接建表接口
-   - 【完成】对接过滤接口
+   - 【进行中】提问建表的结果预览调整为 nocodb 表格
+   - 【未开始】在指定目录下新建表
+   - 【完成】新增、删除、修改表接口
    - 【暂缓】屏蔽部分未支持的字段类型
+   - 【暂缓】同步 nocodb v0.207.2
 
 ### 平台
    - 【暂缓】V: 前端导出规则不要把隐藏的字段也导出来 (项目不急)
