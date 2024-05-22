@@ -228,7 +228,7 @@ const onDelete = async () => {
           </template>
         </NcSubMenu>
       </template>
-      <NcSubMenu key="download">
+      <NcSubMenu disabled key="download">
         <template #title>
           <div
             v-e="[
@@ -253,7 +253,7 @@ const onDelete = async () => {
     <template v-if="isUIAllowed('viewCreateOrEdit')">
       <NcDivider />
 
-      <NcSubMenu key="lock-type" class="scrollbar-thin-dull max-h-90vh overflow-auto !py-0">
+      <NcSubMenu disabled key="lock-type" class="scrollbar-thin-dull max-h-90vh overflow-auto !py-0">
         <template #title>
           <div
             v-e="[
