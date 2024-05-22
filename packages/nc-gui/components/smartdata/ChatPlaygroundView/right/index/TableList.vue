@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import axios from 'axios'
 import { v4 as uuidv4 } from 'uuid'
 
 import { CloseOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons-vue'
@@ -9,7 +8,7 @@ import { useChatPlaygroundViewStore } from '../../../../../store/chatPlaygroundV
 const { $api } = useNuxtApp()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
-const { getCustomCatalogEntityTree, setSessionItem, chataiApi } = store
+const { getCustomCatalogEntityTree, setSessionItem } = store
 
 const isShowSelectCatalogModal = ref<boolean>(false) //是否显示选择目录弹框
 const isEdited = ref<boolean>(false)
@@ -43,8 +42,6 @@ onMounted(() => {
     }
   }
   resizeObserver1.observe(elementRef1.value)
-  // TODO 获取现有模型
-  // existingModelData.value =
 })
 
 const isShow = computed(() => {
@@ -123,96 +120,25 @@ const handleOk = async (selectedCatalog: object) => {
   try {
     isShowSelectCatalogModal.value = false
     isShowLoading.value = true
-    let tableData = chataiData.value.sessionItem?.tabledata.length ? JSON.parse(chataiData.value.sessionItem?.tabledata) : []
+    let exeRes = null
     if (isPublishCatalog.value) {
-      let jsonValueOfSql = { sql: chataiData.value.sessionItem.sql }
-      let jsonValueOfQuestion = { question: chataiData.value.sessionItem.tip }
-      let tableFields = tableData.fields ? tableData.fields : []
-      let fields: any[] = []
-      fields = tableFields.map((item) => {
-        return {
-          id: uuidv4(),
-          fieldCode: item.code,
-          fieldName: item.name,
-          fieldName_cn: item.name_cn || item.name,
-          fieldSysDataType: item.sysDataType,
-          fieldPrecision: item.fieldPrecision,
-          scale: item.scale,
-        }
-      })
-      let name = `query_entity_${Date.now()}`
-      let entitieId = uuidv4()
-      let tableName = await $api.smartData.translateToTableName({
-        id: uuidv4(),
-        orgin: '1',
-        word: chataiData.value.sessionItem.textAreaValue,
-      })
-      tableName = tableName.replace(/\s/g, '')
-      let entities = [
-        {
-          id: entitieId,
-          name: tableName,
-          code: name,
-          name_cn: chataiData.value.sessionItem.textAreaValue,
-          belongCatalog: selectedCatalog.code,
-          props: [
-            {
-              name: 'belongSQL',
-              code: 'belongSQL',
-              jsonValue: JSON.stringify(jsonValueOfSql),
-            },
-            {
-              name: 'belongQuestion',
-              code: 'belongQuestion',
-              jsonValue: JSON.stringify(jsonValueOfQuestion),
-            },
-          ],
-          fields,
-        },
-      ]
-      // 保存模型
-      await $api.smartData.saveModel({ entities: entities })
-      // 发布模型
-      let generateMDTableResutl = await $api.smartData.generateMdTable({ entityId: entitieId })
-      let tableInfo = generateMDTableResutl?.tableInfo[0]
-      if (tableInfo && tableData.datas.length) {
-        let datas = tableData.datas.map((item: object) => ({ ...item, id: uuidv4() }))
-        //往表里插数据
-        await $api.smartData.batchInsertOrUpdate({
-          componentCode: tableInfo.componentCode,
-          tableName: tableInfo.tableName,
-          datas: JSON.stringify(datas),
-        })
+      let params = {
+        tableData: chataiData.value.sessionItem.tabledata,
+        sql: chataiData.value.sessionItem.sql,
+        question: chataiData.value.sessionItem.tip,
+        modelName: chataiData.value.sessionItem.textAreaValue,
+        belongCatalog: selectedCatalog.code,
       }
-      // 生成ddl
-      let generatedDDL = await $api.smartData.ddl({ entityId: entitieId })
-      if (generatedDDL) {
-        await $api.smartData.trainByDdl({ ddl: generatedDDL })
-        // await $api.smartData.trainByPrompt({ prompt: chataiData.value.sessionItem?.tip, sql: chataiData.value.sessionItem?.sql })
-      }
+      exeRes = await $api.smartData.publicModelToCatalog(params)
     } else {
-      //发布至现有模型
-      let insertData: any[] = []
-      tableData.datas.map((item: any) => {
-        let data: { [key: string]: any } = {}
-        for (const key in selectedCatalog) {
-          if (selectedCatalog.hasOwnProperty(key)) {
-            data[key] = selectedCatalog[key] ? item[selectedCatalog[key]] : null
-          }
-        }
-        insertData.push({ ...data, id: uuidv4() })
-      })
-      let findMdTableInfoRes = await $api.smartData.findMdTableInfo({ entityId: selectPublishMode.value.id })
-      let tableInfo = findMdTableInfoRes[0]
-      if (tableInfo) {
-        await $api.smartData.batchInsertOrUpdate({
-          componentCode: tableInfo.componentCode,
-          tableName: tableInfo.tableName,
-          datas: JSON.stringify(insertData),
-        })
+      let params = {
+        mapingData: selectedCatalog,
+        tableData: chataiData.value.sessionItem.tabledata,
+        existingModelId: selectPublishMode.value.id,
       }
+      exeRes = await $api.smartData.publishModelToExistingModel(params)
     }
-    message.success('发布成功')
+    exeRes && exeRes?.success && message.success('发布成功')
   } catch (e: any) {
     console.log(e)
   } finally {
@@ -229,7 +155,6 @@ const handleCancel = () => {
 // 设置模型数据更新频率
 const handleOkBySetUpdateTime = (value: string) => {
   updateTimeValue.value = value
-  console.log('updateTimeValue', updateTimeValue.value)
 }
 
 const setUpdateTimeValue = (value: string) => {

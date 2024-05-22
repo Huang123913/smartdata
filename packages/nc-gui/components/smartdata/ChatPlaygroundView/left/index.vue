@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { deepClone, getNowDate } from '#imports'
+import { getNowDate } from '#imports'
 import { v4 as uuidv4 } from 'uuid'
 
 import { CloseOutlined, DeleteFilled, SearchOutlined, SendOutlined } from '@ant-design/icons-vue'
@@ -17,7 +17,7 @@ export interface SessionItem {
 const { $api } = useNuxtApp()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
-const { setSessionItem, getCustomCatalogEntityTree, setChataiDataIsOpenMode, chataiApi } = store
+const { setSessionItem, getCustomCatalogEntityTree, setChataiDataIsOpenMode } = store
 
 const searchSessionText = ref<string>('') //搜索会话文本
 const isShowSearchSessionResult = ref<boolean>(false) //是否显示搜索的会话结果
@@ -33,26 +33,15 @@ const selectedSessionItem = ref<SessionItem>({
 }) //被选中的会话
 const isShowLoading = ref<boolean>(false) //加载效果
 const textAreaValue = ref<string>('') //查询内容
-const locale = {
-  emptyText: '暂无数据',
-}
 
 onMounted(async () => {
   // 清空展示的会话信息
-  setSessionItem({
-    id: '',
-    textAreaValue: '',
-    sql: '',
-    selectedModel: '',
-    tabledata: '',
-    tip: '',
-  })
+  clearSesstionItem()
   try {
     isShowLoading.value = true
-    // 获取模型数据
     if (!chataiData.value.modelData.length) await getCustomCatalogEntityTree()
   } catch (e: any) {
-    console.log(e)
+    message.error(e?.message)
   } finally {
     isShowLoading.value = false
   }
@@ -60,14 +49,7 @@ onMounted(async () => {
 
 //删除所有会话
 const handldeleteAllSession = () => {
-  setSessionItem({
-    id: '',
-    textAreaValue: '',
-    sql: '',
-    selectedModel: '',
-    tabledata: '',
-    tip: '',
-  })
+  clearSesstionItem()
   sessionList.value = []
 }
 
@@ -100,32 +82,18 @@ const handleClickSessionItem = (sessionItem: SessionItem) => {
 const handleDeleteSessionItem = (deleteItem: SessionItem) => {
   sessionList.value = sessionList.value.filter((item) => item.id !== deleteItem.id)
   deleteItem.id === chataiData.value.sessionItem.id && setSessionItem(sessionList.value[0])
+  !sessionList.value.length && clearSesstionItem()
 }
 
-//获取查询范围
-const getModelrange = async () => {
-  let modelrange = []
-  let deepCloneData = deepClone(chataiData.value.checkedModelData)
-  if (deepCloneData.length) {
-    for (let i = 0; i < deepCloneData.length; i++) {
-      let modelItem = deepCloneData[i]
-      if (modelItem?.fields && modelItem.fields.length == 0) {
-        let modelInfo = await $api.smartData.entity({ entityId: modelItem.id })
-        let fields = modelInfo[0].fields ?? []
-        modelItem.fields = fields
-      }
-    }
-  }
-  modelrange = deepCloneData.map((item) => {
-    let props = []
-    if (item.fields.length) {
-      props = item.fields.map((item1) => {
-        return { prop_name: item1.fieldName }
-      })
-    }
-    return { model_name: item.name, props }
+const clearSesstionItem = () => {
+  setSessionItem({
+    id: '',
+    textAreaValue: '',
+    sql: '',
+    selectedModel: '',
+    tabledata: '',
+    tip: '',
   })
-  return modelrange
 }
 
 //发送按钮
@@ -133,102 +101,45 @@ const handleSend = async () => {
   try {
     if (!textAreaValue.value.trim()) return
     isShowLoading.value = true
-    const id = uuidv4()
-    let modelrange = await getModelrange()
-    let getSqlParams = {
+    let params = {
+      selectedModel: JSON.stringify(chataiData.value.checkedModelData),
       question: textAreaValue.value,
-      id,
-      orgid: '1',
-      projectid: '1',
-      modelrange: JSON.stringify(modelrange),
     }
-    let getSqlRes = await $api.smartData.getSql(getSqlParams)
-    if (getSqlRes) {
-      let sql = getSqlRes.text
-      let sqlId = getSqlRes.id
-      if (sql.indexOf('SELECT') === -1) {
-        message.warning(getSqlRes.text)
-        isShowLoading.value = false
-        return
-      }
-      sql = sql.replace(/;/g, '')
-      let queryBizCustomEntityData = await $api.smartData.exeSql({ sql })
-      if (!queryBizCustomEntityData?.success || !queryBizCustomEntityData?.data?.success) {
-        if (queryBizCustomEntityData?.exceptionType && queryBizCustomEntityData?.exceptionType.indexOf('VSQL') > -1) {
-          message.warning('抱歉，我不能理解你的问题，请调整后再重试')
-        } else {
-          let err_msg = queryBizCustomEntityData?.success
-            ? queryBizCustomEntityData?.data.errorDetail
-            : queryBizCustomEntityData?.data.errorDetail.allStackMsg
-          let newExeRes = await repeatRepair(sqlId, err_msg, textAreaValue.value)
-          if (!newExeRes?.success || !newExeRes?.data.success) {
-            message.warning('抱歉，我不能理解你的问题，请调整后再重试')
-          }
-          queryBizCustomEntityData = newExeRes
-        }
-      }
-      if (queryBizCustomEntityData?.data) {
-        let fields = queryBizCustomEntityData?.data?.fields
-        let datas = queryBizCustomEntityData?.data?.datas
-        let newSessionItem = {
-          id,
-          textAreaValue: textAreaValue.value,
-          sql: queryBizCustomEntityData?.sql ? queryBizCustomEntityData?.sql : sql,
-          searchTime: getNowDate(),
-          selectedModel: chataiData.value.checkedModelData.length ? JSON.stringify(chataiData.value.checkedModelData) : '',
-          tabledata: JSON.stringify({ fields, datas }),
-          tip: textAreaValue.value,
-        }
-        sessionList.value.unshift(newSessionItem)
-        textAreaValue.value = ''
-        setSessionItem(newSessionItem)
-        selectedSessionItem.value = {
-          id: '',
-          textAreaValue: '',
-          sql: '',
-          selectedModel: '',
-          tabledata: '',
-          tip: '',
-        }
-      }
+    let result = await $api.smartData.createTableByAskingQuestion(params)
+    if (result?.errSqlTip) {
+      message.warning(result.errSqlTip)
+      return
+    }
+    if (result?.errSqlExeTip || !result?.success || !result?.data.success) {
+      message.warning('抱歉，我不能理解你的问题，请调整后再重试')
+    }
+    let fields = result?.data?.fields ?? []
+    let datas = result?.data?.datas ?? []
+    let newSessionItem = {
+      id: uuidv4(),
+      textAreaValue: textAreaValue.value,
+      sql: result?.sql,
+      searchTime: getNowDate(),
+      selectedModel: chataiData.value.checkedModelData.length ? JSON.stringify(chataiData.value.checkedModelData) : '',
+      tabledata: JSON.stringify({ fields, datas }),
+      tip: textAreaValue.value,
+    }
+    sessionList.value.unshift(newSessionItem)
+    textAreaValue.value = ''
+    setSessionItem(newSessionItem)
+    selectedSessionItem.value = {
+      id: '',
+      textAreaValue: '',
+      sql: '',
+      selectedModel: '',
+      tabledata: '',
+      tip: '',
     }
   } catch (e: any) {
-    console.log(e)
+    message.error(e?.message)
   } finally {
     isShowLoading.value = false
   }
-}
-
-const repeatRepair = async (id: string, error_msg: string, question: string, maxRetries = 3) => {
-  let retriesCount = 0
-  let returnRes = null
-  while (retriesCount < maxRetries) {
-    try {
-      let response: any = await $api.smartData.repair({ id, orgid: '1', projectid: '1', error_msg, question })
-      if (response.text.indexOf('SELECT') > -1) {
-        let sql = response.text.replace(/;/g, '')
-        let result: any = await $api.smartData.exeSql({ sql })
-        if (result?.success && result?.data.success) {
-          result.sql = sql
-          return result
-        } else {
-          returnRes = result
-          retriesCount++
-        }
-      } else {
-        retriesCount++
-        returnRes = {
-          data: {
-            datas: [],
-            fields: [],
-          },
-        }
-      }
-    } catch (error) {
-      retriesCount++
-    }
-  }
-  return returnRes
 }
 </script>
 
@@ -262,7 +173,9 @@ const repeatRepair = async (id: string, error_msg: string, question: string, max
     </div>
     <!-- 会话列表 -->
     <a-list
-      :locale="locale"
+      :locale="{
+        emptyText: '暂无数据',
+      }"
       class="session-list"
       item-layout="horizontal"
       :data-source="isShowSearchSessionResult ? searchSessionResult : sessionList"

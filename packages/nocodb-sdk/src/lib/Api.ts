@@ -11543,46 +11543,16 @@ export class Api<
       }),
 
     /**
-     * @description getSql LLM
+     * @description createTableByAskingQuestion LLM
      *
      * @tags SmartData
-     * @name GetSql
-     * @summary getSql LLM
-     * @request GET:/api/v2/smartdata/getSql
+     * @name CreateTableByAskingQuestion
+     * @summary createTableByAskingQuestion LLM
+     * @request POST:/api/v2/smartdata/createTableByAskingQuestion
      */
-    getSql: (
-      query: {
-        /** question */
-        question?: string;
-        /** id */
-        id?: string;
-        /** orgid */
-        orgid?: string;
-        /** projectid */
-        projectid?: string;
-        /** modelrange */
-        modelrange: string;
-      },
-      params: RequestParams = {}
-    ) =>
+    createTableByAskingQuestion: (data: object, params: RequestParams = {}) =>
       this.request<any, any>({
-        path: `/api/v2/smartdata/getSql`,
-        method: 'GET',
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * @description exeSql MCDM
-     *
-     * @tags SmartData
-     * @name ExeSql
-     * @summary exeSql MCDM
-     * @request POST:/api/v2/smartdata/exeSql
-     */
-    exeSql: (data: object, params: RequestParams = {}) =>
-      this.request<any, any>({
-        path: `/api/v2/smartdata/exeSql`,
+        path: `/api/v2/smartdata/createTableByAskingQuestion`,
         method: 'POST',
         body: data,
         type: ContentType.Json,
@@ -11590,16 +11560,16 @@ export class Api<
       }),
 
     /**
-     * @description saveModel MCDM
+     * @description publishModelToExistingModel MCDM
      *
      * @tags SmartData
-     * @name SaveModel
-     * @summary saveModel MCDM
-     * @request POST:/api/v2/smartdata/saveModel
+     * @name PublishModelToExistingModel
+     * @summary publishModelToExistingModel MCDM
+     * @request POST:/api/v2/smartdata/publishModelToExistingModel
      */
-    saveModel: (data: object, params: RequestParams = {}) =>
+    publishModelToExistingModel: (data: object, params: RequestParams = {}) =>
       this.request<any, any>({
-        path: `/api/v2/smartdata/saveModel`,
+        path: `/api/v2/smartdata/publishModelToExistingModel`,
         method: 'POST',
         body: data,
         type: ContentType.Json,
@@ -11607,158 +11577,16 @@ export class Api<
       }),
 
     /**
-     * @description generateMDTable MCDM
+     * @description publicModelToCatalog LLM
      *
      * @tags SmartData
-     * @name GenerateMdTable
-     * @summary generateMDTable MCDM
-     * @request POST:/api/v2/smartdata/generateMDTable
+     * @name PublicModelToCatalog
+     * @summary publicModelToCatalog LLM
+     * @request POST:/api/v2/smartdata/publicModelToCatalog
      */
-    generateMdTable: (data: object, params: RequestParams = {}) =>
+    publicModelToCatalog: (data: object, params: RequestParams = {}) =>
       this.request<any, any>({
-        path: `/api/v2/smartdata/generateMDTable`,
-        method: 'POST',
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * @description batchInsertOrUpdate MCDM
-     *
-     * @tags SmartData
-     * @name BatchInsertOrUpdate
-     * @summary batchInsertOrUpdate MCDM
-     * @request POST:/api/v2/smartdata/batchInsertOrUpdate
-     */
-    batchInsertOrUpdate: (data: object, params: RequestParams = {}) =>
-      this.request<any, any>({
-        path: `/api/v2/smartdata/batchInsertOrUpdate`,
-        method: 'POST',
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * @description findMDTableInfo MCDM
-     *
-     * @tags SmartData
-     * @name FindMdTableInfo
-     * @summary findMDTableInfo MCDM
-     * @request GET:/api/v2/smartdata/findMDTableInfo
-     */
-    findMdTableInfo: (
-      query?: {
-        /** entityId */
-        entityId?: string;
-      },
-      params: RequestParams = {}
-    ) =>
-      this.request<any, any>({
-        path: `/api/v2/smartdata/findMDTableInfo`,
-        method: 'GET',
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * @description ddl MCDM
-     *
-     * @tags SmartData
-     * @name Ddl
-     * @summary ddl MCDM
-     * @request GET:/api/v2/smartdata/ddl
-     */
-    ddl: (
-      query?: {
-        /** entityId */
-        entityId?: string;
-      },
-      params: RequestParams = {}
-    ) =>
-      this.request<any, any>({
-        path: `/api/v2/smartdata/ddl`,
-        method: 'GET',
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * @description trainByPrompt LLM
-     *
-     * @tags SmartData
-     * @name TrainByPrompt
-     * @summary trainByPrompt LLM
-     * @request POST:/api/v2/smartdata/trainByPrompt
-     */
-    trainByPrompt: (data: object, params: RequestParams = {}) =>
-      this.request<any, any>({
-        path: `/api/v2/smartdata/trainByPrompt`,
-        method: 'POST',
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * @description trainByDDL LLM
-     *
-     * @tags SmartData
-     * @name TrainByDdl
-     * @summary trainByDDL LLM
-     * @request POST:/api/v2/smartdata/trainByDDL
-     */
-    trainByDdl: (data: object, params: RequestParams = {}) =>
-      this.request<any, any>({
-        path: `/api/v2/smartdata/trainByDDL`,
-        method: 'POST',
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * @description repair LLM
-     *
-     * @tags SmartData
-     * @name Repair
-     * @summary repair LLM
-     * @request GET:/api/v2/smartdata/repair
-     */
-    repair: (
-      query: {
-        /** id */
-        id?: string;
-        /** orgid */
-        orgid?: string;
-        /** projectid */
-        projectid?: string;
-        /** error_msg */
-        error_msg: string;
-        /** question */
-        question?: string;
-      },
-      params: RequestParams = {}
-    ) =>
-      this.request<any, any>({
-        path: `/api/v2/smartdata/repair`,
-        method: 'GET',
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * @description translateToTableName LLM
-     *
-     * @tags SmartData
-     * @name TranslateToTableName
-     * @summary translateToTableName LLM
-     * @request POST:/api/v2/smartdata/translateToTableName
-     */
-    translateToTableName: (data: object, params: RequestParams = {}) =>
-      this.request<any, any>({
-        path: `/api/v2/smartdata/translateToTableName`,
+        path: `/api/v2/smartdata/publicModelToCatalog`,
         method: 'POST',
         body: data,
         type: ContentType.Json,

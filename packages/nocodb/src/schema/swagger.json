@@ -17371,70 +17371,11 @@
         ]
       }
     },
-    "/api/v2/smartdata/getSql": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/xc-auth"
-        }
-      ],
-      "get": {
-        "summary": "getSql LLM",
-        "operationId": "getSql",
-        "description": "getSql LLM",
-        "tags": ["SmartData"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "question",
-            "in": "query",
-            "description": "question"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "id",
-            "in": "query",
-            "description": "id"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "orgid",
-            "in": "query",
-            "description": "orgid"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "projectid",
-            "in": "query",
-            "description": "projectid"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "modelrange",
-            "in": "query",
-            "description": "modelrange",
-            "required": true
-          },
-          {
-            "$ref": "#/components/parameters/xc-auth"
-          }
-        ]
-      }
-    },
-    "/api/v2/smartdata/exeSql": {
+    "/api/v2/smartdata/createTableByAskingQuestion":{
       "post": {
-        "summary": "exeSql MCDM",
-        "operationId": "exeSql",
-        "description": "exeSql MCDM",
+        "summary": "createTableByAskingQuestion LLM",
+        "operationId": "createTableByAskingQuestion",
+        "description": "createTableByAskingQuestion LLM",
         "tags": ["SmartData"],
         "requestBody": {
           "content": {
@@ -17452,28 +17393,11 @@
         }
       ]
     },
-    "/api/v2/smartdata/saveModel":{
+    "/api/v2/smartdata/publishModelToExistingModel":{
       "post": {
-        "summary": "saveModel MCDM",
-        "operationId": "saveModel",
-        "description": "saveModel MCDM",
-        "tags": ["SmartData"],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/smartdata/generateMDTable":{
-      "post": {
-        "summary": "generateMDTable MCDM",
-        "operationId": "generateMDTable",
-        "description": "generateMDTable MCDM",
+        "summary": "publishModelToExistingModel MCDM",
+        "operationId": "publishModelToExistingModel",
+        "description": "publishModelToExistingModel MCDM",
         "tags": ["SmartData"],
         "requestBody": {
           "content": {
@@ -17491,172 +17415,11 @@
         }
       ]
     },
-    "/api/v2/smartdata/batchInsertOrUpdate":{
+    "/api/v2/smartdata/publicModelToCatalog":{
       "post": {
-        "summary": "batchInsertOrUpdate MCDM",
-        "operationId": "batchInsertOrUpdate",
-        "description": "batchInsertOrUpdate MCDM",
-        "tags": ["SmartData"],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/xc-auth"
-        }
-      ]
-    },
-    "/api/v2/smartdata/findMDTableInfo":{
-      "get": {
-        "summary": "findMDTableInfo MCDM",
-        "operationId": "findMDTableInfo",
-        "description": "findMDTableInfo MCDM",
-        "tags": ["SmartData"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "entityId",
-            "in": "query",
-            "description": "entityId"
-          }
-        ]
-      }
-    },
-    "/api/v2/smartdata/ddl":{
-      "get": {
-        "summary": "ddl MCDM",
-        "operationId": "ddl",
-        "description": "ddl MCDM",
-        "tags": ["SmartData"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "entityId",
-            "in": "query",
-            "description": "entityId"
-          }
-        ]
-      }
-    },
-    "/api/v2/smartdata/trainByPrompt":{
-      "post": {
-        "summary": "trainByPrompt LLM",
-        "operationId": "trainByPrompt",
-        "description": "trainByPrompt LLM",
-        "tags": ["SmartData"],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/xc-auth"
-        }
-      ]
-    },
-    "/api/v2/smartdata/trainByDDL":{
-      "post": {
-        "summary": "trainByDDL LLM",
-        "operationId": "trainByDDL",
-        "description": "trainByDDL LLM",
-        "tags": ["SmartData"],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              }
-            }
-          }
-        }
-      },
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/xc-auth"
-        }
-      ]
-    },
-    "/api/v2/smartdata/repair":{
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/xc-auth"
-        }
-      ],
-      "get": {
-        "summary": "repair LLM",
-        "operationId": "repair",
-        "description": "repair LLM",
-        "tags": ["SmartData"],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "id",
-            "in": "query",
-            "description": "id"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "orgid",
-            "in": "query",
-            "description": "orgid"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "projectid",
-            "in": "query",
-            "description": "projectid"
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "error_msg",
-            "in": "query",
-            "description": "error_msg",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "name": "question",
-            "in": "query",
-            "description": "question"
-          },
-          {
-            "$ref": "#/components/parameters/xc-auth"
-          }
-        ]
-      }
-    },
-    "/api/v2/smartdata/translateToTableName":{
-      "post": {
-        "summary": "translateToTableName LLM",
-        "operationId": "translateToTableName",
-        "description": "translateToTableName LLM",
+        "summary": "publicModelToCatalog LLM",
+        "operationId": "publicModelToCatalog",
+        "description": "publicModelToCatalog LLM",
         "tags": ["SmartData"],
         "requestBody": {
           "content": {

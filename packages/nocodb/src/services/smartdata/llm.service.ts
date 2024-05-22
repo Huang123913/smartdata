@@ -1,8 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
 import axios, { type AxiosInstance } from 'axios';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 import { v4 as uuidv4 } from 'uuid';
 import { MCDMService } from '~/services/smartdata/mcdm.service';
+
+import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 export class LLMService {
@@ -132,5 +133,250 @@ export class LLMService {
     }).then((r) => {
       return r.data;
     });
+  }
+
+  async createTableByAskingQuestion(params: {
+    selectedModel: string;
+    question: string;
+  }) {
+    let { selectedModel, question } = params;
+    let modelrange = await this.getModelrange(JSON.parse(selectedModel));
+    let getSqlRes = await this.getSql(question, modelrange);
+    if (getSqlRes) {
+      let sql = getSqlRes.text;
+      let sqlId = getSqlRes.id;
+      if (sql.indexOf('SELECT') === -1)
+        return { success: false, errSqlTip: sql };
+      sql = sql.replace(/;/g, '');
+      let exeSqlRes = await this.mcdm.exeSql({ sql });
+      let isExeFailed = !exeSqlRes?.success || !exeSqlRes?.data?.success;
+      if (isExeFailed) {
+        let isVsqlErr =
+          exeSqlRes?.exceptionType &&
+          exeSqlRes?.exceptionType.indexOf('VSQL') > -1;
+        if (isVsqlErr)
+          return {
+            success: false,
+            errSqlExeTip: true,
+            data: { fields: [], datas: [] },
+            sql: sql,
+          };
+        let err_msg = exeSqlRes?.success
+          ? exeSqlRes?.data.errorDetail
+          : exeSqlRes?.data.errorDetail.allStackMsg;
+        let newExeRes = await this.repeatRepair(sqlId, err_msg, question, sql);
+        if (!newExeRes?.success || !newExeRes?.data.success) {
+          return { success: false, data: { fields: [], datas: [] }, sql: sql };
+        }
+        exeSqlRes = newExeRes;
+      } else {
+        exeSqlRes.sql = sql;
+      }
+      return exeSqlRes;
+    }
+  }
+
+  async getSql(
+    question: string,
+    modelrange: string,
+    orgid: string = '1',
+    projectid: string = '1',
+  ) {
+    return await this.llm({
+      url: `/ask`,
+      params: {
+        question,
+        id: uuidv4(),
+        orgid,
+        projectid,
+        modelrange,
+      },
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+      },
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async repair(
+    id: string,
+    error_msg: string,
+    question: string,
+    orgid: string = '1',
+    projectid: string = '1',
+  ) {
+    return await this.llm({
+      url: `/repair`,
+      params: {
+        id,
+        orgid,
+        projectid,
+        error_msg,
+        question,
+      },
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+      },
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async getModelrange(selectedModel: any[]) {
+    let modelrange = [];
+    for (let i = 0; i < selectedModel.length; i++) {
+      let modelItem = selectedModel[i];
+      if (modelItem?.fields && modelItem.fields.length === 0) {
+        let modelInfo = await this.mcdm.getEntity(modelItem.id);
+        let fields = modelInfo.length ? modelInfo[0].fields : [];
+        modelItem.fields = fields;
+      }
+    }
+    modelrange = selectedModel.map((model) => {
+      let props = [];
+      if (model.fields.length) {
+        props = model.fields.map((field) => {
+          return { prop_name: field.fieldName };
+        });
+      }
+      return { model_name: model.name, props };
+    });
+    return JSON.stringify(modelrange);
+  }
+
+  async repeatRepair(
+    id: string,
+    error_msg: string,
+    question: string,
+    originalSql: string,
+    maxRetries: number = 3,
+  ) {
+    let retriesCount = 0;
+    let returnRes = null;
+    while (retriesCount < maxRetries) {
+      try {
+        let response: any = this.repair(id, error_msg, question);
+        if (response.text.indexOf('SELECT') > -1) {
+          let sql = response.text.replace(/;/g, '');
+          let result: any = await this.mcdm.exeSql({ sql });
+          if (result?.success && result?.data.success) {
+            result.sql = sql;
+            return result;
+          } else {
+            retriesCount++;
+            let isVsqlErr =
+              result?.exceptionType &&
+              result?.exceptionType.indexOf('VSQL') > -1;
+            if (isVsqlErr) {
+              returnRes = result;
+              returnRes.sql = originalSql;
+            } else {
+              let err_msg: string = result?.success
+                ? result?.data.errorDetail
+                : result?.data.errorDetail.allStackMsg;
+              if (maxRetries - retriesCount > 0) {
+                let repeateRes = await this.repeatRepair(
+                  response.id,
+                  err_msg,
+                  question,
+                  originalSql,
+                  maxRetries - retriesCount,
+                );
+                returnRes = repeateRes;
+              } else {
+                returnRes = result;
+                returnRes.sql = originalSql;
+              }
+            }
+          }
+        } else {
+          retriesCount++;
+          returnRes = {
+            success: false,
+            data: {
+              datas: [],
+              fields: [],
+            },
+            sql: originalSql,
+          };
+        }
+      } catch (error) {
+        retriesCount++;
+      }
+    }
+    return returnRes;
+  }
+
+  async publicModelToCatalog(params: {
+    tableData: string;
+    sql: string;
+    question: string;
+    modelName: string;
+    belongCatalog: string;
+  }) {
+    let { tableData, sql, question, modelName, belongCatalog } = params;
+    let tableDataObj = JSON.parse(tableData);
+    let tableDatas = tableDataObj.datas ?? [];
+    let tableFields = tableDataObj.fields ?? [];
+    let fields = tableFields.map((item) => {
+      return {
+        id: uuidv4(),
+        fieldCode: item.code,
+        fieldName: item.name,
+        fieldName_cn: item.name_cn || item.name,
+        fieldSysDataType: item.sysDataType,
+        fieldPrecision: item.fieldPrecision,
+        scale: item.scale,
+      };
+    });
+    let entitieId = uuidv4();
+    let translatedModel = await this.translate(modelName);
+    translatedModel = translatedModel.replace(/\s/g, '');
+    let entities = [
+      {
+        id: entitieId,
+        name: translatedModel,
+        code: `query_entity_${Date.now()}`,
+        name_cn: modelName,
+        belongCatalog,
+        props: [
+          {
+            name: 'belongSQL',
+            code: 'belongSQL',
+            jsonValue: JSON.stringify({ sql }),
+          },
+          {
+            name: 'belongQuestion',
+            code: 'belongQuestion',
+            jsonValue: JSON.stringify({ question }),
+          },
+        ],
+        fields,
+      },
+    ];
+    // 保存模型
+    await this.mcdm.saveModel({ entities: entities });
+    // 发布模型
+    let generateMDTableResutl = await this.mcdm.generateMDTable(entitieId);
+    let tableInfoRes = generateMDTableResutl?.tableInfo
+      ? generateMDTableResutl?.tableInfo[0]
+      : null;
+    //查有数据就往表里插入数据
+    if (tableInfoRes && tableDatas.length) {
+      let datas = tableDatas.map((item: object) => ({
+        ...item,
+        id: uuidv4(),
+      }));
+      let { componentCode, tableName } = tableInfoRes;
+      await this.mcdm.batchInsertOrUpdate(componentCode, tableName, datas);
+    }
+    // 生成ddl
+    let generatedDDL = await this.mcdm.getDDL(entitieId);
+    if (generatedDDL) {
+      await this.trainByDDL(generatedDDL);
+      // await this.llm.trainByPrompt(sql, question);
+    }
+    return { success: true };
   }
 }

@@ -1,6 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
-import axios, { AxiosRequestConfig, type AxiosInstance } from 'axios';
+import axios, { type AxiosInstance, AxiosRequestConfig } from 'axios';
 import { Request } from 'express';
+import { v4 as uuidv4 } from 'uuid';
+
+import { Injectable, Logger } from '@nestjs/common';
 
 interface RewriteOptions {
   req: Request;
@@ -93,5 +95,89 @@ export class MCDMService {
     }).then((r) => {
       return r.data.data?.ddl?.join('\n');
     });
+  }
+
+  async exeSql(data: { sql: string; params?: object }) {
+    return await this.mcdm({
+      url: `/webapi/innersysapi/VMcdmDataServiceWebApi/queryBizCustomEntityData`,
+      data,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async saveModel(data: object) {
+    return await this.mcdm({
+      url: `/webapi/innersysapi/VMcdmDataServiceWebApi/saveBizCustomEntity`,
+      data,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async generateMDTable(entityId: string) {
+    return await this.mcdm({
+      url: `/webapi/innersysapi/VMcdmDataServiceWebApi/generateMDTable`,
+      data: {
+        entityIds: entityId,
+      },
+    }).then((r) => {
+      return r.data.data ?? [];
+    });
+  }
+
+  async batchInsertOrUpdate(
+    componentCode: string,
+    tableName: string,
+    datas: object,
+  ) {
+    return await this.mcdm({
+      url: `/restapi/bizentity/data/${componentCode}/${tableName}/batchInsertOrUpdate`,
+      data: {
+        datas,
+      },
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async findMDTableInfo(entityId: string) {
+    return await this.mcdm({
+      url: `/webapi/innersysapi/VMcdmDataServiceWebApi/findMDTableInfo`,
+      data: {
+        entityIds: entityId,
+      },
+    }).then((r) => {
+      return r.data.data.datas ?? [];
+    });
+  }
+
+  async publishModelToExistingModel(params: {
+    mapingData: object;
+    tableData: string;
+    existingModelId: string;
+  }) {
+    let { tableData, existingModelId, mapingData } = params;
+    let tableDataObj = JSON.parse(tableData);
+    let tableDatas = tableDataObj.datas ?? [];
+    let insertData: any[] = [];
+    tableDatas.map((item: any) => {
+      let data: { [key: string]: any } = {};
+      for (const key in mapingData) {
+        if (mapingData.hasOwnProperty(key)) {
+          data[key] = mapingData[key] ? item[mapingData[key]] : null;
+        }
+      }
+      insertData.push({ ...data, id: uuidv4() });
+    });
+    let findMdTableInfoRes = await this.findMDTableInfo(existingModelId);
+    let tableInfo = findMdTableInfoRes[0];
+    tableInfo &&
+      (await this.batchInsertOrUpdate(
+        tableInfo.componentCode,
+        tableInfo.tableName,
+        insertData,
+      ));
+    return { success: true };
   }
 }
