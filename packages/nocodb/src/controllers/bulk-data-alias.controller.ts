@@ -18,6 +18,7 @@ import { DataApiLimiterGuard } from '~/guards/data-api-limiter.guard';
 
 import { UseInterceptors } from '@nestjs/common';
 import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
+import { MCDMJsonRewrite } from '~/modules/smartdata/interceptors/MCDMJsonInterceptor';
 
 @Controller()
 @UseGuards(DataApiLimiterGuard, GlobalGuard)
@@ -27,7 +28,7 @@ export class BulkDataAliasController {
   @Post(['/api/v1/db/data/bulk/:orgs/:baseName/:tableName'])
   @HttpCode(200)
   @Acl('bulkDataInsert')
-  @UseInterceptors(MCDMRewrite('NocodbDBTableRowBulkInsertTableRows'))
+  @UseInterceptors(MCDMJsonRewrite('NocodbDBTableRowBulkInsertTableRows'))
   async bulkDataInsert(
     @Req() req: Request,
     @Res() res: Response,
