@@ -107,12 +107,17 @@ const systemColumnsCheckboxInfo = SYSTEM_COLUMNS.map((c, index) => ({
 
 const creating = ref(false)
 
+const isShowSelectCatalogModel = ref<boolean>(false)
+
+const selectedCatalog = ref<any>(null)
+
 const _createTable = async () => {
   if (creating.value) return
   try {
     creating.value = true
     await validate()
-    await createTable()
+    let catalogId = selectedCatalog.value ? selectedCatalog.value.id : null
+    await createTable(catalogId)
     dialogShow.value = false
   } catch (e: any) {
     console.error(e)
@@ -124,6 +129,15 @@ const _createTable = async () => {
     }, 500)
     refreshCommandPalette()
   }
+}
+
+const handleShowSelectCatalog = (value: boolean) => {
+  isShowSelectCatalogModel.value = value
+}
+
+const handleSelectCatalogModalOk = (selectedCatalogParam: any) => {
+  selectedCatalog.value = selectedCatalogParam
+  handleShowSelectCatalog(false)
 }
 
 onMounted(() => {
@@ -145,15 +159,18 @@ onMounted(() => {
     </template>
     <div class="flex flex-col mt-2">
       <a-form :model="table" name="create-new-table-form" @keydown.enter="_createTable" @keydown.esc="dialogShow = false">
-        <a-form-item v-bind="validateInfos.title" :class="{ '!mb-1': isSnowflake(props.sourceId) }">
+        <a-form-item v-bind="validateInfos.title" class="flex" :class="{ '!mb-1': isSnowflake(props.sourceId) }">
           <a-input
             ref="inputEl"
             v-model:value="table.title"
-            class="nc-input-md"
+            class="nc-input-md table-name"
             hide-details
             data-testid="create-table-title-input"
             :placeholder="$t('msg.info.enterTableName')"
-          />
+          >
+            <template #suffix> <a-button @click="handleShowSelectCatalog(true)" type="text">选择目录</a-button> </template>
+          </a-input>
+          <div v-if="selectedCatalog" class="selected-catalog-tip">已选目录:{{ selectedCatalog.name_cn }}</div>
         </a-form-item>
         <template v-if="isSnowflake(props.sourceId)">
           <a-checkbox v-model:checked="table.is_hybrid" class="!flex flex-row items-center"> Hybrid Table </a-checkbox>
@@ -203,6 +220,11 @@ onMounted(() => {
       </a-form>
     </div>
   </NcModal>
+  <DlgSelectCatalog
+    :visible="isShowSelectCatalogModel"
+    :handleShowSelectCatalog="handleShowSelectCatalog"
+    :handleModalOk="handleSelectCatalogModalOk"
+  ></DlgSelectCatalog>
 </template>
 
 <style scoped lang="scss">
@@ -214,5 +236,18 @@ onMounted(() => {
   &.active {
     max-height: 100px;
   }
+}
+.table-name {
+  .ant-btn {
+    background: rgba(0, 0, 0, 0.018);
+    padding: 4px 6px;
+    margin-right: -3px;
+  }
+}
+.selected-catalog-tip {
+  margin-top: 2px;
+  font-size: 12px;
+  font-family: Manrope, 'Inter', 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
 }
 </style>

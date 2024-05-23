@@ -144,7 +144,7 @@ export function useTableNew(param: { onTableCreate?: (tableMeta: TableType) => v
     }
   }
 
-  const createTable = async () => {
+  const createTable = async (catalogId?: string | null) => {
     const { onTableCreate, baseId } = param
     let { sourceId } = param
 
@@ -187,6 +187,7 @@ export function useTableNew(param: { onTableCreate?: (tableMeta: TableType) => v
         ...table,
         columns,
       })
+      tableMeta.base_id = baseId
       $e('a:table:create')
       onTableCreate?.(tableMeta)
       refreshCommandPalette()
