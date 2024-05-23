@@ -32,10 +32,23 @@ export class CreateTable implements NestInterceptor {
     if (!this.mcdm.isRewrite()) return next.handle();
 
     const req = context.switchToHttp().getRequest<Request>();
+    const title = req.body?.title;
     const tableName = req.body?.table_name;
     if (tableName) {
       const name: string = await this.llm.translate(tableName);
       req.body.table_name = upperFirst(camelCase(name));
+      req.body.title = title ? title : tableName;
+    }
+
+    const columns = req.body.columns;
+    if (Array.isArray(columns)) {
+      for (let i = 0; i < columns.length; i++) {
+        const column = columns[i];
+        if (column.title == column.column_name) {
+          const column_name: string = await this.llm.translate(column.title);
+          column.ref_column_name = column.column_name = camelCase(column_name);
+        }
+      }
     }
 
     return next.handle();
