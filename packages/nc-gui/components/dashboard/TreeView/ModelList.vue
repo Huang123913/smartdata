@@ -54,7 +54,7 @@ const handleClickCatalog = (catalog: any) => {
 </script>
 
 <template>
-  <div class="model-list nc-sidebar-node mb-0.25 rounded-md h-7.1 w-full">
+  <div class="model-list rounded-md h-full w-full">
     <a-tree :tree-data="showModelTree" :expandedKeys="expandedKeys" @expand="handleExpand">
       <template #title="item">
         <a-tooltip :title="item.title">
@@ -95,12 +95,6 @@ const handleClickCatalog = (catalog: any) => {
 
 <style scoped lang="scss">
 .model-list {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  box-sizing: border-box;
-  margin-top: 4px;
-  overflow: hidden;
   ::v-deep .ant-tree {
     background-color: transparent;
   }
