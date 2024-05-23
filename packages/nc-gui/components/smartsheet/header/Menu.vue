@@ -326,7 +326,7 @@ const isDuplicateAllowed = computed(() => {
             {{ $t('general.hideField') }}
           </div>
         </NcMenuItem>
-        <NcMenuItem hidden v-if="(!virtual || column?.uidt === UITypes.Formula) && !column?.pv" @click="setAsDisplayValue">
+        <NcMenuItem v-if="(!virtual || column?.uidt === UITypes.Formula) && !column?.pv" @click="setAsDisplayValue">
           <div class="nc-column-set-primary nc-header-menu-item item">
             <GeneralIcon icon="star" class="text-gray-700 !w-4.25 !h-4.25" />
 
