@@ -36,7 +36,7 @@ const handleLoadFiles = async () => {
     let modelInfo = await $api.smartData.entity({ entityId: props.modelItem.id })
     let fields = modelInfo[0].fields ?? []
     selectOptionData.value = fields.map((item: any) => {
-      return { ...item, value: item.fieldName, label: item.fieldName }
+      return { ...item, value: item.fieldName, label: item?.fieldName_cn ?? item.fieldName }
     })
   } catch (e: any) {
     console.log(e)

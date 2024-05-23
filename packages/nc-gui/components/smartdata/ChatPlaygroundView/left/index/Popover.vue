@@ -49,7 +49,7 @@ const handleClickChange = (visible: boolean) => {
               <a-list size="small" :data-source="item.fields" class="model-selected-list">
                 <template #renderItem="{ item }">
                   <a-list-item>
-                    <span> {{ item.fieldName }}</span>
+                    <span> {{ item?.fieldName_cn ?? item.fieldName }}</span>
                     <close-outlined class="colse-btn1" @click="handleDeleteFile(item, chataiData.checkedModelData[index].id)" />
                   </a-list-item>
                 </template>
