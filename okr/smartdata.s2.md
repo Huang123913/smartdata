@@ -97,31 +97,29 @@
    - 🟢️ Get Sort **完成**
    - 🟢️️ Update Sort **完成**
    - 🟢️ Delete Sort **完成**
-   - ⚪️ 查询接口从过滤元信息中获取过滤条件并进行数据过滤
+   - ⚪️ 查询接口从过滤元信息中获取过滤条件并进行数据过滤 **进行中**
 
 ### 导入: Excel
    > 已有表导入数据
    - 🟢 Bulk Insert Table Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-bulk-create` **完成**
    > 导入数据到新表
-   - ⚪️ Create Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-create` **联调中, 处理导入建表问题**
+   - 🟢 Create Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-create` **完成**
    - 🟢 Create Primary Value `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Column/operation/db-table-column-primary-column-set` **完成**
 
 ### 导出: Excel, CSV
    > 导出数据
-   - 🟢️ Export Table View Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-csv-export`
+   - ⚪️ Export Table View Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-csv-export`
 
 ## 5.23
    > 正式环境: http://smartdata.yindangu.com
    > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
-   - 【进行中】导入并创建新的表
+   - 【完成】同步 nocodb v0.207.2
+   - 【完成】导入并创建新的表
+   - 【进行中】查询接口从过滤元信息中获取过滤条件并进行数据过滤
    - 【进行中】提问建表的结果预览调整为 nocodb 表格
-   - 【完成】在指定目录下新建表
-   - 【完成】演练场选择字段显示为中文
-   - 【完成】已有表导入
-   - 【暂缓】屏蔽部分未支持的字段类型
-   - 【暂缓】同步 nocodb v0.207.2
+   - 【进行中】屏蔽部分未支持的字段类型
 
 ### 平台
    - 【暂缓】V: 前端导出规则不要把隐藏的字段也导出来 (项目不急)
