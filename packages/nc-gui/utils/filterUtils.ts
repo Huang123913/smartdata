@@ -337,12 +337,14 @@ export const comparisonOpList = (
       UITypes.LastModifiedTime,
     ],
   },
+  /** 
   {
     text: 'is within',
     value: 'isWithin',
     ignoreVal: true,
     includedTypes: [UITypes.Date, UITypes.DateTime, UITypes.LastModifiedTime, UITypes.CreatedTime],
   },
+  */
   {
     text: 'is blank',
     value: 'blank',
@@ -423,6 +425,7 @@ export const comparisonSubOpList = (
     ]
   }
   return [
+    /**
     {
       text: 'today',
       value: 'today',
@@ -477,6 +480,7 @@ export const comparisonSubOpList = (
       ignoreVal: false,
       includedTypes: [...(isDateMonth ? [] : [UITypes.Date, UITypes.DateTime, UITypes.LastModifiedTime, UITypes.CreatedTime])],
     },
+    */
     {
       text: isDateMonth ? 'exact month' : 'exact date',
       value: 'exactDate',
