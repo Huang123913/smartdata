@@ -2,6 +2,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia'
 
 export const useSmartDataStore = defineStore('smartDataStore', () => {
   const { $api } = useNuxtApp()
+  const { ncNavigateTo } = useGlobal()
   const router = useRouter()
   const route = router.currentRoute
 
@@ -17,7 +18,11 @@ export const useSmartDataStore = defineStore('smartDataStore', () => {
     })
   }
 
-  return { train, navigateToPlayground }
+  const navigateToComingSoon = () => {
+    navigateTo('/coming-soon')
+  }
+
+  return { train, navigateToPlayground, navigateToComingSoon }
 })
 
 if (import.meta.hot) {

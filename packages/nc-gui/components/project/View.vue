@@ -190,6 +190,7 @@ watch(
               <div>数据分析</div>
             </div>
           </template>
+          <SmartdataComingSoon />
         </a-tab-pane>
       </a-tabs>
     </div>

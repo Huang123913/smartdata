@@ -27,6 +27,8 @@ const navigateToSettings = () => {
   // } else {
   // }
 }
+
+const { navigateToComingSoon } = useSmartDataStore()
 </script>
 
 <template>
@@ -62,7 +64,7 @@ const navigateToSettings = () => {
           '!text-brand-500 !bg-brand-50 !hover:bg-brand-50': isWorkspaceSettingsPageOpened,
           '!hover:bg-gray-200': !isWorkspaceSettingsPageOpened,
         }"
-        @click="navigateToSettings"
+        @click="navigateToComingSoon"
       >
         <div class="flex items-center gap-2">
           <GeneralIcon icon="cloud" class="!h-4" />
