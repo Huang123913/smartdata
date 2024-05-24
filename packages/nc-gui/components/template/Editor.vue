@@ -1013,4 +1013,15 @@ watch(modelRef, async () => {
     }
   }
 }
+
+:deep(.ant-collapse-item > .ant-collapse-header) {
+  @apply flex items-center;
+  > div {
+    @apply flex items-center;
+  }
+}
+
+.group {
+  @apply !flex items-center;
+}
 </style>
