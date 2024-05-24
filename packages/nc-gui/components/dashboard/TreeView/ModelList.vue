@@ -100,7 +100,7 @@ const handleClickCatalog = (catalog: any) => {
   }
   ::v-deep .ant-tree-treenode {
     width: 100% !important;
-    padding-left: 44px;
+    padding-left: 27px;
     padding-bottom: 0;
     border-radius: 6px;
     margin: 2px 0;
