@@ -589,7 +589,7 @@ const onChange = () => {
               </div>
             </a-tab-pane>
 
-            <a-tab-pane v-else key="urlTab" :closable="false">
+            <a-tab-pane disabled v-else key="urlTab" :closable="false">
               <template #tab>
                 <span class="flex items-center gap-2">
                   <component :is="iconMap.link" />
