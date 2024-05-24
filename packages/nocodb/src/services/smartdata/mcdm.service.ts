@@ -38,8 +38,9 @@ export class MCDMService {
       (r) => r,
       (r) => {
         const message = r.response.data;
-        const request = r.config;
-        this.logger.error(r.message, { message, request });
+        const { method, baseURL, url, params, data, headers } = r.config;
+        const config = { method, baseURL, url, params, data, headers };
+        this.logger.error(r.message, { message, config });
         throw r;
       },
     );
