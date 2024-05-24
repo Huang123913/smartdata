@@ -76,6 +76,8 @@ import { NotificationsController } from '~/controllers/notifications.controller'
 import { NotificationsGateway } from '~/gateways/notifications/notifications.gateway';
 import { CommandPaletteService } from '~/services/command-palette.service';
 import { CommandPaletteController } from '~/controllers/command-palette.controller';
+import { ExtensionsService } from '~/services/extensions.service';
+import { ExtensionsController } from '~/controllers/extensions.controller';
 
 import { MCDMService } from '~/services/smartdata/mcdm.service';
 import { LLMService } from '~/services/smartdata/llm.service';
@@ -129,6 +131,7 @@ export const metaModuleMetadata = {
           SharedBasesController,
           NotificationsController,
           CommandPaletteController,
+          ExtensionsController,
         ]
       : []),
   ],
@@ -172,6 +175,7 @@ export const metaModuleMetadata = {
     NotificationsService,
     NotificationsGateway,
     CommandPaletteService,
+    ExtensionsService,
 
     // SmartData
     MCDMService,

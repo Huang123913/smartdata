@@ -5,13 +5,11 @@ import NcTooltip from '~/components/nc/Tooltip.vue'
 
 const { activeTables } = storeToRefs(useTablesStore())
 const { openTable } = useTablesStore()
-const { openedProject } = storeToRefs(useBases())
+const { openedProject, isDataSourceLimitReached } = storeToRefs(useBases())
 
 const { base } = useBase()
 
 const isNewBaseModalOpen = ref(false)
-
-const isDataSourceLimitReached = computed(() => Number(openedProject.value?.sources?.length) > 1)
 
 const { isUIAllowed } = useRoles()
 
@@ -211,7 +209,7 @@ const onCreateBaseClick = () => {
     </div>
 
     <ProjectImportModal v-if="defaultBase" v-model:visible="isImportModalOpen" :source="defaultBase" />
-    <LazyDashboardSettingsDataSourcesCreateBase v-model:open="isNewBaseModalOpen" />
+<!--    <LazyDashboardSettingsDataSourcesCreateBase v-model:open="isNewBaseModalOpen" />-->
   </div>
 </template>
 

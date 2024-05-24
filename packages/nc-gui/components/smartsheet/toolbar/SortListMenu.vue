@@ -1,22 +1,6 @@
 <script setup lang="ts">
-import { PlanLimitTypes, RelationTypes, UITypes, getEquivalentUIType, isLinksOrLTAR, isSystemColumn } from 'nocodb-sdk'
 import type { ColumnType, LinkToAnotherRecordType } from 'nocodb-sdk'
-import {
-  ActiveViewInj,
-  IsLockedInj,
-  MetaInj,
-  ReloadViewDataHookInj,
-  computed,
-  getSortDirectionOptions,
-  iconMap,
-  inject,
-  isEeUI,
-  ref,
-  useMenuCloseOnEsc,
-  useSmartsheetStoreOrThrow,
-  useViewSorts,
-  watch,
-} from '#imports'
+import { PlanLimitTypes, RelationTypes, UITypes, getEquivalentUIType, isLinksOrLTAR, isSystemColumn } from 'nocodb-sdk'
 
 const meta = inject(MetaInj, ref())
 const view = inject(ActiveViewInj, ref())
@@ -35,6 +19,8 @@ const showCreateSort = ref(false)
 const { isMobileMode } = useGlobal()
 
 const { getPlanLimit } = useWorkspace()
+
+const isCalendar = inject(IsCalendarInj, ref(false))
 
 eventBus.on((event) => {
   if (event === SmartsheetStoreEvents.SORT_RELOAD) {
@@ -126,26 +112,32 @@ onMounted(() => {
     overlay-class-name="nc-dropdown-sort-menu nc-toolbar-dropdown"
   >
     <div :class="{ 'nc-active-btn': sorts?.length }">
-      <a-button disabled v-e="['c:sort']" class="nc-sort-menu-btn nc-toolbar-btn" :disabled="isLocked">
-        <div class="flex items-center gap-2">
-          <component :is="iconMap.sort" class="h-4 w-4 text-inherit" />
+      <NcButton
+        v-e="['c:sort']"
+        :class="{
+          '!border-1 !rounded-lg !h-7': isCalendar,
+          '!border-0 ': !isCalendar,
+        }"
+        :disabled="true"
+        class="nc-sort-menu-btn nc-toolbar-btn"
+        size="small"
+        type="secondary"
+      >
+        <div class="flex items-center gap-1">
+          <div class="flex items-center gap-2">
+            <component :is="iconMap.sort" class="h-4 w-4 text-inherit" />
 
-          <!-- Sort -->
-          <span v-if="!isMobileMode" class="text-capitalize !text-sm font-medium">{{ $t('activity.sort') }}</span>
-
+            <!-- Sort -->
+            <span v-if="!isMobileMode" class="text-capitalize !text-[13px] font-medium">{{ $t('activity.sort') }}</span>
+          </div>
           <span v-if="sorts?.length" class="bg-brand-50 text-brand-500 py-1 px-2 text-md rounded-md">{{ sorts.length }}</span>
         </div>
-      </a-button>
+      </NcButton>
     </div>
     <template #overlay>
       <SmartsheetToolbarCreateSort v-if="!sorts.length" :is-parent-open="open" @created="addSort" />
-      <div
-        v-else
-        :class="{ 'min-w-102': sorts.length }"
-        class="py-6 pl-6 nc-filter-list max-h-[max(80vh,30rem)]"
-        data-testid="nc-sorts-menu"
-      >
-        <div class="sort-grid max-h-120 nc-scrollbar-md" :class="{ 'pr-3.5': sorts?.length }" @click.stop>
+      <div v-else class="pt-2 pb-2 pl-4 nc-filter-list max-h-[max(80vh,30rem)] min-w-102" data-testid="nc-sorts-menu">
+        <div class="sort-grid max-h-120 nc-scrollbar-thin pr-4 my-2 py-1" @click.stop>
           <template v-for="(sort, i) of sorts" :key="i">
             <SmartsheetToolbarFieldListAutoCompleteDropdown
               v-model="sort.fk_column_id"
@@ -160,7 +152,7 @@ onMounted(() => {
               v-model:value="sort.direction"
               class="shrink grow-0 nc-sort-dir-select"
               :label="$t('labels.operation')"
-              dropdown-class-name="sort-dir-dropdown nc-dropdown-sort-dir"
+              dropdown-class-name="sort-dir-dropdown nc-dropdown-sort-dir !rounded-lg"
               @click.stop
               @select="saveOrUpdate(sort, i)"
             >
@@ -170,7 +162,7 @@ onMounted(() => {
                 v-e="['c:sort:operation:select']"
                 :value="option.value"
               >
-                <div class="flex items-center justify-between gap-2">
+                <div class="w-full flex items-center justify-between gap-2">
                   <div class="truncate flex-1">{{ option.text }}</div>
                   <component
                     :is="iconMap.check"
@@ -198,14 +190,13 @@ onMounted(() => {
           v-if="availableColumns.length"
           v-model:visible="showCreateSort"
           :trigger="['click']"
-          class="mt-3"
           overlay-class-name="nc-toolbar-dropdown"
         >
           <template v-if="isEeUI && !isPublic">
             <NcButton
               v-if="sorts.length < getPlanLimit(PlanLimitTypes.SORT_LIMIT)"
               v-e="['c:sort:add']"
-              class="!text-brand-500"
+              class="!text-brand-500 mt-1 mb-2"
               type="text"
               size="small"
               @click.stop="showCreateSort = true"
@@ -219,7 +210,13 @@ onMounted(() => {
             <span v-else></span>
           </template>
           <template v-else>
-            <NcButton v-e="['c:sort:add']" class="!text-brand-500" type="text" size="small" @click.stop="showCreateSort = true">
+            <NcButton
+              v-e="['c:sort:add']"
+              class="!text-brand-500 mt-1 mb-2"
+              type="text"
+              size="small"
+              @click.stop="showCreateSort = true"
+            >
               <div class="flex gap-1 items-center">
                 <component :is="iconMap.plus" />
                 <!-- Add Sort Option -->
