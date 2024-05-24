@@ -144,7 +144,6 @@ declare module 'vue' {
     MdiLogout: typeof import('~icons/mdi/logout')['default']
     MdiMapMarkerOutline: typeof import('~icons/mdi/map-marker-outline')['default']
     MdiMenuDown: typeof import('~icons/mdi/menu-down')['default']
-    MdiMessageOutline: typeof import('~icons/mdi/message-outline')['default']
     MdiMicrosoftTeams: typeof import('~icons/mdi/microsoft-teams')['default']
     MdiMoonFull: typeof import('~icons/mdi/moon-full')['default']
     MdiPlus: typeof import('~icons/mdi/plus')['default']
