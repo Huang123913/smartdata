@@ -361,11 +361,12 @@ export const useViewsStore = defineStore('viewsStore', () => {
       return
     }
 
+    const smartdata_route_baseId = (route.value.params.baseId as string) ?? activeView.value.base_id
     const tableName = tablesStore.baseTables
-      .get(activeView.value.base_id)
+      .get(smartdata_route_baseId)
       ?.find((t) => t.id === activeView.value.fk_model_id)?.title
 
-    const baseName = bases.basesList.find((p) => p.id === activeView.value.base_id)?.title
+    const baseName = bases.basesList.find((p) => p.id === smartdata_route_baseId)?.title
 
     useTitle(
       getFormattedViewTabTitle({
