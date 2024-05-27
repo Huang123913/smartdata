@@ -380,8 +380,8 @@ const filterOrGroupByThisField = (event: SmartsheetStoreEvents) => {
             {{ t('general.duplicate') }}
           </div>
         </NcMenuItem>
-        <a-divider v-if="!column?.pv" class="!my-0" />
-        <NcMenuItem v-if="!column?.pv" @click="hideOrShowField">
+        <a-divider hidden v-if="!column?.pv" class="!my-0" />
+        <NcMenuItem hidden v-if="!column?.pv" @click="hideOrShowField">
           <div v-e="['a:field:hide']" class="nc-column-insert-before nc-header-menu-item">
             <component :is="isHiddenCol ? iconMap.eye : iconMap.eyeSlash" class="text-gray-700 !w-3.75 !h-3.75" />
             <!-- Hide Field -->
@@ -389,6 +389,7 @@ const filterOrGroupByThisField = (event: SmartsheetStoreEvents) => {
           </div>
         </NcMenuItem>
         <NcMenuItem
+          hidden
           v-if="(!virtual || column?.uidt === UITypes.Formula) && !column?.pv && !isHiddenCol"
           @click="setAsDisplayValue"
         >
@@ -405,7 +406,7 @@ const filterOrGroupByThisField = (event: SmartsheetStoreEvents) => {
           <a-divider v-if="!isLinksOrLTAR(column) || column.colOptions.type !== RelationTypes.BELONGS_TO" class="!my-0" />
 
           <template v-if="!isLinksOrLTAR(column) || column.colOptions.type !== RelationTypes.BELONGS_TO">
-            <NcMenuItem @click="sortByColumn('asc')">
+            <NcMenuItem disabled @click="sortByColumn('asc')">
               <div v-e="['a:field:sort', { dir: 'asc' }]" class="nc-column-insert-after nc-header-menu-item">
                 <component
                   :is="iconMap.sortDesc"
@@ -419,7 +420,7 @@ const filterOrGroupByThisField = (event: SmartsheetStoreEvents) => {
                 {{ $t('general.sortAsc') }}
               </div>
             </NcMenuItem>
-            <NcMenuItem @click="sortByColumn('desc')">
+            <NcMenuItem disabled @click="sortByColumn('desc')">
               <div v-e="['a:field:sort', { dir: 'desc' }]" class="nc-column-insert-before nc-header-menu-item">
                 <!-- Sort Descending -->
                 <component :is="iconMap.sortDesc" class="text-gray-700 !w-4.25 !h-4.25" />
@@ -428,7 +429,7 @@ const filterOrGroupByThisField = (event: SmartsheetStoreEvents) => {
             </NcMenuItem>
           </template>
 
-          <a-divider class="!my-0" />
+          <a-divider hidden class="!my-0" />
 
           <NcTooltip :disabled="isFilterSupported && !isFilterLimitExceeded">
             <template #title>
@@ -441,6 +442,7 @@ const filterOrGroupByThisField = (event: SmartsheetStoreEvents) => {
               }}
             </template>
             <NcMenuItem
+              hidden
               :disabled="!isFilterSupported || isFilterLimitExceeded"
               @click="filterOrGroupByThisField(SmartsheetStoreEvents.FILTER_ADD)"
             >
@@ -463,6 +465,7 @@ const filterOrGroupByThisField = (event: SmartsheetStoreEvents) => {
                 : ''
             }}</template>
             <NcMenuItem
+              hidden
               :disabled="isEeUI && !isPublic && (!isGroupBySupported || isGroupByLimitExceeded) && !isGroupedByThisField"
               @click="
                 filterOrGroupByThisField(
@@ -480,21 +483,21 @@ const filterOrGroupByThisField = (event: SmartsheetStoreEvents) => {
 
           <a-divider class="!my-0" />
 
-          <NcMenuItem v-if="!column?.pk" :disabled="!isDuplicateAllowed" @click="openDuplicateDlg">
+          <NcMenuItem hidden v-if="!column?.pk" :disabled="!isDuplicateAllowed" @click="openDuplicateDlg">
             <div v-e="['a:field:duplicate']" class="nc-column-duplicate nc-header-menu-item">
               <component :is="iconMap.duplicate" class="text-gray-700" />
               <!-- Duplicate -->
               {{ t('general.duplicate') }}
             </div>
           </NcMenuItem>
-          <NcMenuItem @click="onInsertAfter">
+          <NcMenuItem disabled @click="onInsertAfter">
             <div v-e="['a:field:insert:after']" class="nc-column-insert-after nc-header-menu-item">
               <component :is="iconMap.colInsertAfter" class="text-gray-700 !w-4.5 !h-4.5" />
               <!-- Insert After -->
               {{ t('general.insertAfter') }}
             </div>
           </NcMenuItem>
-          <NcMenuItem v-if="!column?.pv" @click="onInsertBefore">
+          <NcMenuItem disabled v-if="!column?.pv" @click="onInsertBefore">
             <div v-e="['a:field:insert:before']" class="nc-column-insert-before nc-header-menu-item">
               <component :is="iconMap.colInsertBefore" class="text-gray-600 !w-4.5 !h-4.5" />
               <!-- Insert Before -->

@@ -53,7 +53,7 @@ const { allowCSVDownload } = useSharedView()
 
         <LazySmartsheetToolbarColumnFilterMenu v-if="isGrid || isGallery || isKanban || isMap" />
 
-        <LazySmartsheetToolbarGroupByMenu v-if="isGrid" />
+        <!-- <LazySmartsheetToolbarGroupByMenu v-if="isGrid" /> -->
 
         <LazySmartsheetToolbarSortListMenu v-if="isGrid || isGallery || isKanban" />
       </div>
@@ -61,7 +61,7 @@ const { allowCSVDownload } = useSharedView()
       <LazySmartsheetToolbarCalendarMode v-if="isCalendar && isTab" :tab="isTab" />
 
       <template v-if="!isMobileMode">
-        <LazySmartsheetToolbarRowHeight v-if="isGrid" />
+        <!-- <LazySmartsheetToolbarRowHeight v-if="isGrid" /> -->
 
         <!-- <LazySmartsheetToolbarQrScannerButton v-if="isMobileMode && (isGrid || isKanban || isGallery)" /> -->
 
