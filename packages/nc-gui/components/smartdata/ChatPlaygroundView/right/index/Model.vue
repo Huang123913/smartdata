@@ -9,7 +9,6 @@ import reverseSelectionGrey from '../../../../../assets/img/reverse-selection-gr
 import reverseSelection from '../../../../../assets/img/reverse-selection.svg'
 import { useChatPlaygroundViewStore } from '../../../../../store/chatPlaygroundView'
 
-// const { eventBus } = useSmartsheetStoreOrThrow()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
 const { getCheckedModelData, setChataiDataIsOpenMode, eventBus } = store
@@ -19,9 +18,23 @@ const searchModelResult = ref<any[]>([]) //搜索模型的结果
 const searchModelResultTree = ref<any[]>([]) //搜索模型的结果
 const checkedKeys = ref<string[]>([]) //勾选的模型
 const expandedKeys = ref<string[]>(['0-0', 'catalog'])
+const elementATree = ref(null)
+const scrollYHeight = ref(0)
 onMounted(() => {
   getCheckedModelData(checkedKeys.value)
-  console.log('chataiData', chataiData.value)
+  if (elementATree.value) scrollYHeight.value = parseInt(elementATree.value?.clientHeight) - 2
+})
+
+watch(elementATree, () => {
+  resizeObserver.observe(elementATree.value)
+})
+
+const resizeObserver = new ResizeObserver((entries) => {
+  for (const entry of entries) {
+    if (entry.target === elementATree.value) {
+      scrollYHeight.value = parseInt(entry.contentRect.height)
+    }
+  }
 })
 
 // 是否可以反选
@@ -210,25 +223,30 @@ const cancelParentNode = (nodeId: string) => {
         </a-input>
       </div>
       <!-- 模型 -->
-      <a-tree
-        :checkedKeys="checkedKeys"
-        v-model:expandedKeys="expandedKeys"
-        checkable
-        :tree-data="isShowModelResult ? searchModelResultTree : chataiData.modelTree"
-        v-if="(isShowModelResult && searchModelResultTree.length) || !isShowModelResult"
-        @check="handleCheckModel"
+      <div
+        ref="elementATree"
+        v-if="(isShowModelResult && searchModelResultTree.length) || (!isShowModelResult && chataiData.modelTree.length)"
       >
-        <template #title="item">
-          <span v-if="item.isCatalog">
-            <img :src="catalog" width="16" height="16" class="catlog-img" />
-            {{ item.title }}</span
-          >
-          <div v-else class="model-text">
-            {{ item.title }}
-            <SmartdataChatPlaygroundViewRightIndexModelFilesSelect :modelItem="item" />
-          </div>
-        </template>
-      </a-tree>
+        <a-tree
+          :height="scrollYHeight"
+          :checkedKeys="checkedKeys"
+          v-model:expandedKeys="expandedKeys"
+          checkable
+          :tree-data="isShowModelResult ? searchModelResultTree : chataiData.modelTree"
+          @check="handleCheckModel"
+        >
+          <template #title="item">
+            <span v-if="item.isCatalog">
+              <img :src="catalog" width="16" height="16" class="catlog-img" />
+              {{ item.title }}</span
+            >
+            <div v-else class="model-text">
+              {{ item.title }}
+              <SmartdataChatPlaygroundViewRightIndexModelFilesSelect :modelItem="item" />
+            </div>
+          </template>
+        </a-tree>
+      </div>
       <div v-else class="no-data">暂无数据</div>
       <!-- 统计 -->
       <div class="total">
@@ -274,7 +292,7 @@ const cancelParentNode = (nodeId: string) => {
 }
 ::v-deep .ant-tree {
   .ant-tree-treenode {
-    width: 100% !important;
+    width: calc(100% - 13px) !important;
   }
 }
 
@@ -305,11 +323,10 @@ const cancelParentNode = (nodeId: string) => {
   top: 0;
   left: 0;
   transition: 0.5s;
+  background-color: white;
   overflow: hidden;
   box-sizing: border-box;
-
   z-index: 99;
-  background-color: white;
   .model-main {
     width: 100%;
     height: 100%;
@@ -376,25 +393,26 @@ const cancelParentNode = (nodeId: string) => {
   }
   ::v-deep .ant-tree {
     height: calc(100vh - var(--topbar-height) - 194px);
+    overflow: hidden;
     width: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    &::-webkit-scrollbar {
-      width: 6px;
-      height: 5px;
-    }
-    &::-webkit-scrollbar-thumb {
-      background-color: #c1c1c1;
-      border-radius: 10px;
-    }
-    &::-webkit-scrollbar-thumb:hover {
-      background-color: rgb(168, 168, 168);
-      border-radius: 10px;
-    }
-    &::-webkit-scrollbar-track {
-      background-color: #e0e0e0;
-      border-radius: 10px;
-    }
+    // overflow-y: auto;
+    // overflow-x: hidden;
+    // &::-webkit-scrollbar {
+    //   width: 6px;
+    //   height: 5px;
+    // }
+    // &::-webkit-scrollbar-thumb {
+    //   background-color: #c1c1c1;
+    //   border-radius: 10px;
+    // }
+    // &::-webkit-scrollbar-thumb:hover {
+    //   background-color: rgb(168, 168, 168);
+    //   border-radius: 10px;
+    // }
+    // &::-webkit-scrollbar-track {
+    //   background-color: #e0e0e0;
+    //   border-radius: 10px;
+    // }
   }
   .total {
     display: flex;
@@ -409,5 +427,8 @@ const cancelParentNode = (nodeId: string) => {
       font-weight: 600;
     }
   }
+}
+::v-deep .ant-tree-list-scrollbar-thumb {
+  background-color: #c1c1c1 !important;
 }
 </style>
