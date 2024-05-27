@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { v4 as uuidv4 } from 'uuid'
+import { Empty } from 'ant-design-vue'
 
 import { CloseOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons-vue'
 
@@ -30,18 +30,18 @@ const existingModelField = ref<{
   [key: string]: any
 }>({})
 const selectPublishMode = ref<object>({})
-
+const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 onMounted(() => {
-  tableWidth.value = parseInt(elementRef1.value.clientWidth)
-  tableHeight.value = parseInt(elementRef1.value.clientHeight)
-  if (myTable.value) {
-    const headerElement = myTable.value.$el.querySelector('.ant-table-thead')
-    if (headerElement) {
-      const height = headerElement.clientHeight
-      tableHeight.value = parseInt(tableHeight.value) - parseInt(height)
-    }
-  }
-  resizeObserver1.observe(elementRef1.value)
+  // tableWidth.value = parseInt(elementRef1.value.clientWidth)
+  // tableHeight.value = parseInt(elementRef1.value.clientHeight)
+  // if (myTable.value) {
+  //   const headerElement = myTable.value.$el.querySelector('.ant-table-thead')
+  //   if (headerElement) {
+  //     const height = headerElement.clientHeight
+  //     tableHeight.value = parseInt(tableHeight.value) - parseInt(height)
+  //   }
+  // }
+  // resizeObserver1.observe(elementRef1.value)
 })
 
 const isShow = computed(() => {
@@ -59,7 +59,7 @@ const columns = computed(() => {
       title: item.name_cn ?? item.name ?? item.code,
       dataIndex: item.name ?? item.code,
       name_en: item.name ?? item.code,
-      width: 'fit-content',
+      width: '180px',
       value: item.name,
       label: item.name,
     }
@@ -71,8 +71,8 @@ const tableData = computed(() => {
   if (!chataiData.value.sessionItem?.sql) return []
   let result = JSON.parse(chataiData.value.sessionItem.tabledata).datas
   if (!result) return []
-  let newDatas = result?.map((item) => {
-    let newItem = { ...item }
+  let newDatas = result?.map((item: any, index: number) => {
+    let newItem = { ...item, indexItem: index + 1 }
     return newItem
   })
   return newDatas
@@ -263,7 +263,7 @@ const handleClickCleanBtn = () => {
       </a-dropdown>
     </div>
     <!-- 表格数据 -->
-    <div class="table-data" ref="elementRef1">
+    <!-- <div class="table-data" ref="elementRef1">
       <a-table
         ref="myTable"
         :pagination="false"
@@ -278,7 +278,11 @@ const handleClickCleanBtn = () => {
           </a-tooltip>
         </template>
       </a-table>
-    </div>
+    </div> -->
+    <template v-if="columns.length">
+      <SmartdataChatPlaygroundViewRightIndexTableListTable :columns="columns" :datas="tableData" :simpleImage="simpleImage" />
+    </template>
+    <div v-else class="no-data-table"><a-empty :description="'暂无数据'" :image="simpleImage" /></div>
   </div>
   <!-- 模型目录/字段映射弹框 -->
   <SmartdataChatPlaygroundViewRightIndexTableListSelectCatalogModal
@@ -336,7 +340,15 @@ const handleClickCleanBtn = () => {
     margin-top: 0 !important;
   }
 }
-
+.no-data-table {
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.25);
+  font-size: 14px;
+}
 .publish-model {
   width: 130px !important;
   box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
