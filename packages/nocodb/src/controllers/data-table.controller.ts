@@ -21,6 +21,7 @@ import { GlobalGuard } from '~/guards/global/global.guard';
 
 import { UseInterceptors } from '@nestjs/common';
 import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
+import { DeleteTableRecords } from '~/modules/smartdata/interceptors/data/TableRecords/DeleteTableRecords';
 
 @Controller()
 @UseGuards(DataApiLimiterGuard, GlobalGuard)
@@ -101,7 +102,10 @@ export class DataTableController {
 
   @Delete(['/api/v2/tables/:modelId/records'])
   @Acl('dataDelete')
-  @UseInterceptors(MCDMRewrite('NocodbTableRecordsDeleteTableRecords'))
+  @UseInterceptors(
+    DeleteTableRecords,
+    MCDMRewrite('NocodbTableRecordsDeleteTableRecords'),
+  )
   async dataDelete(
     @Req() req: Request,
     @Param('modelId') modelId: string,

@@ -50,3 +50,4 @@ test_sakila_?.db
 /tests/unit/.env
 
 .env
+!src/modules/smartdata
