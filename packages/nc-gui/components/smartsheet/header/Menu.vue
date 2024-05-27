@@ -389,7 +389,6 @@ const filterOrGroupByThisField = (event: SmartsheetStoreEvents) => {
           </div>
         </NcMenuItem>
         <NcMenuItem
-          hidden
           v-if="(!virtual || column?.uidt === UITypes.Formula) && !column?.pv && !isHiddenCol"
           @click="setAsDisplayValue"
         >
