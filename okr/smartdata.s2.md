@@ -83,21 +83,22 @@
    - 🟢️ Delete Column `/api/v1/db/meta/columns/{columnId}` **完成**
    - 🟡️ Update Column `/api/v1/db/meta/columns/{columnId}` **完成: 部分类型**
    - 🟡 Create Column `/api/v1/db/meta/tables/{tableId}/columns` **完成: 部分类型**
+      - 1. ⚪️ 在指定位置插入 **未开始**
    - 🟢️ Create Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-create` **完成**
    - 🟢 Update Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-update` **完成**
    - 🟢️ Delete Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-delete` **完成**
+   - ⚪️ Update Grid Column (字段排序) `https://meta-apis-v1.nocodb.com/#tag/DB-View/operation/db-view-grid-column-update` **未开始**
    - ⚪️ Duplicate Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-duplicate` **未开始**
    - ⚪️ Duplicate Column `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/duplicate-column` **未开始**
    - ⚪️ Reorder Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-reorder` **未开始**
-   - ⚪️ Update Grid Column `https://meta-apis-v1.nocodb.com/#tag/DB-View/operation/db-view-grid-column-update` **未开始**
 
-### 显示: 排序&过滤
-   - 🟢️️ List View Sorts **完成**
-   - 🟢️ Update View Sort **完成**
-   - 🟢️ Get Sort **完成**
-   - 🟢️️ Update Sort **完成**
-   - 🟢️ Delete Sort **完成**
-   - ⚪️ 查询接口从过滤元信息中获取过滤条件并进行数据过滤 **进行中**
+### 显示: 过滤
+   - 🟢️️ Get View Filter **完成**
+   - 🟢️️ Create View Filter **完成**
+   - 🟢️️ Get Filter **完成**
+   - 🟢️️ Update Filter **完成**
+   - 🟢️️ Delete Filter **完成**
+   - 🟢️️ 查询接口从过滤元信息中获取过滤条件并进行数据过滤 **完成**
 
 ### 导入: Excel
    > 已有表导入数据
@@ -110,16 +111,26 @@
    > 导出数据
    - ⚪️ Export Table View Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-csv-export`
 
+### 显示: 排序
+   - ⚪ List View Sorts `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort`
+   - ⚪ Update View Sort `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort/operation/db-table-sort-create`
+   - ⚪ Update Sort `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort/operation/db-table-sort-update`
+   - ⚪ Delete Sort `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort/operation/db-table-sort-delete`
+
 ## 5.23
    > 正式环境: http://smartdata.yindangu.com
    > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
-   - 【完成】同步 nocodb v0.207.2
-   - 【完成】导入并创建新的表
-   - 【进行中】查询接口从过滤元信息中获取过滤条件并进行数据过滤
-   - 【进行中】提问建表的结果预览调整为 nocodb 表格
-   - 【进行中】屏蔽部分未支持的字段类型
+   - 【进行中，部分完成】屏蔽部分未支持的字段类型
+   - 【进行中】拖拽修改模型所属目录
+   - 【进行中】直接在目录节点添加表
+   - 【进行中】对接排序接口
+   - 【未启动】修改目录名称
+   - 【未启动】导出数据 (尝试拦截数据请求, 套用 nocodb 的文件输出流)
+   - 【完成】查询接口从过滤元信息中获取过滤条件并进行数据过滤
+   - 【完成】演练场结果预览改用 Nocodb 的表格 (已移除需要API支持的特性)
+   - 【完成】模型树增加虚拟滚动 (优化性能)
 
 ### 平台
    - 【暂缓】V: 前端导出规则不要把隐藏的字段也导出来 (项目不急)
