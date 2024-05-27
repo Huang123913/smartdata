@@ -21,6 +21,7 @@ import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
 import { UseInterceptors } from '@nestjs/common';
 import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
 import { CreateColumn } from '~/modules/smartdata/interceptors/meta/DBTableColumn/CreateColumn';
+import { UpdateColumn } from '~/modules/smartdata/interceptors/meta/DBTableColumn/UpdateColumn';
 
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
@@ -52,7 +53,7 @@ export class ColumnsController {
     '/api/v2/meta/columns/:columnId',
   ])
   @Acl('columnUpdate')
-  @UseInterceptors(MCDMRewrite('NocodbDBTableColumnUpdateColumn'))
+  @UseInterceptors(UpdateColumn, MCDMRewrite('NocodbDBTableColumnUpdateColumn'))
   async columnUpdate(
     @Param('columnId') columnId: string,
     @Body() body: ColumnReqType,
