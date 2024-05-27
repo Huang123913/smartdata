@@ -405,7 +405,7 @@ const filterOrGroupByThisField = (event: SmartsheetStoreEvents) => {
           <a-divider v-if="!isLinksOrLTAR(column) || column.colOptions.type !== RelationTypes.BELONGS_TO" class="!my-0" />
 
           <template v-if="!isLinksOrLTAR(column) || column.colOptions.type !== RelationTypes.BELONGS_TO">
-            <NcMenuItem disabled @click="sortByColumn('asc')">
+            <NcMenuItem @click="sortByColumn('asc')">
               <div v-e="['a:field:sort', { dir: 'asc' }]" class="nc-column-insert-after nc-header-menu-item">
                 <component
                   :is="iconMap.sortDesc"
@@ -419,7 +419,7 @@ const filterOrGroupByThisField = (event: SmartsheetStoreEvents) => {
                 {{ $t('general.sortAsc') }}
               </div>
             </NcMenuItem>
-            <NcMenuItem disabled @click="sortByColumn('desc')">
+            <NcMenuItem @click="sortByColumn('desc')">
               <div v-e="['a:field:sort', { dir: 'desc' }]" class="nc-column-insert-before nc-header-menu-item">
                 <!-- Sort Descending -->
                 <component :is="iconMap.sortDesc" class="text-gray-700 !w-4.25 !h-4.25" />
@@ -489,14 +489,14 @@ const filterOrGroupByThisField = (event: SmartsheetStoreEvents) => {
               {{ t('general.duplicate') }}
             </div>
           </NcMenuItem>
-          <NcMenuItem disabled @click="onInsertAfter">
+          <NcMenuItem @click="onInsertAfter">
             <div v-e="['a:field:insert:after']" class="nc-column-insert-after nc-header-menu-item">
               <component :is="iconMap.colInsertAfter" class="text-gray-700 !w-4.5 !h-4.5" />
               <!-- Insert After -->
               {{ t('general.insertAfter') }}
             </div>
           </NcMenuItem>
-          <NcMenuItem disabled v-if="!column?.pv" @click="onInsertBefore">
+          <NcMenuItem v-if="!column?.pv" @click="onInsertBefore">
             <div v-e="['a:field:insert:before']" class="nc-column-insert-before nc-header-menu-item">
               <component :is="iconMap.colInsertBefore" class="text-gray-600 !w-4.5 !h-4.5" />
               <!-- Insert Before -->

@@ -118,7 +118,7 @@ onMounted(() => {
           '!border-1 !rounded-lg !h-7': isCalendar,
           '!border-0 ': !isCalendar,
         }"
-        :disabled="true"
+        :disabled="isLocked"
         class="nc-sort-menu-btn nc-toolbar-btn"
         size="small"
         type="secondary"
