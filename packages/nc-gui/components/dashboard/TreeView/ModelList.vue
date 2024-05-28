@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { BaseType } from 'nocodb-sdk'
+import type { BaseType, TableType } from 'nocodb-sdk'
 
 import catalog from '../../../assets/img/catalog.svg'
 import { useChatPlaygroundViewStore } from '../../../store/chatPlaygroundView'
@@ -23,6 +23,7 @@ const route = useRoute()
 const expandedKeys = ref([])
 const { $api } = useNuxtApp()
 const isShowLoading = ref(false)
+const isAddNewProjectChildEntityLoading = ref(false)
 const openedTableId = computed(() => route.params.viewId)
 const showModelTree = computed(() => {
   return chataiData.value.modelTree.length ? chataiData.value.modelTree[0].children : []
@@ -87,6 +88,41 @@ const onDrop = async (info: any) => {
     isShowLoading.value = false
   }
 }
+
+const addNewProjectChildEntity = (catalog: any) => {
+  if (isAddNewProjectChildEntityLoading.value) return
+  isAddNewProjectChildEntityLoading.value = true
+  try {
+    openTableCreateDialog(catalog)
+  } finally {
+    isAddNewProjectChildEntityLoading.value = false
+  }
+}
+
+const openTableCreateDialog = (catalog: any) => {
+  const isOpen = ref(true)
+  console.log('props.base', props.base)
+  let sourceId = props.base?.sources?.[0].id
+  const { close } = useDialog(resolveComponent('DlgTableCreate'), {
+    'modelValue': isOpen,
+    sourceId,
+    'baseId': props.base.id,
+    'onCreate': closeDialog,
+    'onUpdate:modelValue': () => closeDialog(),
+    'catalog': catalog,
+  })
+
+  function closeDialog(table?: TableType) {
+    isOpen.value = false
+    if (!table) return
+    setTimeout(() => {
+      const newTableDom = document.querySelector(`[data-table-id="${table.id}"]`)
+      if (!newTableDom) return
+      newTableDom?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }, 1000)
+    close(1000)
+  }
+}
 </script>
 
 <template>
@@ -101,9 +137,26 @@ const onDrop = async (info: any) => {
     >
       <template #title="item">
         <a-tooltip :title="item.title">
-          <div v-if="item.isCatalog" class="model-text-content pr-1" @click="handleClickCatalog(item)">
-            <img :src="catalog" width="16" height="16" class="catlog-img" />
-            <span class="mode-text"> {{ item.title }}</span>
+          <div v-if="item.isCatalog" class="model-text-content pr-1 hover-set" @click="handleClickCatalog(item)">
+            <div class="table-name">
+              <img :src="catalog" width="16" height="16" class="catlog-img" />
+              <span class="mode-text"> {{ item.title }}</span>
+            </div>
+            <div class="flex more-action-btn">
+              <NcButton
+                class="nc-sidebar-node-btn"
+                size="xxsmall"
+                type="text"
+                data-testid="nc-sidebar-add-base-entity"
+                :class="{
+                  '!text-black !inline-block !opacity-100': isAddNewProjectChildEntityLoading,
+                }"
+                :loading="isAddNewProjectChildEntityLoading"
+                @click.stop="addNewProjectChildEntity(item)"
+              >
+                <GeneralIcon icon="plus" class="text-xl leading-5" style="-webkit-text-stroke: 0.15px" />
+              </NcButton>
+            </div>
           </div>
           <div
             v-else
@@ -155,6 +208,15 @@ const onDrop = async (info: any) => {
     &:hover {
       --tw-bg-opacity: 1;
       background-color: rgba(231, 231, 233, var(--tw-bg-opacity));
+    }
+  }
+  .nc-sidebar-node-btn {
+    @apply !opacity-100 !inline-block;
+    opacity: 0;
+  }
+  .hover-set {
+    &:hover .nc-sidebar-node-btn {
+      opacity: 1 !important;
     }
   }
 

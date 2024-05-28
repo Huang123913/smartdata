@@ -3,6 +3,7 @@ const props = defineProps<{
   modelValue: boolean
   sourceId: string
   baseId: string
+  catalog?: any
 }>()
 
 const emit = defineEmits(['update:modelValue', 'create'])
@@ -126,6 +127,7 @@ const handleSelectCatalogModalOk = (selectedCatalogParam: any) => {
 }
 
 onMounted(() => {
+  if (props.catalog) selectedCatalog.value = props.catalog
   generateUniqueTitle()
   nextTick(() => {
     inputEl.value?.focus()
@@ -153,9 +155,11 @@ onMounted(() => {
             data-testid="create-table-title-input"
             :placeholder="$t('msg.info.enterTableName')"
           >
-            <template #suffix> <a-button @click="handleShowSelectCatalog(true)" type="text">选择目录</a-button> </template>
+            <template #suffix v-if="!catalog">
+              <a-button @click="handleShowSelectCatalog(true)" type="text">选择目录</a-button>
+            </template>
           </a-input>
-          <div v-if="selectedCatalog" class="selected-catalog-tip">已选目录:{{ selectedCatalog.name_cn }}</div>
+          <div v-if="selectedCatalog && !catalog" class="selected-catalog-tip">已选目录:{{ selectedCatalog.name_cn }}</div>
         </a-form-item>
         <template v-if="isSnowflake(props.sourceId)">
           <a-checkbox v-model:checked="table.is_hybrid" class="!flex flex-row items-center"> Hybrid Table </a-checkbox>
