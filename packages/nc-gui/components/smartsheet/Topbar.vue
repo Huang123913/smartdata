@@ -29,9 +29,9 @@ const isSharedBase = computed(() => route.value.params.typeOrId === 'base')
       <GeneralOpenLeftSidebarBtn />
       <LazySmartsheetToolbarViewInfo v-if="!isPublic" />
 
-      <!-- <div v-if="!isSharedBase && !isMobileMode">
+      <div v-if="!isSharedBase && !isMobileMode && false">
         <SmartsheetTopbarSelectMode />
-      </div> -->
+      </div>
       <div class="flex-1" />
 
       <GeneralApiLoader v-if="!isMobileMode" />
