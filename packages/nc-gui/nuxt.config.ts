@@ -233,4 +233,8 @@ export default defineNuxtConfig({
       { name: 'storeToRefs', from: 'pinia' },
     ],
   },
+
+  devServer: {
+    host: '0.0.0.0',
+  },
 })
