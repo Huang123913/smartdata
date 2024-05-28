@@ -147,7 +147,7 @@ export class LLMService {
       let sql = getSqlRes.text;
       let sqlId = getSqlRes.id;
       if (sql.indexOf('SELECT') === -1)
-        return { success: false, errSqlTip: sql };
+        return { isSqlErr: true, sqlErrTip: sql };
       sql = sql.replace(/;/g, '');
       let exeSqlRes = await this.mcdm.exeSql({ sql });
       let isExeFailed = !exeSqlRes?.success || !exeSqlRes?.data?.success;
@@ -157,17 +157,23 @@ export class LLMService {
           exeSqlRes?.exceptionType.indexOf('VSQL') > -1;
         if (isVsqlErr)
           return {
-            success: false,
-            errSqlExeTip: true,
+            isSqlExeErrOfVSQL: true,
             data: { fields: [], datas: [] },
             sql: sql,
+            sqlExeRes: exeSqlRes,
           };
         let err_msg = exeSqlRes?.success
           ? exeSqlRes?.data.errorDetail
           : exeSqlRes?.data.errorDetail.allStackMsg;
-        let newExeRes = await this.repeatRepair(sqlId, err_msg, question, sql);
+        let newExeRes = await this.repeatRepair(sqlId, err_msg, question);
         if (!newExeRes?.success || !newExeRes?.data.success) {
-          return { success: false, data: { fields: [], datas: [] }, sql: sql };
+          return {
+            isRepairSuccess: false,
+            success: false,
+            data: { fields: [], datas: [] },
+            sql: sql,
+            sqlExeRes: exeSqlRes,
+          };
         }
         exeSqlRes = newExeRes;
       } else {
@@ -250,7 +256,6 @@ export class LLMService {
     id: string,
     error_msg: string,
     question: string,
-    originalSql: string,
     maxRetries: number = 3,
   ) {
     let retriesCount = 0;
@@ -271,7 +276,6 @@ export class LLMService {
               result?.exceptionType.indexOf('VSQL') > -1;
             if (isVsqlErr) {
               returnRes = result;
-              returnRes.sql = originalSql;
             } else {
               let err_msg: string = result?.success
                 ? result?.data.errorDetail
@@ -281,26 +285,17 @@ export class LLMService {
                   response.id,
                   err_msg,
                   question,
-                  originalSql,
                   maxRetries - retriesCount,
                 );
                 returnRes = repeateRes;
               } else {
                 returnRes = result;
-                returnRes.sql = originalSql;
               }
             }
           }
         } else {
           retriesCount++;
-          returnRes = {
-            success: false,
-            data: {
-              datas: [],
-              fields: [],
-            },
-            sql: originalSql,
-          };
+          returnRes = { success: false };
         }
       } catch (error) {
         retriesCount++;

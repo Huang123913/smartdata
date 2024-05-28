@@ -106,12 +106,13 @@ const handleSend = async () => {
       question: textAreaValue.value,
     }
     let result = await $api.smartData.createTableByAskingQuestion(params)
-    if (result?.errSqlTip) {
-      message.warning(result.errSqlTip)
+    if (result?.isSqlErr) {
+      message.warning(result.sqlErrTip)
       return
     }
-    if (result?.errSqlExeTip || !result?.success || !result?.data.success) {
+    if (result?.isSqlExeErrOfVSQL || !result?.success || !result?.data.success) {
       message.warning('抱歉，我不能理解你的问题，请调整后再重试')
+      result?.sqlExeRes && console.error(result?.sqlExeRes)
     }
     let fields = result?.data?.fields ?? []
     let datas = result?.data?.datas ?? []
