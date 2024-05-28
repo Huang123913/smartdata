@@ -112,10 +112,11 @@
    - ⚪️ Export Table View Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-csv-export`
 
 ### 显示: 排序
-   - ⚪ List View Sorts `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort`
-   - ⚪ Update View Sort `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort/operation/db-table-sort-create`
-   - ⚪ Update Sort `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort/operation/db-table-sort-update`
-   - ⚪ Delete Sort `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort/operation/db-table-sort-delete`
+   - 🟢 List View Sorts `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort` **完成**
+   - 🟢 Update View Sort `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort/operation/db-table-sort-create` **完成**
+   - 🟢 Get Sort `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort/operation/db-table-sort-get` **完成**
+   - 🟢 Update Sort `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort/operation/db-table-sort-update` **完成**
+   - 🟢 Delete Sort `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort/operation/db-table-sort-delete` **完成**
 
 ## 5.23
    > 正式环境: http://smartdata.yindangu.com
@@ -123,14 +124,13 @@
 
 ### 前端
    - 【进行中，部分完成】屏蔽部分未支持的字段类型
-   - 【进行中】拖拽修改模型所属目录
    - 【进行中】直接在目录节点添加表
-   - 【进行中】对接排序接口
    - 【未启动】修改目录名称
    - 【未启动】导出数据 (尝试拦截数据请求, 套用 nocodb 的文件输出流)
-   - 【完成】查询接口从过滤元信息中获取过滤条件并进行数据过滤
-   - 【完成】演练场结果预览改用 Nocodb 的表格 (已移除需要API支持的特性)
-   - 【完成】模型树增加虚拟滚动 (优化性能)
+   - 【未启动】增加提问建表入口 (页签)
+   - 【完成】拖拽修改模型所属目录
+   - 【完成】对接排序接口
+   - 【完成】发布至现有表用中文字段
 
 ### 平台
    - 【暂缓】V: 前端导出规则不要把隐藏的字段也导出来 (项目不急)
