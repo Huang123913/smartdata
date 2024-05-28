@@ -441,14 +441,13 @@ const filterOrGroupByThisField = (event: SmartsheetStoreEvents) => {
               }}
             </template>
             <NcMenuItem
-              hidden
               :disabled="!isFilterSupported || isFilterLimitExceeded"
               @click="filterOrGroupByThisField(SmartsheetStoreEvents.FILTER_ADD)"
             >
               <div v-e="['a:field:add:filter']" class="nc-column-filter nc-header-menu-item">
                 <component :is="iconMap.filter" class="text-gray-700" />
                 <!-- Filter by this field -->
-                Filter by this field
+                按此字段筛选
               </div>
             </NcMenuItem>
           </NcTooltip>
