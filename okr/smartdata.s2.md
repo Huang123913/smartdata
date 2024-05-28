@@ -117,6 +117,7 @@
    - 🟢 Get Sort `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort/operation/db-table-sort-get` **完成**
    - 🟢 Update Sort `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort/operation/db-table-sort-update` **完成**
    - 🟢 Delete Sort `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort/operation/db-table-sort-delete` **完成**
+   - ⚪️️ 查询接口对结果进行排序 **进行中**
 
 ## 5.23
    > 正式环境: http://smartdata.yindangu.com
