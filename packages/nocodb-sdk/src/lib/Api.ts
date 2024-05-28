@@ -11775,5 +11775,22 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+     * @description updateModelCatalog MCDM
+     *
+     * @tags SmartData
+     * @name UpdateModelCatalog
+     * @summary updateModelCatalog MCDM
+     * @request POST:/api/v2/smartdata/updateModelCatalog
+     */
+    updateModelCatalog: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/updateModelCatalog`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
 }

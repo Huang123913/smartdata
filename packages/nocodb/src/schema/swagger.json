@@ -17627,6 +17627,28 @@
           "$ref": "#/components/parameters/xc-auth"
         }
       ]
+    },
+    "/api/v2/smartdata/updateModelCatalog":{
+      "post": {
+        "summary": "updateModelCatalog MCDM",
+        "operationId": "updateModelCatalog",
+        "description": "updateModelCatalog MCDM",
+        "tags": ["SmartData"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/xc-auth"
+        }
+      ]
     }
   },
   "components": {

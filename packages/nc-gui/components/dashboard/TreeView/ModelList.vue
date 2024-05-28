@@ -17,9 +17,12 @@ onMounted(async () => {
 const { loadProjectTables } = useTablesStore()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
+const { updateModelCatalog } = store
 const { openTable: _openTable } = useTableNew({ baseId: props.base.id! })
 const route = useRoute()
 const expandedKeys = ref([])
+const { $api } = useNuxtApp()
+const isShowLoading = ref(false)
 const openedTableId = computed(() => route.params.viewId)
 const showModelTree = computed(() => {
   return chataiData.value.modelTree.length ? chataiData.value.modelTree[0].children : []
@@ -51,11 +54,51 @@ const handleClickCatalog = (catalog: any) => {
     expandedKeys.value.push(catalog.id)
   }
 }
+
+const onDragEnter = (info: any) => {
+  if (info.node.isCatalog && !expandedKeys.value.includes(info?.node?.id)) {
+    expandedKeys.value.push(info.node.id)
+  }
+}
+
+const onDrop = async (info: any) => {
+  try {
+    const dragKey = info.dragNode.key //拖拽的模型id
+    let dropNode = info.node //拖拽的目的地
+    let dropKey = dropNode.isCatalog ? info.node.key : dropNode.parentId
+    let belongCatalog = info.node.code
+    const dropPosition = info.dropPosition
+    if (Number(dropPosition) < 0) {
+      belongCatalog = props.base.id
+      dropKey = null
+    } else if (!dropNode.isCatalog) {
+      belongCatalog = props.base.id
+      if (dropNode.parentId) {
+        let findCatalog = chataiData.value.modelData.find((item: any) => item.id === dropNode.parentId)
+        belongCatalog = findCatalog.code
+      }
+    }
+    updateModelCatalog(dragKey, dropKey)
+    isShowLoading.value = true
+    await $api.smartData.updateModelCatalog({ entities: [{ id: dragKey, belongCatalog }] })
+  } catch (error) {
+    console.log('error', error)
+  } finally {
+    isShowLoading.value = false
+  }
+}
 </script>
 
 <template>
   <div class="model-list rounded-md h-full w-full">
-    <a-tree :tree-data="showModelTree" :expandedKeys="expandedKeys" @expand="handleExpand">
+    <a-tree
+      :tree-data="showModelTree"
+      v-model:expandedKeys="expandedKeys"
+      @expand="handleExpand"
+      draggable
+      @drop="onDrop"
+      @dragenter="onDragEnter"
+    >
       <template #title="item">
         <a-tooltip :title="item.title">
           <div v-if="item.isCatalog" class="model-text-content pr-1" @click="handleClickCatalog(item)">
@@ -91,10 +134,12 @@ const handleClickCatalog = (catalog: any) => {
       </template>
     </a-tree>
   </div>
+  <SmartdataChatPlaygroundViewCommonLoading :isShow="isShowLoading" />
 </template>
 
 <style scoped lang="scss">
 .model-list {
+  margin-top: 4px;
   ::v-deep .ant-tree {
     background-color: transparent;
   }
@@ -121,7 +166,6 @@ const handleClickCatalog = (catalog: any) => {
     padding: 0;
     font-size: 14px;
     color: rgb(0, 0, 0);
-    overflow: hidden;
     flex: 1;
   }
   ::v-deep .ant-tree-switcher {
@@ -140,8 +184,6 @@ const handleClickCatalog = (catalog: any) => {
     border-radius: 4px;
     position: relative;
     .more-action-btn {
-      // position: absolute;
-      // right: 0;
       width: 24px;
       margin-left: 16px;
     }

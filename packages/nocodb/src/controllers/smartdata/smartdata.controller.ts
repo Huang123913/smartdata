@@ -66,4 +66,14 @@ export class SmartDataController {
   ) {
     return await this.llm.publicModelToCatalog(data);
   }
+
+  @Post(['/api/v2/smartdata/updateModelCatalog'])
+  async updateModelCatalog(
+    @Body()
+    data: {
+      entities: any[];
+    },
+  ) {
+    return await this.mcdm.saveModel(data);
+  }
 }
