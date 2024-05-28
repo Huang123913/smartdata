@@ -127,7 +127,7 @@ const handleOk = async (selectedCatalog: object) => {
         sql: chataiData.value.sessionItem.sql,
         question: chataiData.value.sessionItem.tip,
         modelName: chataiData.value.sessionItem.textAreaValue,
-        belongCatalog: selectedCatalog.code,
+        belongCatalog: selectedCatalog.id,
       }
       exeRes = await $api.smartData.publicModelToCatalog(params)
     } else {

@@ -67,7 +67,7 @@ const onDrop = async (info: any) => {
     const dragKey = info.dragNode.key //拖拽的模型id
     let dropNode = info.node //拖拽的目的地
     let dropKey = dropNode.isCatalog ? info.node.key : dropNode.parentId
-    let belongCatalog = info.node.code
+    let belongCatalog = info.node.id
     const dropPosition = info.dropPosition
     if (Number(dropPosition) < 0) {
       belongCatalog = props.base.id
@@ -76,7 +76,7 @@ const onDrop = async (info: any) => {
       belongCatalog = props.base.id
       if (dropNode.parentId) {
         let findCatalog = chataiData.value.modelData.find((item: any) => item.id === dropNode.parentId)
-        belongCatalog = findCatalog.code
+        belongCatalog = findCatalog.id
       }
     }
     updateModelCatalog(dragKey, dropKey)
