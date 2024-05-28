@@ -107,7 +107,7 @@ const handleSelectSourceField = (option: any, targetFieldItem: any) => {
         <span class="source">来源</span>
       </div>
       <div v-for="item in targetField" :key="item.id" class="list-item">
-        <div class="input">{{ item.fieldName }}</div>
+        <div class="input">{{ item?.fieldName_cn || item.fieldName }}</div>
         <a-select
           class="select"
           :allowClear="!!(selectValue.hasOwnProperty(item.id) && selectValue[item.id])"

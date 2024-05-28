@@ -61,7 +61,7 @@ const columns = computed(() => {
       name_en: item.name ?? item.code,
       width: '180px',
       value: item.name,
-      label: item.name,
+      label: item.name_cn ?? item.name ?? item.code,
     }
   })
   return newFileds
