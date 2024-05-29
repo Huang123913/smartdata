@@ -36,7 +36,12 @@ export class SmartDataController {
 
   @Post(['/api/v2/smartdata/createTableByAskingQuestion'])
   async createTableByAskingQuestion(
-    @Body() data: { selectedModel: string; question: string },
+    @Body()
+    data: {
+      selectedModel: string;
+      question: string;
+      ischoose: boolean;
+    },
   ) {
     return await this.llm.createTableByAskingQuestion(data);
   }

@@ -96,14 +96,21 @@ const clearSesstionItem = () => {
   })
 }
 
+const allTableMode = computed(() => {
+  let data = chataiData.value.modelData.filter((item) => !item.isCatalog && item.id).map((item) => ({ ...item, fields: [] }))
+  return data
+})
+
 //发送按钮
 const handleSend = async () => {
   try {
     if (!textAreaValue.value.trim()) return
     isShowLoading.value = true
+    let selectedModel = chataiData.value.checkedModelData.length ? chataiData.value.checkedModelData : allTableMode.value
     let params = {
-      selectedModel: JSON.stringify(chataiData.value.checkedModelData),
+      selectedModel: JSON.stringify(selectedModel),
       question: textAreaValue.value,
+      ischoose: !!chataiData.value.checkedModelData.length,
     }
     let result = await $api.smartData.createTableByAskingQuestion(params)
     if (result?.isSqlErr) {

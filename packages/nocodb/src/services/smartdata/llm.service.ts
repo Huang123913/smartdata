@@ -139,9 +139,11 @@ export class LLMService {
   async createTableByAskingQuestion(params: {
     selectedModel: string;
     question: string;
+    ischoose: boolean;
   }) {
-    let { selectedModel, question } = params;
-    let modelrange = await this.getModelrange(JSON.parse(selectedModel));
+    let { selectedModel, question, ischoose } = params;
+    let modelList = await this.getModelrange(JSON.parse(selectedModel));
+    let modelrange = { ischoose: ischoose, modellist: modelList };
     let getSqlRes = await this.getSql(question, modelrange);
     if (getSqlRes) {
       let sql = getSqlRes.text;
@@ -185,7 +187,7 @@ export class LLMService {
 
   async getSql(
     question: string,
-    modelrange: string,
+    modelrange: object,
     orgid: string = '1',
     projectid: string = '1',
   ) {
