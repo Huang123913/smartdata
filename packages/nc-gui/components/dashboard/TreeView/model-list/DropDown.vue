@@ -6,11 +6,19 @@ const props = defineProps<{
   item: any
   base: BaseType
 }>()
+const { $api } = useNuxtApp()
+const store = useChatPlaygroundViewStore()
+const { chataiData } = storeToRefs(store)
+const { updateModelCatalog } = store
 const { isUIAllowed } = useRoles()
 const { openRenameTableDialog, duplicateTable } = inject(TreeViewInj)!
 const baseRole = inject(ProjectRoleInj)
 const clicked = ref<boolean>(false)
 const isTableDeleteDialogVisible = ref(false)
+const isShowSelectCatalogModel = ref(false)
+const updatedModel = ref(null)
+const isShowLoading = ref(false)
+const modelPath = ref('')
 
 const handleClickChange = (visible: boolean) => {
   if (!visible) clicked.value = visible
@@ -29,6 +37,38 @@ const handleRename = (item: any) => {
 const handleCopy = (item: any) => {
   clicked.value = false
   duplicateTable(item)
+}
+
+const handleShowSelectCatalog = (value: boolean, item?: any) => {
+  isShowSelectCatalogModel.value = value
+  clicked.value = false
+  if (item) {
+    updatedModel.value = item
+    if (item.parentId) {
+      let findCatalog = chataiData.value.modelData.find((model) => model.id == item.parentId)
+      modelPath.value = `${findCatalog.name_cn} / ${item.name_cn}`
+    } else {
+      modelPath.value = `${props.base.title} / ${item.name_cn}`
+    }
+  }
+}
+
+const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
+  try {
+    if (updatedModel.value?.parentId === selectedCatalogParam.id) {
+      message.warning('此表已经在该目录下')
+      return
+    }
+    handleShowSelectCatalog(false, null)
+    isShowLoading.value = true
+    updateModelCatalog(updatedModel.value?.id, selectedCatalogParam.id)
+    await $api.smartData.updateModelCatalog({
+      entities: [{ id: updatedModel.value?.id, belongCatalog: selectedCatalogParam.id }],
+    })
+  } catch (error) {
+  } finally {
+    isShowLoading.value = false
+  }
 }
 </script>
 <template>
@@ -75,17 +115,25 @@ const handleCopy = (item: any) => {
           </div>
         </NcMenuItem>
 
-        <NcMenuItem
-          v-if="isUIAllowed('tableDelete', { roles: baseRole })"
-          :data-testid="`sidebar-table-delete-${item.title}`"
-          class="!text-red-500 !hover:bg-red-50"
-          @click="handleTableDelete"
-        >
-          <div v-e="['c:table:delete']" class="flex gap-2 items-center">
-            <GeneralIcon icon="delete" />
-            {{ $t('general.delete') }}
+        <NcMenuItem :data-testid="`sidebar-table-rename-${item.title}`" @click="handleShowSelectCatalog(true, item)">
+          <div class="flex gap-2 items-center">
+            <GeneralIcon icon="rename" class="text-gray-700" />
+            {{ $t('general.moveCatalog') }}
           </div>
         </NcMenuItem>
+        <template v-if="isUIAllowed('tableDelete', { roles: baseRole })">
+          <NcDivider />
+          <NcMenuItem
+            :data-testid="`sidebar-table-delete-${item.title}`"
+            class="!text-red-500 !hover:bg-red-50"
+            @click="handleTableDelete"
+          >
+            <div v-e="['c:table:delete']" class="flex gap-2 items-center">
+              <GeneralIcon icon="delete" />
+              {{ $t('general.delete') }}
+            </div>
+          </NcMenuItem>
+        </template>
       </NcMenu>
     </template>
   </NcDropdown>
@@ -96,6 +144,15 @@ const handleCopy = (item: any) => {
     :table-id="item.id"
     :base-id="base.id"
   />
+
+  <DlgSelectCatalog
+    :visible="isShowSelectCatalogModel"
+    :handleShowSelectCatalog="handleShowSelectCatalog"
+    :handleModalOk="handleSelectCatalogModalOk"
+    :modelTitle="'移动表格目录'"
+    :modelPath="modelPath"
+  ></DlgSelectCatalog>
+  <SmartdataChatPlaygroundViewCommonLoading :isShow="isShowLoading" />
 </template>
 
 <style lang="scss">
@@ -105,7 +162,6 @@ const handleCopy = (item: any) => {
 .table-action-content {
   .ant-dropdown-menu {
     min-width: 200px;
-    padding: 16px 8px !important;
   }
 }
 .hover-set {

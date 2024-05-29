@@ -1,10 +1,14 @@
 <script lang="ts" setup>
+import { CloseOutlined } from '@ant-design/icons-vue'
+
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
 const props = defineProps<{
   visible: boolean
   handleShowSelectCatalog: (value: boolean) => void
   handleModalOk: (selectedCatalog: any) => void
+  modelTitle: string
+  modelPath?: string
 }>()
 const selectedKeys = ref<string[]>([]) //勾选的模型
 const expandedKeys = ref<string[]>([]) //展开的父节点
@@ -36,7 +40,12 @@ const handleSelectModelCancel = () => {
 </script>
 
 <template>
-  <a-modal class="select-catalog-modal" :title="'选择目录'" :visible="visible" @cancel="handleShowSelectCatalog(false)">
+  <a-modal
+    class="select-catalog-modal"
+    :closable="false"
+    :visible="visible"
+    :style="{ '--set-padding': modelPath ? '0 0 8px 0' : '8px 0 16px 0' }"
+  >
     <a-tree
       class="catalog catalog-tree"
       blockNode
@@ -48,6 +57,35 @@ const handleSelectModelCancel = () => {
         <span> {{ item.name_cn }}</span>
       </template>
     </a-tree>
+    <template #title>
+      <div class="select-catalog-modal-header">
+        <div class="title" :class="{ 'title-style': !modelPath }">
+          <span class="text-lg font-medium">{{ modelTitle }}</span>
+          <NcTooltip
+            :style="{
+              marginTop: '-4px',
+            }"
+            class="truncate max-w-full"
+            show-on-truncate-only
+          >
+            <template #title> {{ modelPath }}</template>
+            <span
+              class="text-ellipsis overflow-hidden text-gray-500 xs:ml-2"
+              :style="{
+                wordBreak: 'keep-all',
+                whiteSpace: 'nowrap',
+                display: 'inline',
+                fontSize: '12px',
+                marginTop: '-4px',
+              }"
+            >
+              <template v-if="modelPath">路径:{{ modelPath }}</template>
+            </span>
+          </NcTooltip>
+        </div>
+        <close-outlined class="colse-btn" @click="handleSelectModelCancel" />
+      </div>
+    </template>
     <template #footer>
       <a-button key="back" @click="handleSelectModelCancel">取消</a-button>
       <a-button key="submit" type="primary" @click="handleSearchModelOk">确认</a-button>
@@ -57,10 +95,32 @@ const handleSelectModelCancel = () => {
 
 <style lang="scss">
 .select-catalog-modal {
+  .title-style {
+    display: flex;
+    align-items: center;
+  }
+  .colse-btn {
+    position: relative;
+    top: 0px;
+    color: rgb(99, 107, 116);
+  }
+  .text-lg {
+    font-size: 18px;
+  }
+  .select-catalog-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    .title {
+      height: 100%;
+      width: calc(100% - 32px);
+    }
+  }
   .ant-modal-content {
     padding: 16px 16px 0 16px !important;
     .ant-modal-header {
-      padding: 16px 0 !important;
+      padding: var(--set-padding) !important;
     }
     .ant-modal-body {
       padding: 16px 0 0px 8px !important;
@@ -69,10 +129,15 @@ const handleSelectModelCancel = () => {
       padding: 16px;
     }
   }
-  .ant-modal-close {
-    top: 12px !important;
-    right: 15px;
+  .select-catalog-modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .anticon-close {
+      margin-left: 0 !important;
+    }
   }
+
   .ant-modal-footer {
     .ant-btn {
       border-radius: 0.5rem;

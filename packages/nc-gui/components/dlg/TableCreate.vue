@@ -215,6 +215,7 @@ onMounted(() => {
     :visible="isShowSelectCatalogModel"
     :handleShowSelectCatalog="handleShowSelectCatalog"
     :handleModalOk="handleSelectCatalogModalOk"
+    :modelTitle="'选择目录'"
   ></DlgSelectCatalog>
 </template>
 
