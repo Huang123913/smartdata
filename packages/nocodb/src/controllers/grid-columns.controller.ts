@@ -6,6 +6,7 @@ import {
   Patch,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { GridColumnReqType } from 'nocodb-sdk';
 import { GlobalGuard } from '~/guards/global/global.guard';
@@ -13,6 +14,8 @@ import { GridColumnsService } from '~/services/grid-columns.service';
 import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
 import { NcRequest } from '~/interface/config';
+
+import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
 
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
@@ -34,6 +37,7 @@ export class GridColumnsController {
     '/api/v2/meta/grid-columns/:gridViewColumnId',
   ])
   @Acl('gridColumnUpdate')
+  @UseInterceptors(MCDMRewrite('NocodbDBViewUpdateGridColumn'))
   async gridColumnUpdate(
     @Param('gridViewColumnId') gridViewColumnId: string,
     @Body() body: GridColumnReqType,

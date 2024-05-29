@@ -62,6 +62,13 @@ export const useColumnDrag = ({
     const newOrder = nextToViewCol ? toViewCol.order! + (nextToViewCol.order! - toViewCol.order!) / 2 : lastViewCol.order! + 1
     const oldOrder = toBeReorderedViewCol.order
 
+    const oldColIndex = fields.value.findIndex((f) => f.id === colId)
+    const oldNextToColField = oldColIndex < fields.value.length - 1 ? fields.value[oldColIndex + 1] : null
+    const oldNextToViewCol = oldNextToColField ? gridViewCols.value[oldNextToColField.id!] : null
+
+    const newPrependToColumnId = nextToViewCol.id
+    const oldPrependToColumnId = oldNextToViewCol?.id
+
     toBeReorderedViewCol.order = newOrder
 
     if (isDefaultView.value && toBeReorderedViewCol.fk_column_id) {
@@ -77,7 +84,7 @@ export const useColumnDrag = ({
           if (isDefaultView.value) {
             updateDefaultViewColumnOrder(toBeReorderedViewCol.fk_column_id, oldOrder)
           }
-          await updateGridViewColumn(colId, { order: oldOrder } as any)
+          await updateGridViewColumn(colId, { order: oldOrder, prependToColumnId: oldPrependToColumnId } as any)
 
           eventBus.emit(SmartsheetStoreEvents.FIELD_RELOAD)
         },
@@ -91,7 +98,7 @@ export const useColumnDrag = ({
           if (isDefaultView.value) {
             updateDefaultViewColumnOrder(toBeReorderedViewCol.fk_column_id, newOrder)
           }
-          await updateGridViewColumn(colId, { order: newOrder } as any)
+          await updateGridViewColumn(colId, { order: newOrder, prependToColumnId: newPrependToColumnId } as any)
 
           eventBus.emit(SmartsheetStoreEvents.FIELD_RELOAD)
         },
@@ -100,7 +107,7 @@ export const useColumnDrag = ({
       scope: defineViewScope({ view: activeView.value }),
     })
 
-    await updateGridViewColumn(colId, { order: newOrder } as any, true)
+    await updateGridViewColumn(colId, { order: newOrder, prependToColumnId: newPrependToColumnId } as any, true)
 
     eventBus.emit(SmartsheetStoreEvents.FIELD_RELOAD)
   }
