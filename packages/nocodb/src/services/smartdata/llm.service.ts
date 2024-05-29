@@ -143,7 +143,10 @@ export class LLMService {
   }) {
     let { selectedModel, question, ischoose } = params;
     let modelList = await this.getModelrange(JSON.parse(selectedModel));
-    let modelrange = { ischoose: ischoose, modellist: modelList };
+    let modelrange = JSON.stringify({
+      ischoose: ischoose,
+      modellist: modelList,
+    });
     let getSqlRes = await this.getSql(question, modelrange);
     if (getSqlRes) {
       let sql = getSqlRes.text;
@@ -187,7 +190,7 @@ export class LLMService {
 
   async getSql(
     question: string,
-    modelrange: object,
+    modelrange: string,
     orgid: string = '1',
     projectid: string = '1',
   ) {
