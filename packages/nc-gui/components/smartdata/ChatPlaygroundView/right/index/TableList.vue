@@ -282,7 +282,9 @@ const handleClickCleanBtn = () => {
     <template v-if="columns.length">
       <SmartdataChatPlaygroundViewRightIndexTableListTable :columns="columns" :datas="tableData" :simpleImage="simpleImage" />
     </template>
-    <div v-else class="no-data-table"><a-empty :description="'抱歉......换一个问题'" :image="simpleImage" /></div>
+    <div v-else class="no-data-table">
+      <a-empty description="抱歉，我不能理解你的问题，请调整后再重试" :image="simpleImage" />
+    </div>
   </div>
   <!-- 模型目录/字段映射弹框 -->
   <SmartdataChatPlaygroundViewRightIndexTableListSelectCatalogModal
