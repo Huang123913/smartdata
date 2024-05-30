@@ -205,7 +205,7 @@
     "apply": "Apply",
     "text": "Text",
     "appearance": "Appearance",
-    "moveCatalog":"MoveCatalog"
+    "moveTo":"Move"
   },
   "objects": {
     "owner": "Owner",

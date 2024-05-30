@@ -79,7 +79,7 @@ const handleSelectModelCancel = () => {
                 marginTop: '-4px',
               }"
             >
-              <template v-if="modelPath">路径:{{ modelPath }}</template>
+              <template v-if="modelPath">当前归属：{{ modelPath }}</template>
             </span>
           </NcTooltip>
         </div>

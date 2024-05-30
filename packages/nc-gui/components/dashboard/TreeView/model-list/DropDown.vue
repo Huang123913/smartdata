@@ -134,8 +134,8 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
           @click="handleShowSelectCatalog(true, item)"
         >
           <div class="flex gap-2 items-center">
-            <GeneralIcon icon="rename" class="text-gray-700" />
-            {{ isCatalogDropDown ? '移动目录' : $t('general.moveCatalog') }}
+            <GeneralIcon icon="move" class="text-gray-700" />
+            {{ $t('general.moveTo') }}
           </div>
         </NcMenuItem>
 
