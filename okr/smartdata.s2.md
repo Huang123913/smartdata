@@ -87,7 +87,7 @@
    - 🟢️ Create Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-create` **完成**
    - 🟢 Update Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-update` **完成**
    - 🟢️ Delete Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-delete` **完成**
-   - ⚪️ Update Grid Column (字段拖拽排序) `https://meta-apis-v1.nocodb.com/#tag/DB-View/operation/ db-view-grid-column-update` **进行中** 
+   - 🟢️️ Update Grid Column (字段拖拽排序) `https://meta-apis-v1.nocodb.com/#tag/DB-View/operation/ db-view-grid-column-update` **完成**
    - ⚪️ Duplicate Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-duplicate` **未开始**
       - 1. ⚪️ 拷贝表结构
       - 2. ⚪️ 拷贝表结构+数据
@@ -112,7 +112,7 @@
 
 ### 导出: Excel, CSV
    > 导出数据
-   - ⚪️ Export Table View Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-csv-export`
+   - ⚪️ Export Table View Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-csv-export` **进行中**
 
 ### 显示: 排序
    - 🟢 List View Sorts `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort` **完成**
@@ -122,17 +122,21 @@
    - 🟢 Delete Sort `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort/operation/db-table-sort-delete` **完成**
    - 🟢️ 查询接口对结果进行排序 **完成**
 
-## 5.23
+## 5.30
    > 正式环境: http://smartdata.yindangu.com
    > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
-   - 【进行中，部分完成】屏蔽部分未支持的字段类型
-   - 【进行中】修改目录名称
    - 【进行中】增加提问建表入口 (页签)
-   - 【完成】直接在目录节点添加表
-   - 【完成】查询接口对结果进行排序
-   - 【未启动】导出数据 (尝试拦截数据请求, 套用 nocodb 的文件输出流)
+   - 【联调中】导出数据 (csv, excel)
+   - 【完成】字段拖拽排序
+   - 【完成】字段调整宽度
+   - 【完成】修改目录名称
+   - 【暂缓，部分完成】屏蔽部分未支持的字段类型
+
+### 需求池
+   - 存储 Prompt 模板
+   - 存储训练数据 (修改模型时重训)
 
 ### 平台
    - 【暂缓】V: 前端导出规则不要把隐藏的字段也导出来 (项目不急)
