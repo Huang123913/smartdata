@@ -11792,5 +11792,22 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+     * @description renameCatalogCustom MCDM
+     *
+     * @tags SmartData
+     * @name RenameCatalogCustom
+     * @summary renameCatalogCustom MCDM
+     * @request POST:/api/v2/smartdata/renameCatalogCustom
+     */
+    renameCatalogCustom: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/renameCatalogCustom`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
 }

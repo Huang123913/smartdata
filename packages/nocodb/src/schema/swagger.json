@@ -17649,6 +17649,28 @@
           "$ref": "#/components/parameters/xc-auth"
         }
       ]
+    },
+    "/api/v2/smartdata/renameCatalogCustom":{
+      "post": {
+        "summary": "renameCatalogCustom MCDM",
+        "operationId": "renameCatalogCustom",
+        "description": "renameCatalogCustom MCDM",
+        "tags": ["SmartData"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/xc-auth"
+        }
+      ]
     }
   },
   "components": {

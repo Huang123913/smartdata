@@ -190,4 +190,19 @@ export class MCDMService {
       ));
     return { success: true };
   }
+
+  async renameCatalogCustom(params: {
+    id: string;
+    name: string;
+    name_cn: string;
+  }) {
+    return await this.mcdm({
+      url: `/webapi/ydg_vmcdm_custom_api/renameCatalogCustom`,
+      params: {
+        bizEntityCatalogCustom: JSON.stringify([params]),
+      },
+    }).then((r) => {
+      return r.data;
+    });
+  }
 }

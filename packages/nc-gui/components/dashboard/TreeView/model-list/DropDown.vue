@@ -5,6 +5,7 @@ import type { BaseType } from 'nocodb-sdk'
 const props = defineProps<{
   item: any
   base: BaseType
+  isCatalogDropDown: boolean
 }>()
 const { $api } = useNuxtApp()
 const store = useChatPlaygroundViewStore()
@@ -19,6 +20,14 @@ const isShowSelectCatalogModel = ref(false)
 const updatedModel = ref(null)
 const isShowLoading = ref(false)
 const modelPath = ref('')
+const isShowCatalogRenameDialog = ref(false)
+const selectCatalogModelTitle = computed(() => {
+  return props.isCatalogDropDown ? '移动目录' : '移动表格目录'
+})
+
+const setIsShowCatalogRenameDialog = (value: boolean) => {
+  isShowCatalogRenameDialog.value = value
+}
 
 const handleClickChange = (visible: boolean) => {
   if (!visible) clicked.value = visible
@@ -31,7 +40,11 @@ const handleTableDelete = () => {
 
 const handleRename = (item: any) => {
   clicked.value = false
-  openRenameTableDialog(item, true)
+  if (props.isCatalogDropDown) {
+    setIsShowCatalogRenameDialog(true)
+  } else {
+    openRenameTableDialog(item, true)
+  }
 }
 
 const handleCopy = (item: any) => {
@@ -105,7 +118,7 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
 
         <NcMenuItem
           disabled
-          v-if="isUIAllowed('tableDuplicate')"
+          v-if="isUIAllowed('tableDuplicate') && !isCatalogDropDown"
           :data-testid="`sidebar-table-duplicate-${item.title}`"
           @click="handleCopy(item)"
         >
@@ -115,15 +128,21 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
           </div>
         </NcMenuItem>
 
-        <NcMenuItem :data-testid="`sidebar-table-rename-${item.title}`" @click="handleShowSelectCatalog(true, item)">
+        <NcMenuItem
+          :disabled="isCatalogDropDown"
+          :data-testid="`sidebar-table-rename-${item.title}`"
+          @click="handleShowSelectCatalog(true, item)"
+        >
           <div class="flex gap-2 items-center">
             <GeneralIcon icon="rename" class="text-gray-700" />
-            {{ $t('general.moveCatalog') }}
+            {{ isCatalogDropDown ? '移动目录' : $t('general.moveCatalog') }}
           </div>
         </NcMenuItem>
+
         <template v-if="isUIAllowed('tableDelete', { roles: baseRole })">
           <NcDivider />
           <NcMenuItem
+            :disabled="isCatalogDropDown"
             :data-testid="`sidebar-table-delete-${item.title}`"
             class="!text-red-500 !hover:bg-red-50"
             @click="handleTableDelete"
@@ -149,9 +168,11 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
     :visible="isShowSelectCatalogModel"
     :handleShowSelectCatalog="handleShowSelectCatalog"
     :handleModalOk="handleSelectCatalogModalOk"
-    :modelTitle="'移动表格目录'"
+    :modelTitle="selectCatalogModelTitle"
     :modelPath="modelPath"
-  ></DlgSelectCatalog>
+  />
+  <DlgCatalogRename :catalogMeta="item" :dialogShow="isShowCatalogRenameDialog" :setDialogShow="setIsShowCatalogRenameDialog" />
+
   <SmartdataChatPlaygroundViewCommonLoading :isShow="isShowLoading" />
 </template>
 

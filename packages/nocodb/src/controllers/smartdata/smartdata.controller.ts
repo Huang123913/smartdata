@@ -81,4 +81,15 @@ export class SmartDataController {
   ) {
     return await this.mcdm.saveModel(data);
   }
+  @Post(['/api/v2/smartdata/renameCatalogCustom'])
+  async renameCatalogCustom(
+    @Body()
+    data: {
+      id: string;
+      name: string;
+      name_cn: string;
+    },
+  ) {
+    return await this.mcdm.renameCatalogCustom(data);
+  }
 }

@@ -142,7 +142,8 @@ const openTableCreateDialog = (catalog: any) => {
               <img :src="catalog" width="16" height="16" class="catlog-img" />
               <span class="mode-text"> {{ item.title }}</span>
             </div>
-            <div class="flex more-action-btn">
+            <div class="flex more-action-btn more-acttion-btn-to-catalog">
+              <DashboardTreeViewModelListDropDown :item="item" :base="base" :isCatalogDropDown="true" />
               <NcButton
                 class="nc-sidebar-node-btn"
                 size="xxsmall"
@@ -180,6 +181,7 @@ const openTableCreateDialog = (catalog: any) => {
                   source_id: item.parentId,
                 }"
                 :base="base"
+                :isCatalogDropDown="false"
               />
             </div>
           </div>
@@ -248,6 +250,10 @@ const openTableCreateDialog = (catalog: any) => {
     .more-action-btn {
       width: 24px;
       margin-left: 16px;
+      align-items: center;
+    }
+    .more-acttion-btn-to-catalog {
+      width: 48px;
     }
     .table-name {
       display: flex;

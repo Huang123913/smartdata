@@ -155,6 +155,25 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     ]
   }
 
+  const updateCatalogName = (catalog: any, rename: string) => {
+    let findCatalog = chataiData.modelData.find((item) => item.id === catalog.id)
+    findCatalog.name = rename
+    findCatalog.name_cn = rename
+    chataiData.modelTree = [
+      {
+        id: null,
+        name_cn: '模型目录',
+        parentId: 'add-catalog',
+        isCatalog: true,
+        children: buildTree(chataiData.modelData),
+        title: '模型目录',
+        key: '0-0',
+      },
+    ]
+    chataiData.modelCatalog = chataiData.modelData.filter((item) => item.isCatalog && item.id !== null)
+    chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog)
+  }
+
   return {
     chataiData,
     chataiApi,
@@ -168,5 +187,6 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     setChataiDataIsOpenMode,
     eventBus,
     updateModelCatalog,
+    updateCatalogName,
   }
 })

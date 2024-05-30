@@ -218,3 +218,26 @@ export const urlValidator = {
     })
   },
 }
+
+export const validateCatalogName = {
+  validator: (_: unknown, value: string) => {
+    return new Promise((resolve, reject) => {
+      const { t } = getI18n().global
+      if (!value) {
+        // return 'Catalog name required'
+        return reject(new Error(t('目录名是必填项')))
+      }
+      // exclude . / \
+      // rest all characters allowed
+      // https://documentation.sas.com/doc/en/pgmsascdc/9.4_3.5/acreldb/n0rfg6x1shw0ppn1cwhco6yn09f7.htm#:~:text=By%20default%2C%20MySQL%20encloses%20column,not%20truncate%20a%20longer%20name.
+      const m = value.match(/[./\\]/g)
+      if (m) {
+        // return `Following characters are not allowed ${m.map((c) => JSON.stringify(c)).join(', ')}`
+        return reject(
+          new Error(`${t('msg.error.followingCharactersAreNotAllowed')} ${m.map((c) => JSON.stringify(c)).join(', ')}`),
+        )
+      }
+      return resolve(true)
+    })
+  },
+}

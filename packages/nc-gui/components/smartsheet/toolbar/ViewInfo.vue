@@ -8,7 +8,8 @@ const { baseUrl } = useBase()
 
 const { activeTable } = storeToRefs(useTablesStore())
 const { tableUrl } = useTablesStore()
-
+const store = useChatPlaygroundViewStore()
+const { chataiData } = storeToRefs(store)
 const { isLeftSidebarOpen } = storeToRefs(useSidebarStore())
 
 const openedBaseUrl = computed(() => {
@@ -19,6 +20,15 @@ const openedBaseUrl = computed(() => {
     type: 'database',
     isSharedBase: isSharedBase.value,
   })}`
+})
+
+const activeTableParentCatalog = computed(() => {
+  if (activeTable.value) {
+    let findParentCatalog = chataiData.value.modelData.find((item) => item.id === activeTable.value.parentId)
+    return findParentCatalog.name_cn
+  } else {
+    return ''
+  }
 })
 </script>
 
@@ -73,10 +83,10 @@ const openedBaseUrl = computed(() => {
     </template>
 
     <!-- 父级目录 -->
-    <template v-if="activeTable?.parentCatalog">
+    <template v-if="activeTableParentCatalog">
       <NcTooltip class="truncate nc-active-table-title max-w-full" show-on-truncate-only>
         <template #title>
-          {{ activeTable?.parentCatalog }}
+          {{ activeTableParentCatalog }}
         </template>
         <span
           class="text-ellipsis overflow-hidden text-gray-500 xs:ml-2"
@@ -91,7 +101,7 @@ const openedBaseUrl = computed(() => {
           }"
         >
           <template v-if="activeView?.is_default">
-            {{ activeTable?.parentCatalog }}
+            {{ activeTableParentCatalog }}
           </template>
         </span>
       </NcTooltip>
