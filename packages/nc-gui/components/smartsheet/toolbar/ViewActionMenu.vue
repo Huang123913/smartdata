@@ -231,7 +231,7 @@ const onDelete = async () => {
           </template>
         </NcSubMenu>
       </template>
-      <NcSubMenu disabled key="download">
+      <NcSubMenu key="download">
         <template #title>
           <div
             v-e="[

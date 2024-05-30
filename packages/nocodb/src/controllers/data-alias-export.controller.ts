@@ -1,4 +1,11 @@
-import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Req,
+  Res,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 import * as XLSX from 'xlsx';
 import { GlobalGuard } from '~/guards/global/global.guard';
@@ -7,6 +14,8 @@ import { extractCsvData, extractXlsxData } from '~/modules/datas/helpers';
 import { View } from '~/models';
 import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { DataApiLimiterGuard } from '~/guards/data-api-limiter.guard';
+
+import { ExportTableViewRows } from '~/modules/smartdata/interceptors/data/DBViewRow/ExportTableViewRows';
 
 @Controller()
 @UseGuards(DataApiLimiterGuard, GlobalGuard)
@@ -18,6 +27,7 @@ export class DataAliasExportController {
     '/api/v1/db/data/:orgs/:baseName/:tableName/views/:viewName/export/excel',
   ])
   @Acl('exportExcel')
+  @UseInterceptors(ExportTableViewRows('ExportTableViewRows', 'excel'))
   async excelDataExport(@Req() req: Request, @Res() res: Response) {
     const { model, view } =
       await this.datasService.getViewAndModelFromRequestByAliasOrId(req);
@@ -45,6 +55,7 @@ export class DataAliasExportController {
     '/api/v1/db/data/:orgs/:baseName/:tableName/export/csv',
   ])
   @Acl('exportCsv')
+  @UseInterceptors(ExportTableViewRows('ExportTableViewRows', 'csv'))
   async csvDataExport(@Req() req: Request, @Res() res: Response) {
     const { model, view } =
       await this.datasService.getViewAndModelFromRequestByAliasOrId(req);
