@@ -27,7 +27,9 @@ export class DataAliasExportController {
     '/api/v1/db/data/:orgs/:baseName/:tableName/views/:viewName/export/excel',
   ])
   @Acl('exportExcel')
-  @UseInterceptors(ExportTableViewRows('ExportTableViewRows', 'excel'))
+  @UseInterceptors(
+    ExportTableViewRows('NocodbDBTableRowExportTableViewRows', 'excel'),
+  )
   async excelDataExport(@Req() req: Request, @Res() res: Response) {
     const { model, view } =
       await this.datasService.getViewAndModelFromRequestByAliasOrId(req);
@@ -55,7 +57,9 @@ export class DataAliasExportController {
     '/api/v1/db/data/:orgs/:baseName/:tableName/export/csv',
   ])
   @Acl('exportCsv')
-  @UseInterceptors(ExportTableViewRows('ExportTableViewRows', 'csv'))
+  @UseInterceptors(
+    ExportTableViewRows('NocodbDBTableRowExportTableViewRows', 'csv'),
+  )
   async csvDataExport(@Req() req: Request, @Res() res: Response) {
     const { model, view } =
       await this.datasService.getViewAndModelFromRequestByAliasOrId(req);
