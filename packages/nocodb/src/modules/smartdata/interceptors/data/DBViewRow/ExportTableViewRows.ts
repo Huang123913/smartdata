@@ -5,6 +5,7 @@ import type {
   Type,
 } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
+import type { Request } from 'express';
 import papaparse from 'papaparse';
 import { of } from 'rxjs';
 import * as XLSX from 'xlsx';
@@ -48,7 +49,7 @@ class ExportTableViewRowsInterceptor implements NestInterceptor {
     return of(null);
   }
 
-  async fetch(req) {
+  async fetch(req: Request) {
     // return Promise.resolve({
     //   data: [
     //     { Title: 'title1', age: 1 },
@@ -61,6 +62,20 @@ class ExportTableViewRowsInterceptor implements NestInterceptor {
     //   offset: -1,
     //   elapsed: 6.778912,
     // });
+
+    const query = req.query;
+    const params = req.params;
+
+    req.params = {};
+    req.query = {
+      operation: this.operation,
+    };
+
+    req.body = {
+      operation: this.operation,
+      ...params,
+      ...query,
+    };
 
     return this.mcdm.fetch(this.operation, { req });
   }
