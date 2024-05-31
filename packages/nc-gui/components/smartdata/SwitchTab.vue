@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-const activeKey = ref('consoleDesk')
+const activeKey = ref('')
 const router = useRouter()
 const { isLeftSidebarOpen } = storeToRefs(useSidebarStore())
 const showName = ['index-typeOrId-baseId-index-index', 'index-typeOrId-baseId-tab-tabView', 'index-typeOrId-baseId-playground']
@@ -31,7 +31,11 @@ watch(
 </script>
 
 <template>
-  <div class="switch-tab-main h-[var(--topbar-height)]" :class="{ 'left-sidebar-open-class': isLeftSidebarOpen }">
+  <div
+    v-if="activeKey"
+    class="switch-tab-main h-[var(--topbar-height)]"
+    :class="{ 'left-sidebar-open-class': isLeftSidebarOpen }"
+  >
     <div class="switch-tab flex flex-row p-1 mx-3 bg-gray-100 rounded-lg gap-x-0.5 nc-view-sidebar-tab">
       <div
         class="tab"
