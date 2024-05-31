@@ -467,7 +467,7 @@ useMenuCloseOnEsc(open)
             </Draggable>
           </div>
         </div>
-        <div v-if="!filterQuery" class="flex px-2 gap-2 py-2">
+        <div v-if="!filterQuery && false" class="flex px-2 gap-2 py-2">
           <NcButton class="nc-fields-show-all-fields" size="small" type="ghost" @click="showAllColumns = !showAllColumns">
             {{ showAllColumns ? 'Hide all' : 'Show all' }} fields
           </NcButton>
