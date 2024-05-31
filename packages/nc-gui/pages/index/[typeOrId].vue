@@ -6,6 +6,7 @@ const route = router.currentRoute
 
 <template>
   <div class="h-full">
+    <SmartdataSwitchTab />
     <NuxtPage :transition="false" :page-key="route.params.typeOrId" />
   </div>
 </template>
