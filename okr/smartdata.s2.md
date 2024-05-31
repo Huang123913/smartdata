@@ -89,8 +89,8 @@
    - 🟢️ Delete Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-delete` **完成**
    - 🟢️️ Update Grid Column (字段拖拽排序) `https://meta-apis-v1.nocodb.com/#tag/DB-View/operation/ db-view-grid-column-update` **完成**
    - ⚪️ Duplicate Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-duplicate` **未开始**
-      - 1. ⚪️ 拷贝表结构
-      - 2. ⚪️ 拷贝表结构+数据
+      - 1. ⚪️ 拷贝表结构 **进行中**
+      - 2. ⚪️ 拷贝表结构+数据 **进行中**
       - 3. ⚪️ 拷贝数据
    - ⚪️ Duplicate Column `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/duplicate-column` **未开始**
    - ⚪️ Reorder Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-reorder` **未开始**
@@ -112,7 +112,7 @@
 
 ### 导出: Excel, CSV
    > 导出数据
-   - ⚪️ Export Table View Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-csv-export` **进行中**
+   - 🟢️ Export Table View Rows `https://data-apis-v1.nocodb.com/#tag/DB-Table-Row/operation/db-table-row-csv-export` **完成**
 
 ### 显示: 排序
    - 🟢 List View Sorts `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort` **完成**
@@ -122,16 +122,19 @@
    - 🟢 Delete Sort `https://meta-apis-v1.nocodb.com/#tag/DB-Table-Sort/operation/db-table-sort-delete` **完成**
    - 🟢️ 查询接口对结果进行排序 **完成**
 
+### 后台任务
+   > 复制表、字段时后台起的线程，前端会轮询其状态
+   - ⚪️ /jobs/listen **未启动**
+
 ## 5.30
    > 正式环境: http://smartdata.yindangu.com
    > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
-   - 【进行中】增加提问建表入口 (页签)
-   - 【联调中】导出数据 (csv, excel)
-   - 【完成】字段拖拽排序
-   - 【完成】字段调整宽度
-   - 【完成】修改目录名称
+   - 【联调中】移动目录
+   - 【测试中】模型表格树卡顿优化
+   - 【完成】增加提问建表入口 (页签)
+   - 【完成】导出数据 (csv, excel)
    - 【暂缓，部分完成】屏蔽部分未支持的字段类型
 
 ### 需求池
