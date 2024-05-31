@@ -94,7 +94,9 @@ class ExportTableViewRowsInterceptor implements NestInterceptor {
       'Access-Control-Expose-Headers': 'nc-export-offset',
       'nc-export-offset': offset ?? -1,
       'nc-export-elapsed-time': elapsed ?? 0,
-      'Content-Disposition': `attachment; filename="${name}-export.csv"`,
+      'Content-Disposition': `attachment; filename="${encodeURI(
+        name,
+      )}-export.csv"`,
     });
 
     res.send(csvData);
@@ -114,7 +116,9 @@ class ExportTableViewRowsInterceptor implements NestInterceptor {
       'Access-Control-Expose-Headers': 'nc-export-offset',
       'nc-export-offset': offset ?? -1,
       'nc-export-elapsed-time': elapsed ?? 0,
-      'Content-Disposition': `attachment; filename="${name}-export.xlsx"`,
+      'Content-Disposition': `attachment; filename="${encodeURI(
+        name,
+      )}-export.xlsx"`,
     });
 
     res.end(buf);
