@@ -7,6 +7,7 @@ import {
   Post,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ProjectStatus } from 'nocodb-sdk';
@@ -17,6 +18,8 @@ import { Base, Column, Model, Source } from '~/models';
 import { generateUniqueName } from '~/helpers/exportImportHelpers';
 import { JobTypes } from '~/interface/Jobs';
 import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
+
+import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
 
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
@@ -168,6 +171,7 @@ export class DuplicateController {
   ])
   @HttpCode(200)
   @Acl('duplicateModel')
+  @UseInterceptors(MCDMRewrite('NocodbDBTableDuplicateTable'))
   async duplicateModel(
     @Req() req: Request,
     @Param('baseId') baseId: string,
@@ -224,6 +228,7 @@ export class DuplicateController {
   ])
   @HttpCode(200)
   @Acl('duplicateColumn')
+  @UseInterceptors(MCDMRewrite('NocodbDBTableDuplicateColumn'))
   async duplicateColumn(
     @Req() req: Request,
     @Param('baseId') baseId: string,

@@ -31,6 +31,8 @@ import { JOBS_QUEUE } from '~/interface/Jobs';
 import { MetasModule } from '~/modules/metas/metas.module';
 import { DatasModule } from '~/modules/datas/datas.module';
 
+import { MCDMService } from '~/services/smartdata/mcdm.service';
+
 export const JobsModuleMetadata = {
   imports: [
     DatasModule,
@@ -77,6 +79,9 @@ export const JobsModuleMetadata = {
     MetaSyncProcessor,
     SourceCreateProcessor,
     SourceDeleteProcessor,
+
+    // SmartData
+    MCDMService,
   ],
   exports: ['JobsService'],
 };

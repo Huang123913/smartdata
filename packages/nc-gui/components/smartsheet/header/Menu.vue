@@ -481,7 +481,7 @@ const filterOrGroupByThisField = (event: SmartsheetStoreEvents) => {
 
           <a-divider class="!my-0" />
 
-          <NcMenuItem hidden v-if="!column?.pk" :disabled="!isDuplicateAllowed" @click="openDuplicateDlg">
+          <NcMenuItem v-if="!column?.pk" :disabled="!isDuplicateAllowed" @click="openDuplicateDlg">
             <div v-e="['a:field:duplicate']" class="nc-column-duplicate nc-header-menu-item">
               <component :is="iconMap.duplicate" class="text-gray-700" />
               <!-- Duplicate -->

@@ -117,7 +117,6 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
         </NcMenuItem>
 
         <NcMenuItem
-          disabled
           v-if="isUIAllowed('tableDuplicate') && !isCatalogDropDown"
           :data-testid="`sidebar-table-duplicate-${item.title}`"
           @click="handleCopy(item)"
