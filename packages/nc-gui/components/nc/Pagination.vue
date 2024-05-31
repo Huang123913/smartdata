@@ -79,19 +79,19 @@ const pagesList = computed(() => {
 const pageSizeOptions = [
   {
     value: 25,
-    label: '25 / page',
+    label: '25 条 / 页',
   },
   {
     value: 50,
-    label: '50 / page',
+    label: '50 条 / 页',
   },
   {
     value: 75,
-    label: '75 / page',
+    label: '75 条 / 页',
   },
   {
     value: 100,
-    label: '100 / page',
+    label: '100 条 / 页',
   },
 ]
 
