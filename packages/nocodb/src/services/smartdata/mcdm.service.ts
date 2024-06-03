@@ -216,4 +216,15 @@ export class MCDMService {
       return r.data;
     });
   }
+
+  async delEntityCatalogCustom(params: { id: string }) {
+    return await this.mcdm({
+      url: `/webapi/ydg_vmcdm_custom_api/delEntityCatalogCustom`,
+      params: {
+        bizEntityCatalogCustom: JSON.stringify([params]),
+      },
+    }).then((r) => {
+      return r.data;
+    });
+  }
 }

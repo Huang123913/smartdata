@@ -11826,5 +11826,22 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+     * @description delEntityCatalogCustom MCDM
+     *
+     * @tags SmartData
+     * @name DelEntityCatalogCustom
+     * @summary delEntityCatalogCustom MCDM
+     * @request POST:/api/v2/smartdata/delEntityCatalogCustom
+     */
+    delEntityCatalogCustom: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/delEntityCatalogCustom`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
 }

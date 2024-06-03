@@ -97,4 +97,9 @@ export class SmartDataController {
   async saveCustomCatalog(@Body() data: object) {
     return await this.mcdm.saveCustomCatalog(data);
   }
+
+  @Post(['/api/v2/smartdata/delEntityCatalogCustom'])
+  async delEntityCatalogCustom(@Body() data: { id: string }) {
+    return await this.mcdm.delEntityCatalogCustom(data);
+  }
 }

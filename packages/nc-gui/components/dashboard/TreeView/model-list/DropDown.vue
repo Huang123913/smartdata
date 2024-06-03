@@ -16,6 +16,7 @@ const { openRenameTableDialog, duplicateTable } = inject(TreeViewInj)!
 const baseRole = inject(ProjectRoleInj)
 const clicked = ref<boolean>(false)
 const isTableDeleteDialogVisible = ref(false)
+const isCatalogDeleteDialogVisible = ref(false)
 const isShowSelectCatalogModel = ref(false)
 const updatedModel = ref(null)
 const isShowLoading = ref(false)
@@ -35,7 +36,12 @@ const handleClickChange = (visible: boolean) => {
 
 const handleTableDelete = () => {
   clicked.value = false
-  isTableDeleteDialogVisible.value = true
+  if (props.isCatalogDropDown) {
+    isCatalogDeleteDialogVisible.value = true
+    console.log('isCatalogDeleteDialogVisible', isCatalogDeleteDialogVisible.value)
+  } else {
+    isTableDeleteDialogVisible.value = true
+  }
 }
 
 const handleRename = (item: any) => {
@@ -105,6 +111,10 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
     isShowLoading.value = false
   }
 }
+
+const handleSetIsCatalogDeleteDialogVisible = (value: boolean) => {
+  isCatalogDeleteDialogVisible.value = value
+}
 </script>
 <template>
   <NcDropdown
@@ -159,7 +169,6 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
         <template v-if="isUIAllowed('tableDelete', { roles: baseRole })">
           <NcDivider />
           <NcMenuItem
-            :disabled="isCatalogDropDown"
             :data-testid="`sidebar-table-delete-${item.title}`"
             class="!text-red-500 !hover:bg-red-50"
             @click="handleTableDelete"
@@ -179,6 +188,12 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
     v-model:visible="isTableDeleteDialogVisible"
     :table-id="item.id"
     :base-id="base.id"
+  />
+
+  <DlgCatalogDelete
+    :visible="isCatalogDeleteDialogVisible"
+    :catalog="item"
+    :handleSetIsCatalogDeleteDialogVisible="handleSetIsCatalogDeleteDialogVisible"
   />
 
   <DlgSelectCatalog

@@ -17693,6 +17693,28 @@
           "$ref": "#/components/parameters/xc-auth"
         }
       ]
+    },
+    "/api/v2/smartdata/delEntityCatalogCustom":{
+      "post": {
+        "summary": "delEntityCatalogCustom MCDM",
+        "operationId": "delEntityCatalogCustom",
+        "description": "delEntityCatalogCustom MCDM",
+        "tags": ["SmartData"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/xc-auth"
+        }
+      ]
     }
 
   },

@@ -4,6 +4,7 @@ const props = defineProps<{
   entityName: string
   onDelete: () => Promise<void>
   deleteLabel?: string | undefined
+  onCancel?: (value: boolean) => void
 }>()
 
 const emits = defineEmits(['update:visible'])
@@ -40,6 +41,12 @@ onKeyStroke('Enter', () => {
 
   onDelete()
 })
+const handleCancel = () => {
+  if (props.onCancel) props.onCancel(false)
+  else {
+    visible.value = false
+  }
+}
 </script>
 
 <template>
@@ -60,7 +67,7 @@ onKeyStroke('Enter', () => {
       <slot name="entity-preview"></slot>
 
       <div class="flex flex-row gap-x-2 mt-2.5 pt-2.5 justify-end">
-        <NcButton type="secondary" @click="visible = false">
+        <NcButton type="secondary" @click="handleCancel">
           {{ $t('general.cancel') }}
         </NcButton>
 
