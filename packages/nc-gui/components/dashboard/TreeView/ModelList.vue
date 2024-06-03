@@ -25,8 +25,19 @@ const { $api } = useNuxtApp()
 const isShowLoading = ref(false)
 const isAddNewProjectChildEntityLoading = ref(false)
 const openedTableId = computed(() => route.params.viewId)
+const elementATree = ref(null)
+const scrollYHeight = ref(0)
 const showModelTree = computed(() => {
+  if (elementATree.value) resizeObserver.observe(elementATree.value)
   return chataiData.value.modelTree.length ? chataiData.value.modelTree[0].children : []
+})
+
+const resizeObserver = new ResizeObserver((entries) => {
+  for (const entry of entries) {
+    if (entry.target === elementATree.value) {
+      scrollYHeight.value = parseInt(entry.contentRect.height)
+    }
+  }
 })
 
 const onClickToTableView = (item: any) => {
@@ -143,8 +154,9 @@ const openTableCreateDialog = (catalog: any) => {
 </script>
 
 <template>
-  <div class="model-list rounded-md h-full w-full">
+  <div class="model-list rounded-md w-full" ref="elementATree" v-if="showModelTree.length">
     <a-tree
+      :height="scrollYHeight"
       :tree-data="showModelTree"
       v-model:expandedKeys="expandedKeys"
       @expand="handleExpand"
@@ -211,16 +223,23 @@ const openTableCreateDialog = (catalog: any) => {
 
 <style scoped lang="scss">
 .model-list {
+  height: calc(100vh - 261px);
   margin-top: 4px;
   ::v-deep .ant-tree {
     background-color: transparent;
   }
+  ::v-deep .ant-tree-list-holder {
+    overflow-x: hidden;
+    width: 100%;
+  }
   ::v-deep .ant-tree-treenode {
     width: 100% !important;
     padding-left: 27px;
-    padding-bottom: 0;
+    padding-bottom: 0px;
     border-radius: 6px;
-    margin: 2px 0;
+    padding-right: 2px;
+    border-bottom: 2px solid #f9f9fa;
+    border-top: 2px solid #f9f9fa;
   }
 
   ::v-deep .ant-tree-treenode:has(.hover-set) {
@@ -248,6 +267,7 @@ const openTableCreateDialog = (catalog: any) => {
     font-size: 14px;
     color: rgb(0, 0, 0);
     flex: 1;
+    overflow: hidden;
   }
   ::v-deep .ant-tree-switcher {
     top: -1px !important;
@@ -261,9 +281,10 @@ const openTableCreateDialog = (catalog: any) => {
   .model-text-content {
     display: flex;
     align-items: center;
-    height: 1.77rem;
+    // height: 1.77rem;
     border-radius: 4px;
     position: relative;
+    padding: 2px 0;
     .more-action-btn {
       width: 24px;
       margin-left: 16px;
