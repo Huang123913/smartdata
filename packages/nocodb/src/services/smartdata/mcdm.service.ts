@@ -1,4 +1,4 @@
-import axios, { type AxiosRequestConfig, type AxiosInstance } from 'axios';
+import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios';
 import { Request } from 'express';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 import { v4 as uuidv4 } from 'uuid';
@@ -198,6 +198,17 @@ export class MCDMService {
   }) {
     return await this.mcdm({
       url: `/webapi/ydg_vmcdm_custom_api/renameCatalogCustom`,
+      params: {
+        bizEntityCatalogCustom: JSON.stringify([params]),
+      },
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async saveCustomCatalog(params: object) {
+    return await this.mcdm({
+      url: `/webapi/ydg_vmcdm_custom_api/saveCustomCatalog`,
       params: {
         bizEntityCatalogCustom: JSON.stringify([params]),
       },

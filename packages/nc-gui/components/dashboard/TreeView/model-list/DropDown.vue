@@ -10,7 +10,7 @@ const props = defineProps<{
 const { $api } = useNuxtApp()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
-const { updateModelCatalog } = store
+const { updateModelCatalog, findNodeById } = store
 const { isUIAllowed } = useRoles()
 const { openRenameTableDialog, duplicateTable } = inject(TreeViewInj)!
 const baseRole = inject(ProjectRoleInj)
@@ -72,12 +72,34 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
       message.warning('此表已经在该目录下')
       return
     }
+    // let orderNo = selectedCatalogParam ? 0 : chataiData.value.modelTree[0].children.length + 1
     handleShowSelectCatalog(false, null)
     isShowLoading.value = true
     updateModelCatalog(updatedModel.value?.id, selectedCatalogParam.id)
-    await $api.smartData.updateModelCatalog({
-      entities: [{ id: updatedModel.value?.id, belongCatalog: selectedCatalogParam.id }],
-    })
+    if (updatedModel.value?.isCatalog) {
+      await $api.smartData.saveCustomCatalog({
+        id: updatedModel.value?.id,
+        name: null,
+        name_cn: null,
+        catalogType: null,
+        parentId: selectedCatalogParam.id,
+        code: null,
+        label: null,
+        description: null,
+        description_cn: null,
+        disabled: null,
+        orderNo: null,
+        customDateTime: null,
+        customGroupId: null,
+        customGroupName: null,
+        customOwnerId: null,
+        customOwnerName: null,
+      })
+    } else {
+      await $api.smartData.updateModelCatalog({
+        entities: [{ id: updatedModel.value?.id, belongCatalog: selectedCatalogParam.id }],
+      })
+    }
   } catch (error) {
   } finally {
     isShowLoading.value = false
@@ -127,11 +149,7 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
           </div>
         </NcMenuItem>
 
-        <NcMenuItem
-          :disabled="isCatalogDropDown"
-          :data-testid="`sidebar-table-rename-${item.title}`"
-          @click="handleShowSelectCatalog(true, item)"
-        >
+        <NcMenuItem :data-testid="`sidebar-table-rename-${item.title}`" @click="handleShowSelectCatalog(true, item)">
           <div class="flex gap-2 items-center">
             <GeneralIcon icon="move" class="text-gray-700" />
             {{ $t('general.moveTo') }}

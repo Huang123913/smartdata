@@ -64,24 +64,41 @@ const onDragEnter = (info: any) => {
 
 const onDrop = async (info: any) => {
   try {
-    const dragKey = info.dragNode.key //拖拽的模型id
-    let dropNode = info.node //拖拽的目的地
-    let dropKey = dropNode.isCatalog ? info.node.key : dropNode.parentId
-    let belongCatalog = info.node.id
+    const dragNode = info.dragNode //拖拽节点
+    const dragNodeKey = info.dragNode.key //拖拽节点id
+    const dragNodeParentId = info.dragNode.parentId //拖拽节点的父级id
+    let dropNode = info.node //归属节点
+    let dropNodeKey = dropNode.isCatalog ? info.node.key : dropNode.parentId //归属节点id
+    // let belongCatalog = dropNode.isCatalog ? info.node.key : dropNode.parentId //归属节点id
     const dropPosition = info.dropPosition
-    if (Number(dropPosition) < 0) {
-      belongCatalog = props.base.id
-      dropKey = null
-    } else if (!dropNode.isCatalog) {
-      belongCatalog = props.base.id
-      if (dropNode.parentId) {
-        let findCatalog = chataiData.value.modelData.find((item: any) => item.id === dropNode.parentId)
-        belongCatalog = findCatalog.id
-      }
+    if (Number(dropPosition) < 0 || !dropNodeKey) {
+      dropNodeKey = props.base.id
     }
-    updateModelCatalog(dragKey, dropKey)
     isShowLoading.value = true
-    await $api.smartData.updateModelCatalog({ entities: [{ id: dragKey, belongCatalog }] })
+
+    updateModelCatalog(dragNodeKey, dropNodeKey)
+    if (dragNode.isCatalog) {
+      await $api.smartData.saveCustomCatalog({
+        id: dragNodeKey,
+        name: null,
+        name_cn: null,
+        catalogType: null,
+        parentId: dropNodeKey,
+        code: null,
+        label: null,
+        description: null,
+        description_cn: null,
+        disabled: null,
+        orderNo: null,
+        customDateTime: null,
+        customGroupId: null,
+        customGroupName: null,
+        customOwnerId: null,
+        customOwnerName: null,
+      })
+    } else {
+      await $api.smartData.updateModelCatalog({ entities: [{ id: dragNodeKey, belongCatalog: dropNodeKey }] })
+    }
   } catch (error) {
     console.log('error', error)
   } finally {

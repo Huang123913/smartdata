@@ -17671,7 +17671,30 @@
           "$ref": "#/components/parameters/xc-auth"
         }
       ]
+    },
+    "/api/v2/smartdata/saveCustomCatalog":{
+      "post": {
+        "summary": "saveCustomCatalog MCDM",
+        "operationId": "saveCustomCatalog",
+        "description": "saveCustomCatalog MCDM",
+        "tags": ["SmartData"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/xc-auth"
+        }
+      ]
     }
+
   },
   "components": {
     "schemas": {

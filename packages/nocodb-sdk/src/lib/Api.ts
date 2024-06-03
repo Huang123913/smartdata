@@ -11809,5 +11809,22 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+     * @description saveCustomCatalog MCDM
+     *
+     * @tags SmartData
+     * @name SaveCustomCatalog
+     * @summary saveCustomCatalog MCDM
+     * @request POST:/api/v2/smartdata/saveCustomCatalog
+     */
+    saveCustomCatalog: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/saveCustomCatalog`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
 }

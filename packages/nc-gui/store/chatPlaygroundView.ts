@@ -76,6 +76,8 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
           key: '0-0',
         },
       ]
+      // 模型树进行排序
+      // chataiData.modelTree.forEach((node) => sortTreeNodesByOrderNo(node))
       chataiData.modelCatalog = chataiData.modelData.filter((item) => item.isCatalog && item.id !== null)
       chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog)
     } catch (e) {
@@ -91,6 +93,18 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
         let children: any[] = item.isCatalog ? buildTree(datas, item.id) : []
         return { ...item, title: item.name_cn, key: item.id, children, fields: [] }
       })
+  }
+
+  // 排序
+  const sortTreeNodesByOrderNo = (node: any) => {
+    if (node?.children && node.children.length > 0) {
+      // 对当前节点的 children 进行排序
+      node.children.sort((a: any, b: any) => {
+        return a.orderNo - b.orderNo
+      })
+      // 递归对每个子节点进行排序
+      node.children.forEach((child: any) => sortTreeNodesByOrderNo(child))
+    }
   }
 
   //设置展示的会话信息
@@ -139,7 +153,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
   }
 
   // 修改模型目录
-  const updateModelCatalog = (modelId: string, catalogId: string) => {
+  const updateModelCatalog = (modelId: string, catalogId: string, orderNo?: number) => {
     let findModel = chataiData.modelData.find((item) => item.id === modelId)
     findModel.parentId = catalogId
     chataiData.modelTree = [
@@ -153,6 +167,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
         key: '0-0',
       },
     ]
+    // chataiData.modelTree.forEach((node) => sortTreeNodesByOrderNo(node))
   }
 
   const updateCatalogName = (catalog: any, rename: string) => {
@@ -174,6 +189,19 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog)
   }
 
+  // 在模型树根据id查找节点
+  const findNodeById: any = (nodes: any, nodeId: string) => {
+    for (const node of nodes) {
+      if (node.id === nodeId) {
+        return node
+      } else if (node?.children && node.children.length > 0) {
+        const found = findNodeById(node.children, nodeId)
+        if (found) return found
+      }
+    }
+    return null
+  }
+
   return {
     chataiData,
     chataiApi,
@@ -188,5 +216,6 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     eventBus,
     updateModelCatalog,
     updateCatalogName,
+    findNodeById,
   }
 })
