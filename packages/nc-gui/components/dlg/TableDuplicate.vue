@@ -151,7 +151,9 @@ const isEaster = ref(false)
 
       <div class="text-xs p-2">
         <a-checkbox v-model:checked="options.includeData" :disabled="isLoading">{{ $t('labels.includeData') }}</a-checkbox>
-        <a-checkbox v-model:checked="options.includeViews" :disabled="isLoading">{{ $t('labels.includeView') }}</a-checkbox>
+        <!-- <a-checkbox v-model:checked="options.includeViews" :disabled="isLoading">{{
+          $t('labels.includeView')
+        }}</a-checkbox> -->
         <a-checkbox v-show="isEaster" v-model:checked="options.includeHooks" :disabled="isLoading">
           {{ $t('labels.includeWebhook') }}
         </a-checkbox>
