@@ -102,4 +102,9 @@ export class SmartDataController {
   async delEntityCatalogCustom(@Body() data: { id: string }) {
     return await this.mcdm.delEntityCatalogCustom(data);
   }
+
+  @Post(['/api/v2/smartdata/retraining'])
+  async retraining(@Body() data: { isUpdate: boolean; entityId: string }) {
+    return await this.llm.retraining(data);
+  }
 }

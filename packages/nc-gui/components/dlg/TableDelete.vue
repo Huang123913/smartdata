@@ -59,7 +59,7 @@ const onDelete = async () => {
       )
       return
     }
-
+    await $api.smartData.retraining({ isUpdate: false, entityId: toBeDeletedTable.id })
     await $api.dbTable.delete(toBeDeletedTable.id as string)
 
     await closeTab({

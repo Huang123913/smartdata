@@ -117,7 +117,7 @@ const renameTable = async (undo = false, disableTitleDiffCheck?: boolean | undef
       table_name: formState.title,
       title: formState.title,
     })
-
+    await $api.smartData.retraining({ isUpdate: true, entityId: tableMeta.id })
     dialogShow.value = false
 
     await loadProjectTables(tableMeta.base_id!, true)

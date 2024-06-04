@@ -11843,5 +11843,22 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+     * @description retraining llm
+     *
+     * @tags SmartData
+     * @name Retraining
+     * @summary retraining llm
+     * @request POST:/api/v2/smartdata/retraining
+     */
+    retraining: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/retraining`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
 }

@@ -61,7 +61,22 @@ export class LLMService {
     if (!entities.length) return undefined;
 
     const ddl = await this.mcdm.getDDL(entityId);
-    await this.trainByDDL(ddl);
+    const trainrRes = await this.trainByDDL(ddl);
+    if (trainrRes) {
+      let saveDdlProps = [
+        {
+          id: entityId,
+          props: [
+            {
+              name: 'belongDdlId',
+              code: 'belongDdlId',
+              value: trainrRes.id,
+            },
+          ],
+        },
+      ];
+      await this.mcdm.saveModel({ entities: saveDdlProps });
+    }
     result.ddl = ddl;
 
     // const entity = entities[0];
@@ -375,9 +390,57 @@ export class LLMService {
     // 生成ddl
     let generatedDDL = await this.mcdm.getDDL(entitieId);
     if (generatedDDL) {
-      await this.trainByDDL(generatedDDL);
+      let ddl = await this.trainByDDL(generatedDDL);
       // await this.llm.trainByPrompt(sql, question);
+      if (ddl) {
+        let savePropsEntities = [
+          {
+            id: entitieId,
+            props: [
+              {
+                name: 'belongDdlId',
+                code: 'belongDdlId',
+                value: ddl.id,
+              },
+            ],
+          },
+        ];
+        await this.mcdm.saveModel({ entities: savePropsEntities });
+      }
     }
     return { success: true };
+  }
+
+  async retraining(params: { isUpdate: boolean; entityId: string }) {
+    let { isUpdate, entityId } = params;
+    const entities = await this.mcdm.getEntity(entityId);
+    const entity = entities[0];
+    let result: null;
+    const entityProps = entity.props;
+    const ddlProp = entityProps.find((p) => p.code == 'belongDdlId');
+    if (ddlProp && ddlProp.value)
+      result = await this.removetrainbyids([ddlProp.value]);
+    if (isUpdate) {
+      result = await this.trainByEntityId(entityId);
+    }
+    return result;
+  }
+
+  async removetrainbyids(
+    ids: string[],
+    orgid: string = '1',
+    projectid: string = '1',
+  ) {
+    return await this.llm({
+      method: 'POST',
+      url: '/removetrainbyids',
+      params: {
+        ids: JSON.stringify(ids),
+        orgid,
+        projectid,
+      },
+    }).then((r) => {
+      return r.data;
+    });
   }
 }
