@@ -40,7 +40,7 @@ onUnmounted(() => {
       outlineWidth: '1px',
     }"
   >
-    <div class="flex flex-col">
+    <div class="flex flex-col layout-left-header">
       <DashboardSidebarHeader />
 
       <DashboardSidebarTopSection v-if="!isSharedBase" />
@@ -56,7 +56,7 @@ onUnmounted(() => {
     >
       <DashboardTreeView v-if="!isWorkspaceLoading" />
     </div>
-    <div v-if="!isSharedBase" class="border-t-1">
+    <div v-if="!isSharedBase" class="border-t-1 layout-left-footer">
       <DashboardSidebarBeforeUserInfo />
       <DashboardSidebarUserInfo />
     </div>

@@ -10,26 +10,39 @@ const props = defineProps<{
 }>()
 
 onMounted(async () => {
+  layoutLfetHeaderElem.value = document.querySelector('.layout-left-header')
+  layoutLfetFooterElem.value = document.querySelector('.layout-left-footer')
   props.setIsLoadingModel(true)
   await loadProjectTables(props.base.id as string)
   props.setIsLoadingModel(false)
 })
+
 const { loadProjectTables } = useTablesStore()
+const { openTable: _openTable } = useTableNew({ baseId: props.base.id! })
+const { $api } = useNuxtApp()
+const route = useRoute()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
 const { updateModelCatalog } = store
-const { openTable: _openTable } = useTableNew({ baseId: props.base.id! })
-const route = useRoute()
 const expandedKeys = ref([])
-const { $api } = useNuxtApp()
 const isShowLoading = ref(false)
 const isAddNewProjectChildEntityLoading = ref(false)
-const openedTableId = computed(() => route.params.viewId)
 const elementATree = ref(null)
+const layoutLfetHeaderElem = ref(null)
+const layoutLfetFooterElem = ref(null)
 const scrollYHeight = ref(0)
 const showModelTree = computed(() => {
   if (elementATree.value) resizeObserver.observe(elementATree.value)
+  if (!layoutLfetHeaderElem.value) layoutLfetHeaderElem.value = document.querySelector('.layout-left-header')
+  if (!layoutLfetFooterElem.value) layoutLfetFooterElem.value = document.querySelector('.layout-left-footer')
   return chataiData.value.modelTree.length ? chataiData.value.modelTree[0].children : []
+})
+const openedTableId = computed(() => route.params.viewId)
+
+const otherHeight = computed(() => {
+  if (layoutLfetHeaderElem.value && layoutLfetFooterElem.value)
+    return Math.ceil(layoutLfetHeaderElem.value.offsetHeight + layoutLfetFooterElem.value.offsetHeight) + 73
+  return 0
 })
 
 const resizeObserver = new ResizeObserver((entries) => {
@@ -154,7 +167,12 @@ const openTableCreateDialog = (catalog: any) => {
 </script>
 
 <template>
-  <div class="model-list rounded-md w-full" ref="elementATree" v-if="showModelTree.length">
+  <div
+    class="model-list rounded-md w-full"
+    ref="elementATree"
+    :style="{ height: `calc(100vh  - ${otherHeight}px)` }"
+    if="showModelTree.length"
+  >
     <a-tree
       :height="scrollYHeight"
       :tree-data="showModelTree"
@@ -223,7 +241,7 @@ const openTableCreateDialog = (catalog: any) => {
 
 <style scoped lang="scss">
 .model-list {
-  height: calc(100vh - 261px);
+  overflow: hidden;
   margin-top: 4px;
   ::v-deep .ant-tree {
     background-color: transparent;
