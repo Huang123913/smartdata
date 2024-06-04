@@ -12,6 +12,7 @@ export interface SessionItem {
   sql: string
   selectedModel: string
   tabledata: string
+  columns: any[]
   tip: string
 }
 
@@ -41,6 +42,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
       sql: '',
       selectedModel: '',
       tabledata: '',
+      columns: [],
       tip: '',
     }, //展示的会话信息
     modelFields: {}, //选择了的字段映射到对应模型
@@ -202,6 +204,12 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     return null
   }
 
+  //修改表字段名称
+  const updateTableColumnName = (column: object, name: string) => {
+    let findItem = chataiData.sessionItem.columns.find((item) => item.id === column.id)
+    findItem.name_cn = name
+  }
+
   return {
     chataiData,
     chataiApi,
@@ -217,5 +225,6 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     updateModelCatalog,
     updateCatalogName,
     findNodeById,
+    updateTableColumnName,
   }
 })

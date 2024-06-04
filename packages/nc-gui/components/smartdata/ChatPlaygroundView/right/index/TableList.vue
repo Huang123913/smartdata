@@ -9,7 +9,6 @@ const { $api } = useNuxtApp()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
 const { getCustomCatalogEntityTree, setSessionItem } = store
-
 const isShowSelectCatalogModal = ref<boolean>(false) //是否显示选择目录弹框
 const isEdited = ref<boolean>(false)
 const editText = ref<string>('')
@@ -31,27 +30,13 @@ const existingModelField = ref<{
 }>({})
 const selectPublishMode = ref<object>({})
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
-onMounted(() => {
-  // tableWidth.value = parseInt(elementRef1.value.clientWidth)
-  // tableHeight.value = parseInt(elementRef1.value.clientHeight)
-  // if (myTable.value) {
-  //   const headerElement = myTable.value.$el.querySelector('.ant-table-thead')
-  //   if (headerElement) {
-  //     const height = headerElement.clientHeight
-  //     tableHeight.value = parseInt(tableHeight.value) - parseInt(height)
-  //   }
-  // }
-  // resizeObserver1.observe(elementRef1.value)
-})
-
 const isShow = computed(() => {
   return chataiData.value.sessionItem?.sql
 })
 
 const columns = computed(() => {
   if (!chataiData.value.sessionItem?.sql) return []
-  let result = JSON.parse(chataiData.value.sessionItem.tabledata).fields
-  if (!result) return []
+  let result = chataiData.value.sessionItem.columns
   let fileds = result?.filter((item) => item.name !== 'id')
   let newFileds = fileds?.map((item) => {
     return {
@@ -65,17 +50,6 @@ const columns = computed(() => {
     }
   })
   return newFileds
-})
-
-const tableData = computed(() => {
-  if (!chataiData.value.sessionItem?.sql) return []
-  let result = JSON.parse(chataiData.value.sessionItem.tabledata).datas
-  if (!result) return []
-  let newDatas = result?.map((item: any, index: number) => {
-    let newItem = { ...item, indexItem: index + 1 }
-    return newItem
-  })
-  return newDatas
 })
 
 const existingModelData = computed(() => {
@@ -121,9 +95,11 @@ const handleOk = async (selectedCatalog: object) => {
     isShowSelectCatalogModal.value = false
     isShowLoading.value = true
     let exeRes = null
+    let datas = JSON.parse(chataiData.value.sessionItem.tabledata)
+    let fields = chataiData.value.sessionItem.columns
     if (isPublishCatalog.value) {
       let params = {
-        tableData: chataiData.value.sessionItem.tabledata,
+        tableData: JSON.stringify({ fields, datas }),
         sql: chataiData.value.sessionItem.sql,
         question: chataiData.value.sessionItem.tip,
         modelName: chataiData.value.sessionItem.textAreaValue,
@@ -133,7 +109,7 @@ const handleOk = async (selectedCatalog: object) => {
     } else {
       let params = {
         mapingData: selectedCatalog,
-        tableData: chataiData.value.sessionItem.tabledata,
+        tableData: JSON.stringify({ fields, datas }),
         existingModelId: selectPublishMode.value.id,
       }
       exeRes = await $api.smartData.publishModelToExistingModel(params)
@@ -204,13 +180,13 @@ const handleClickCleanBtn = () => {
     <div class="table-list-header">
       <div class="table-list-header-left">
         <a-typography-text class="list-item-left-content-textAreaValue">
-          <span v-if="!isEdited" class="edit-content"
+          <span v-if="!isEdited" class="edit-content edit-icon"
             ><span class="edit-text"> {{ chataiData.sessionItem?.textAreaValue }}</span>
-            <EditOutlined :title="isEdited ? '确认修改' : '编辑'" class="edit-outlined" @click="handleEdit(true)"
+            <EditOutlined :title="isEdited ? '确认修改' : '修改表名'" class="edit-outlined" @click="handleEdit(true)"
           /></span>
-          <a-input v-else v-model:value="editText">
+          <a-input v-else v-model:value="editText" class="edit-icon">
             <template #suffix>
-              <EditOutlined :title="isEdited ? '确认修改' : '编辑'" @click="handleEdit(false)" />
+              <EditOutlined :title="isEdited ? '确认修改' : '修改表名'" @click="handleEdit(false)" />
             </template>
           </a-input>
         </a-typography-text>
@@ -263,24 +239,8 @@ const handleClickCleanBtn = () => {
       </a-dropdown>
     </div>
     <!-- 表格数据 -->
-    <!-- <div class="table-data" ref="elementRef1">
-      <a-table
-        ref="myTable"
-        :pagination="false"
-        class="ant-table-striped"
-        :columns="columns"
-        :data-source="tableData"
-        :scroll="{ y: tableHeight }"
-      >
-        <template #headerCell="{ title, column }">
-          <a-tooltip :title="column.name_en" :overlayClassName="'reverse-selection-tip'">
-            <span style="cursor: default">{{ title }}</span>
-          </a-tooltip>
-        </template>
-      </a-table>
-    </div> -->
     <template v-if="columns.length">
-      <SmartdataChatPlaygroundViewRightIndexTableListTable :columns="columns" :datas="tableData" :simpleImage="simpleImage" />
+      <SmartdataChatPlaygroundViewRightIndexTableListTable :simpleImage="simpleImage" />
     </template>
     <div v-else class="no-data-table">
       <a-empty description="抱歉，我不能理解你的问题，请调整后再重试" :image="simpleImage" />
@@ -304,6 +264,9 @@ const handleClickCleanBtn = () => {
 <style lang="scss">
 .ant-tree-switcher {
   top: -2px;
+}
+.edit-icon .anticon-edit {
+  color: #0b6bcb;
 }
 .existing-model {
   max-height: 300px;
@@ -485,7 +448,7 @@ const handleClickCleanBtn = () => {
         box-shadow: 0 0 0 2px #0b6bcb !important;
       }
       .edit-outlined {
-        margin-left: 16px;
+        margin-left: 5px;
         position: relative;
       }
       input {

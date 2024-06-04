@@ -1,22 +1,73 @@
 <script lang="ts" setup>
+import { EditOutlined } from '@ant-design/icons-vue'
+
 const props = defineProps<{
-  columns: any[]
-  datas: any[]
   simpleImage: any
 }>()
+
+onMounted(() => {
+  if (tableRef.value) containerHeight.value = parseInt(tableRef.value?.clientHeight)
+  resizeObserver.observe(tableRef.value)
+})
+const store = useChatPlaygroundViewStore()
+const { chataiData } = storeToRefs(store)
+const { updateTableColumnName } = store
+let frame: number | null = null
 const itemHeight = 32 // 每个数据项的高度
 const buffer = 5 // 缓冲区行数
 const tableRef = ref(null)
 const containerHeight = ref(0)
 const startIndex = ref(0) // 当前滚动的起始索引
 const offsetY = ref(0) // 滚动偏移量
-onMounted(() => {
-  if (tableRef.value) containerHeight.value = parseInt(tableRef.value?.clientHeight)
-  resizeObserver.observe(tableRef.value)
+const inputValue = ref('')
+const inputRef = ref(null)
+const isEditObj = ref({})
+const columns = computed(() => {
+  if (!chataiData.value.sessionItem?.sql) return []
+  let result = chataiData.value.sessionItem.columns
+  let fileds = result?.filter((item) => item.name !== 'id')
+  let newFileds = fileds?.map((item) => {
+    return {
+      ...item,
+      title: item.name_cn ?? item.name ?? item.code,
+      dataIndex: item.name ?? item.code,
+      name_en: item.name ?? item.code,
+      width: '180px',
+      value: item.name,
+      label: item.name_cn ?? item.name ?? item.code,
+    }
+  })
+  newFileds.map((item) => (isEditObj.value[item.id] = false))
+  return newFileds
+})
+
+const tableData = computed(() => {
+  if (!chataiData.value.sessionItem?.sql) return []
+  let result = JSON.parse(chataiData.value.sessionItem.tabledata)
+  if (!result) return []
+  let newDatas = result?.map((item: any, index: number) => {
+    let newItem = { ...item, indexItem: index + 1 }
+    return newItem
+  })
+  return newDatas
+})
+
+//可见行数
+const visibleCount = computed(() => {
+  return Math.ceil(containerHeight.value / itemHeight)
+})
+
+// 数据总高度
+const totalHeight = computed(() => {
+  return tableData.value.length * itemHeight
+})
+
+const visibleItems = computed(() => {
+  const end = startIndex.value + visibleCount.value + buffer
+  return tableData.value.slice(startIndex.value, end)
 })
 
 const resizeObserver = new ResizeObserver((entries) => {
-  // 当尺寸发生变化时更新宽度值
   for (const entry of entries) {
     if (entry.target === tableRef.value) {
       containerHeight.value = parseInt(entry.contentRect.height)
@@ -24,21 +75,6 @@ const resizeObserver = new ResizeObserver((entries) => {
   }
 })
 
-//可见行数
-const visibleCount = computed(() => {
-  return Math.ceil(containerHeight.value / itemHeight)
-})
-// 数据总高度
-const totalHeight = computed(() => {
-  return props.datas.length * itemHeight
-})
-
-const visibleItems = computed(() => {
-  const end = startIndex.value + visibleCount.value + buffer
-  return props.datas.slice(startIndex.value, end)
-})
-
-let frame: number | null = null
 // 滚动事件处理程序
 const onScroll = (event: any) => {
   if (frame) {
@@ -49,6 +85,23 @@ const onScroll = (event: any) => {
     startIndex.value = Math.max(0, Math.floor(scrollTop / itemHeight))
     offsetY.value = scrollTop - (scrollTop % itemHeight)
   })
+}
+
+const handleEditClick = (col: object) => {
+  inputValue.value = col.title
+  isEditObj.value[col.id] = true
+  nextTick(() => {
+    inputRef.value[0]?.focus()
+    inputRef.value[0]?.select()
+    inputRef.value[0]?.scrollIntoView()
+  })
+}
+
+const updateColumnName = (col: object) => {
+  isEditObj.value[col.id] = false
+  if (inputValue.value.trim() === col.title) return
+  console.log('inputValue.value', inputValue.value)
+  updateTableColumnName(col, inputValue.value)
 }
 </script>
 <template>
@@ -71,29 +124,46 @@ const onScroll = (event: any) => {
             v-xc-ver-resize
             :data-col="col.id"
             :data-title="col.title"
-            class="nc-grid-column-header text-gray-500"
+            class="nc-grid-column-header text-gray-500 header-title"
             :style="{
               'min-width': '180px',
               'max-width': '180px',
               'width': '180px',
+              'cursor': 'pointer',
             }"
           >
-            <NcTooltip class="truncate text" show-on-truncate-only :style="{ 'text-align': 'left' }">
+            <NcTooltip v-if="!isEditObj[col.id]" class="truncate text" show-on-truncate-only :style="{ 'text-align': 'left' }">
               <template #title>
                 {{ col.title }}
               </template>
-              <span
-                class="text-ellipsis overflow-hidden text-gray-500"
-                :style="{
-                  'wordBreak': 'keep-all',
-                  'whiteSpace': 'nowrap',
-                  'display': 'inline',
-                  'font-size': '13px',
-                }"
-              >
-                {{ col.title }}
+              <span class="flex align-center">
+                <span
+                  class="text-ellipsis overflow-hidden text-gray-500"
+                  :style="{
+                    'wordBreak': 'keep-all',
+                    'whiteSpace': 'nowrap',
+                    'font-size': '13px',
+                    'display': 'inline-block',
+                    'flex': 1,
+                    'position': 'relative',
+                    'top': '2px',
+                  }"
+                  >{{ col.title }}</span
+                >
+                <span class="th-edit-icon">
+                  <EditOutlined @click="handleEditClick(col)" />
+                </span>
               </span>
             </NcTooltip>
+            <input
+              ref="inputRef"
+              v-else
+              v-model="inputValue"
+              class="th-input !text-brand-600 !font-semibold flex-grow leading-1 outline-0 ring-none capitalize !text-inherit !bg-transparent"
+              @click.stop
+              @keyup.esc="updateColumnName(col)"
+              @blur="updateColumnName(col)"
+            />
           </th>
         </tr>
       </thead>
@@ -162,13 +232,28 @@ const onScroll = (event: any) => {
       </table>
     </div>
 
-    <div v-if="datas.length === 0" class="no-data">
+    <div v-if="tableData.length === 0" class="no-data">
       <a-empty :description="'暂无数据'" :image="simpleImage" />
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
+.header-title {
+  &:hover .th-edit-icon {
+    opacity: 1;
+  }
+}
+.th-edit-icon {
+  margin-left: 2px;
+  position: relative;
+  top: -2px;
+  opacity: 0;
+}
+.th-input {
+  position: relative;
+  top: 2px;
+}
 .nc-grid-wrapper {
   position: relative;
 }

@@ -12,6 +12,7 @@ export interface SessionItem {
   sql: string
   selectedModel: string
   tabledata: string
+  columns: any[]
   tip: string
 }
 const { $api } = useNuxtApp()
@@ -30,6 +31,7 @@ const selectedSessionItem = ref<SessionItem>({
   selectedModel: '',
   tabledata: '',
   tip: '',
+  columns: [],
 }) //被选中的会话
 const isShowLoading = ref<boolean>(false) //加载效果
 const textAreaValue = ref<string>('') //查询内容
@@ -122,6 +124,7 @@ const handleSend = async () => {
       result?.sqlExeRes && console.error(result?.sqlExeRes)
     }
     let fields = result?.data?.fields ?? []
+    if (fields.length) fields.map((item) => (item.id = uuidv4()))
     let datas = result?.data?.datas ?? []
     let newSessionItem = {
       id: uuidv4(),
@@ -129,7 +132,8 @@ const handleSend = async () => {
       sql: result?.sql,
       searchTime: getNowDate(),
       selectedModel: chataiData.value.checkedModelData.length ? JSON.stringify(chataiData.value.checkedModelData) : '',
-      tabledata: JSON.stringify({ fields, datas }),
+      tabledata: JSON.stringify(datas),
+      columns: fields,
       tip: textAreaValue.value,
     }
     sessionList.value.unshift(newSessionItem)
@@ -141,6 +145,7 @@ const handleSend = async () => {
       sql: '',
       selectedModel: '',
       tabledata: '',
+      columns: [],
       tip: '',
     }
   } catch (e: any) {
