@@ -452,4 +452,35 @@ export class LLMService {
       return r.data;
     });
   }
+
+  async analyzingHeadersGenerateTable(
+    tableHeader: string,
+    orgid: string = '1',
+    projectid: string = '1',
+  ) {
+    return await this.llm({
+      method: 'POST',
+      url: '/AnalyzingHeadersGenerateTable',
+      params: {
+        id: uuidv4(),
+        orgid,
+        projectid,
+        table_headers: tableHeader,
+      },
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async intelligentImport(params: { tableHeader: string }) {
+    let { tableHeader } = params;
+    let exeRes = await this.analyzingHeadersGenerateTable('tableHeader');
+    if (exeRes) {
+      let sql = exeRes.text;
+      sql = sql.replace(/;/g, '');
+      let exeSqlRes = await this.mcdm.exeSql({ sql });
+      return exeSqlRes;
+    }
+    return null;
+  }
 }

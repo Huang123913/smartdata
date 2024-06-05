@@ -107,4 +107,9 @@ export class SmartDataController {
   async retraining(@Body() data: { isUpdate: boolean; entityId: string }) {
     return await this.llm.retraining(data);
   }
+
+  @Post(['/api/v2/smartdata/analyzingHeadersGenerateTable'])
+  async analyzingHeadersGenerateTable(@Body() data: { tableHeader: string }) {
+    return await this.llm.analyzingHeadersGenerateTable(data.tableHeader);
+  }
 }

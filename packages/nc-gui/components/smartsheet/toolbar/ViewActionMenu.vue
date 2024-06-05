@@ -1,7 +1,9 @@
 <script lang="ts" setup>
+import { LockType } from '#imports'
 import type { TableType, ViewType } from 'nocodb-sdk'
 import { ViewTypes } from 'nocodb-sdk'
-import { LockType } from '#imports'
+
+import Icon from '@ant-design/icons-vue'
 
 const props = withDefaults(
   defineProps<{
@@ -13,6 +15,8 @@ const props = withDefaults(
     inSidebar: false,
   },
 )
+
+const reloadDataHook = inject(ReloadViewDataHookInj)
 
 const emits = defineEmits(['rename', 'closeModal', 'delete'])
 
@@ -27,6 +31,10 @@ const { t } = useI18n()
 const view = computed(() => props.view)
 
 const table = computed(() => props.table)
+
+const fields = inject(FieldsInj, ref([]))
+const { filters, loadFilters } = useViewFilters(view, null)
+const { sorts } = useViewSorts(view.value, () => reloadDataHook?.trigger())
 
 const { viewsByTable } = storeToRefs(useViewsStore())
 const { loadViews, navigateToView } = useViewsStore()
@@ -142,6 +150,33 @@ const onViewIdCopy = async () => {
 const onDelete = async () => {
   emits('delete')
 }
+
+const intelligentImport = async () => {
+  await loadFilters('')
+  let tableHeaderColumns: any[] = fields.value.map((item) => ({
+    header: item.column_name,
+    meaning: item.description,
+    chinese: item.title,
+  }))
+  let filtersData: any[] = filters.value.map((item) => {
+    let findColumn = fields.value.find((column) => column.fk_column_id === item.fk_column_id)
+    return { field: findColumn.column_name, operator: item.comparison_op, value: item.value }
+  })
+  let sort_order = sorts.value.map((item) => {
+    let findColumn = fields.value.find((column) => column.fk_column_id === item.fk_column_id)
+    return { field: findColumn.column_name, direction: item.direction.toUpperCase() }
+  })
+  let table_meta = [{ table_name: table.value.name, meaning: table.value.description_cn, chinese: table.value.name_cn }]
+
+  let tableHeader = {
+    table_headers: tableHeaderColumns,
+    filters: filtersData,
+    sort_order,
+    pagination: {},
+    table_meta,
+  }
+  await $api.smartData.analyzingHeadersGenerateTable({ tableHeader })
+}
 </script>
 
 <template>
@@ -192,6 +227,34 @@ const onDelete = async () => {
 
     <template v-if="view.type !== ViewTypes.FORM">
       <NcDivider />
+      <NcMenuItem @click="intelligentImport">
+        <div class="nc-base-menu-item group">
+          <icon :style="{ marginRight: '2px' }">
+            <template #component>
+              <svg
+                t="1717567800506"
+                class="icon"
+                viewBox="0 0 1024 1024"
+                version="1.1"
+                xmlns="http://www.w3.org/2000/svg"
+                p-id="5075"
+                width="16"
+                height="16"
+              >
+                <path
+                  d="M819.5 107H199.3C140.7 107 93 154.7 93 213.3v356c0 17.6 14.3 31.9 31.9 31.9s31.9-14.3 31.9-31.9v-356c0-23.4 19.1-42.5 42.5-42.5h620.2c23.4 0 42.5 19.1 42.5 42.5v584.5c0 23.4-19.1 42.5-42.5 42.5h-413c-17.6 0-31.9 14.3-31.9 31.9s14.3 31.9 31.9 31.9h413c58.6 0 106.3-47.7 106.3-106.3V213.3c0-58.6-47.7-106.3-106.3-106.3z"
+                  p-id="5076"
+                ></path>
+                <path
+                  d="M531.2 671.9v61.4c-0.1 19.3 22.3 30 37.3 17.9l229.1-185.3c11.4-9.2 11.3-26.5-0.1-35.7l-228-205.1c-15-12-38.3-1.4-38.4 17.8V405c0 11.7-8 20.1-19.4 22.7C207.5 497 130.6 853.6 133.2 878.1c99-93.7 199-238.6 375.7-229.2 12.6 0.7 22.4 10.5 22.3 23z"
+                  p-id="5077"
+                ></path>
+              </svg>
+            </template>
+          </icon>
+          {{ '智能导入' }}
+        </div>
+      </NcMenuItem>
       <template v-if="isUIAllowed('csvTableImport') && !isPublicView">
         <NcSubMenu key="upload">
           <template #title>
@@ -231,6 +294,7 @@ const onDelete = async () => {
           </template>
         </NcSubMenu>
       </template>
+
       <NcSubMenu key="download">
         <template #title>
           <div

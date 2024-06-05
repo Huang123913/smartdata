@@ -11860,5 +11860,22 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+     * @description analyzingHeadersGenerateTable llm
+     *
+     * @tags SmartData
+     * @name AnalyzingHeadersGenerateTable
+     * @summary analyzingHeadersGenerateTable llm
+     * @request POST:/api/v2/smartdata/analyzingHeadersGenerateTable
+     */
+    analyzingHeadersGenerateTable: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/analyzingHeadersGenerateTable`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
 }
