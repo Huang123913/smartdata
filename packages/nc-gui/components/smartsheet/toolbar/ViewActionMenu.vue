@@ -168,13 +168,13 @@ const intelligentImport = async () => {
   })
   let table_meta = [{ table_name: table.value.name, meaning: table.value.description_cn, chinese: table.value.name_cn }]
 
-  let tableHeader = {
+  let tableHeader = JSON.stringify({
     table_headers: tableHeaderColumns,
     filters: filtersData,
     sort_order,
     pagination: {},
     table_meta,
-  }
+  })
   await $api.smartData.analyzingHeadersGenerateTable({ tableHeader })
 }
 </script>
