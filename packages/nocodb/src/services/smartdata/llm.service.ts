@@ -42,20 +42,26 @@ export class LLMService {
 
   async train() {
     await this.deleteTrainData();
-
+    const wait = (time: number) =>
+      new Promise((resolve) => setTimeout(resolve, time));
     const result = [];
     const entities = await this.mcdm.getEntities();
     for (let i = 0; i < entities.length; i++) {
       const entity = entities[i];
       if (entity.isCatalog == true) continue;
-
-      const trainResult = await this.trainByEntityId(entity.id);
+      const entityProps = entity.props;
+      const ddlProp = entityProps.findLast((p) => p.code == 'belongDdlId');
+      const trainResult = await this.trainByEntityId(
+        entity.id,
+        ddlProp ? ddlProp.id : '',
+      );
       result.push(trainResult);
+      await wait(500);
     }
     return result;
   }
 
-  async trainByEntityId(entityId: string) {
+  async trainByEntityId(entityId: string, id?: string) {
     const result = Object.create({ id: entityId });
     const entities = await this.mcdm.getEntity(entityId);
     if (!entities.length) return undefined;
@@ -68,6 +74,7 @@ export class LLMService {
           id: entityId,
           props: [
             {
+              id: id ? id : null,
               name: 'belongDdlId',
               code: 'belongDdlId',
               value: trainrRes.id,
@@ -75,7 +82,9 @@ export class LLMService {
           ],
         },
       ];
-      await this.mcdm.saveModel({ entities: saveDdlProps });
+      result.saveDdlPropsRes = await this.mcdm.saveModel({
+        entities: saveDdlProps,
+      });
     }
     result.ddl = ddl;
 
@@ -417,11 +426,11 @@ export class LLMService {
     const entity = entities[0];
     let result: null;
     const entityProps = entity.props;
-    const ddlProp = entityProps.find((p) => p.code == 'belongDdlId');
+    const ddlProp = entityProps.findLast((p) => p.code == 'belongDdlId');
     if (ddlProp && ddlProp.value)
       result = await this.removetrainbyids([ddlProp.value]);
     if (isUpdate) {
-      result = await this.trainByEntityId(entityId);
+      result = await this.trainByEntityId(entityId, ddlProp ? ddlProp.id : '');
     }
     return result;
   }
