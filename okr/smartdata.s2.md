@@ -132,11 +132,11 @@
    > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
-   - 【进行中】智能导入数据 /AnalyzingHeadersGenerateTable
    - 【进行中】持久化数据导入的原文件
    - 【进行中】创建目录
-   - 【完成】发布模型时, 允许编辑表名及字段名 (直接在结果预览中修改)
-   - 【完成】修改模型元信息时重新训练
+   - 【联调中】智能导入数据 /AnalyzingHeadersGenerateTable
+   - 【未开始】创建表时增加描述字段 
+   - 【未开始】创建字段时增加描述字段 
 
 ### 需求池
    - 存储 Prompt 模板
