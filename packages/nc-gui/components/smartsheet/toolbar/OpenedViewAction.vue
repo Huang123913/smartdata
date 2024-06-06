@@ -1,4 +1,8 @@
 <script lang="ts" setup>
+const props = defineProps<{
+  intelligentImport?: () => void
+}>()
+
 const { activeTable } = storeToRefs(useTablesStore())
 
 const { isMobileMode } = useGlobal()
@@ -201,6 +205,7 @@ function openDeleteDialog() {
         @close-modal="isDropdownOpen = false"
         @rename="onRenameMenuClick"
         @delete="openDeleteDialog"
+        :intelligentImport="intelligentImport"
       />
     </template>
   </NcDropdown>

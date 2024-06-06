@@ -11862,16 +11862,33 @@ export class Api<
       }),
 
     /**
-     * @description analyzingHeadersGenerateTable llm
+     * @description intelligentImport llm
      *
      * @tags SmartData
-     * @name AnalyzingHeadersGenerateTable
-     * @summary analyzingHeadersGenerateTable llm
-     * @request POST:/api/v2/smartdata/analyzingHeadersGenerateTable
+     * @name IntelligentImport
+     * @summary intelligentImport llm
+     * @request POST:/api/v2/smartdata/intelligentImport
      */
-    analyzingHeadersGenerateTable: (data: object, params: RequestParams = {}) =>
+    intelligentImport: (data: object, params: RequestParams = {}) =>
       this.request<any, any>({
-        path: `/api/v2/smartdata/analyzingHeadersGenerateTable`,
+        path: `/api/v2/smartdata/intelligentImport`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description importData MCDM
+     *
+     * @tags SmartData
+     * @name ImportData
+     * @summary importData MCDM
+     * @request POST:/api/v2/smartdata/importData
+     */
+    importData: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/importData`,
         method: 'POST',
         body: data,
         type: ContentType.Json,

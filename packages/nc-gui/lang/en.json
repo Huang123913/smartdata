@@ -205,7 +205,8 @@
     "apply": "Apply",
     "text": "Text",
     "appearance": "Appearance",
-    "moveTo":"Move"
+    "moveTo":"Move",
+    "intelligentImport":"Intelligent Import"
   },
   "objects": {
     "owner": "Owner",

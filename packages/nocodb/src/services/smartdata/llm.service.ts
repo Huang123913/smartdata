@@ -446,15 +446,29 @@ export class LLMService {
     });
   }
 
-  async intelligentImport(params: { tableHeader: string }) {
-    let { tableHeader } = params;
-    let exeRes = await this.analyzingHeadersGenerateTable(tableHeader);
-    if (exeRes) {
-      let sql = exeRes.text;
-      sql = sql.replace(/;/g, '');
+  async intelligentImport(params: {
+    tableHeader: string;
+    allTableMode: string;
+  }) {
+    let { tableHeader, allTableMode } = params;
+    let modelList = await this.getModelrange(JSON.parse(allTableMode));
+    let tableHeaderObj = JSON.parse(tableHeader);
+    let tableHeaders = {
+      ...tableHeaderObj,
+      modelrange: {
+        ischoose: false,
+        modellist: JSON.parse(modelList),
+      },
+    };
+    let exeRes = await this.analyzingHeadersGenerateTable(
+      JSON.stringify(tableHeaders),
+    );
+    if (exeRes && typeof exeRes === 'string' && exeRes.indexOf('SELECT') > -1) {
+      let sql = exeRes.replace(/;/g, '');
       let exeSqlRes = await this.mcdm.exeSql({ sql });
+      exeSqlRes.sql = sql;
       return exeSqlRes;
     }
-    return null;
+    return exeRes;
   }
 }

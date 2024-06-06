@@ -3,32 +3,61 @@ import { ChatPlaygroundViewStoreEvents } from '#imports'
 import { Empty } from 'ant-design-vue'
 
 const props = defineProps<{
-  visible?: boolean
-  columns?: any[]
-  tableData?: any[]
+  visible: boolean
+  propsColumns: any[]
+  propsTableData: any[]
+  closePreview: (value: boolean) => void
+  activeTable: any
 }>()
-onMounted(() => {})
 
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
+const tableContainerHeight = 568
 let frame: number | null = null
 const itemHeight = 32 // 每个数据项的高度
 const buffer = 5 // 缓冲区行数
-const tableRef = ref(null)
 const startIndex = ref(0) // 当前滚动的起始索引
 const offsetY = ref(0) // 滚动偏移量
+const loading = ref(false)
+const { $api } = useNuxtApp()
+const columns = computed(() => {
+  if (!props.propsColumns.length) return []
+  let fileds = props.propsColumns.filter((item) => item.name !== 'id')
+  let newFileds = fileds.map((item) => {
+    return {
+      ...item,
+      title: item.name_cn ?? item.name ?? item.code,
+      dataIndex: item.name ?? item.code,
+      name_en: item.name ?? item.code,
+      width: '180px',
+      value: item.name,
+      label: item.name_cn ?? item.name ?? item.code,
+    }
+  })
+  return newFileds
+})
+
+const tableData = computed(() => {
+  if (!props.propsTableData.length) return []
+  let newDatas = props.propsTableData.map((item: any, index: number) => {
+    let newItem = { ...item, indexItem: index + 1 }
+    return newItem
+  })
+  return newDatas
+})
+
 //可见行数
 const visibleCount = computed(() => {
-  return Math.ceil(568 / itemHeight)
+  return Math.ceil(tableContainerHeight / itemHeight)
 })
 
 // 数据总高度
 const totalHeight = computed(() => {
-  return props.tableData.length * itemHeight
+  return tableData.value.length * itemHeight
 })
 
 const visibleItems = computed(() => {
   const end = startIndex.value + visibleCount.value + buffer
-  return props.tableData.slice(startIndex.value, end)
+  return tableData.value.slice(startIndex.value, end)
 })
 
 // 滚动事件处理程序
@@ -42,15 +71,47 @@ const onScroll = (event: any) => {
     offsetY.value = scrollTop - (scrollTop % itemHeight)
   })
 }
+const { xWhere } = useSmartsheetStoreOrThrow()
+const meta = inject(MetaInj, ref())
+const { activeView } = storeToRefs(useViewsStore())
+const { loadData } = useViewData(meta, activeView, xWhere)
+const { eventBus } = useSmartsheetStoreOrThrow()
+const handleModalOk = async () => {
+  try {
+    loading.value = true
+    let result = await $api.smartData.importData({
+      entityId: props.activeTable.id,
+      tableData: JSON.stringify(props.propsTableData),
+    })
+    if (result && result?.success) {
+      await loadData()
+      eventBus.emit(SmartsheetStoreEvents.DATA_RELOAD)
+      message.success('成功导入数据')
+    }
+  } catch (error) {
+    console.error(error)
+  } finally {
+    loading.value = false
+    props.closePreview(false)
+  }
+}
 
-const handleModalOk = () => {}
-
-const handleCancel = () => {}
+const handleCancel = () => {
+  props.closePreview(false)
+}
 </script>
 
 <template>
-  <a-modal class="intelligent-import-preview" title="数据" :visible="true" :afterClose="hanldeAfterClose" @cancel="handleCancel">
-    <div ref="tableRef" class="nc-grid-wrapper min-h-0 flex-1 relative nc-scrollbar-x-lg !overflow-auto" @scroll="onScroll">
+  <a-modal
+    :width="'max-content'"
+    class="intelligent-import-preview"
+    title="数据预览"
+    :visible="visible"
+    :maskClosable="false"
+    @cancel="handleCancel"
+    :style="{ '--set-height': tableData && tableData.length ? '600px' : '300px' }"
+  >
+    <div class="nc-grid-wrapper min-h-0 flex-1 relative nc-scrollbar-x-lg !overflow-auto" @scroll="onScroll">
       <table class="xc-row-table nc-grid backgroundColorDefault !h-auto bg-white sticky top-0 z-5 bg-white">
         <thead>
           <tr class="!h-auto bg-white sticky top-0 z-5 bg-white desktop">
@@ -74,7 +135,6 @@ const handleCancel = () => {}
                 'min-width': '180px',
                 'max-width': '180px',
                 'width': '180px',
-                'cursor': 'pointer',
               }"
             >
               <NcTooltip class="truncate text" show-on-truncate-only :style="{ 'text-align': 'left' }">
@@ -87,10 +147,7 @@ const handleCancel = () => {}
                     'wordBreak': 'keep-all',
                     'whiteSpace': 'nowrap',
                     'font-size': '13px',
-                    'display': 'inline-block',
-                    'flex': 1,
-                    'position': 'relative',
-                    'top': '2px',
+                    s,
                   }"
                   >{{ col.title }}</span
                 >
@@ -113,12 +170,7 @@ const handleCancel = () => {}
           class="xc-row-table nc-grid backgroundColorDefault !h-auto bg-white relative pr-1 pb-1"
         >
           <tbody>
-            <tr
-              v-for="(row, rowIndex) of visibleItems"
-              class="nc-grid-row !xs:h-14"
-              :style="{ height: `32px` }"
-              :data-testid="`grid-row-${rowIndex}`"
-            >
+            <tr v-for="(row, rowIndex) of visibleItems" class="nc-grid-row !xs:h-14" :style="{ height: `32px` }">
               <td
                 :key="rowIndex"
                 class="caption nc-grid-cell w-[64px] min-w-[64px] text-gray-500"
@@ -163,14 +215,24 @@ const handleCancel = () => {}
         </table>
       </div>
     </div>
-    <!-- <div v-if="tableData.length === 0" class="no-data">
+    <div v-if="tableData.length === 0" class="no-data">
       <a-empty :description="'暂无数据'" :image="simpleImage" />
-    </div> -->
+    </div>
+
+    <!-- :disabled="!tableData.length" -->
     <template #footer>
-      <div>
-        <a-button key="back" @click="handleCancel">取消</a-button>
-        <a-button key="submit" type="primary" @click="handleModalOk">导入数据</a-button>
-      </div>
+      <NcButton type="secondary" @click="handleCancel">{{ $t('general.cancel') }}</NcButton>
+      <NcButton
+        key="submit"
+        type="primary"
+        label="导入数据"
+        loading-label="导入数据"
+        :loading="loading"
+        @click="() => handleModalOk()"
+      >
+        {{ '导入数据' }}
+        <template #loading> {{ '导入数据' }}</template>
+      </NcButton>
     </template>
   </a-modal>
 </template>
@@ -179,13 +241,18 @@ const handleCancel = () => {}
 .intelligent-import-preview {
   .ant-modal-content {
     padding: 8px 16px 0 16px !important;
-    width: 900px;
+    width: max-content;
+    max-width: 900px;
     .ant-modal-header {
       padding: 16px 0 !important;
+      .ant-modal-title {
+        font-size: 1.125rem;
+        font-weight: 550;
+      }
     }
     .ant-modal-body {
+      height: var(--set-height);
       padding: 16px 0 16px 8px !important;
-      height: 600px;
     }
     .ant-modal-footer {
       padding: 16px;
@@ -193,7 +260,6 @@ const handleCancel = () => {}
   }
   .ant-modal-close {
     top: 4px !important;
-    right: 10px;
   }
   .ant-modal-footer {
     .ant-btn {
@@ -217,21 +283,6 @@ const handleCancel = () => {}
 </style>
 
 <style lang="scss" scoped>
-.header-title {
-  &:hover .th-edit-icon {
-    opacity: 1;
-  }
-}
-.th-edit-icon {
-  margin-left: 2px;
-  position: relative;
-  top: -2px;
-  opacity: 0;
-}
-.th-input {
-  position: relative;
-  top: 2px;
-}
 .nc-grid-wrapper {
   position: relative;
 }
@@ -239,6 +290,7 @@ const handleCancel = () => {}
   position: absolute;
   top: 40%;
   left: 50%;
+  transform: translateX(-50%);s
 }
 .nc-grid-pagination-wrapper .ant-dropdown-button {
   > .ant-btn {

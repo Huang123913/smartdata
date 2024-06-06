@@ -108,8 +108,15 @@ export class SmartDataController {
     return await this.llm.retraining(data);
   }
 
-  @Post(['/api/v2/smartdata/analyzingHeadersGenerateTable'])
-  async analyzingHeadersGenerateTable(@Body() data: { tableHeader: string }) {
-    return await this.llm.analyzingHeadersGenerateTable(data.tableHeader);
+  @Post(['/api/v2/smartdata/intelligentImport'])
+  async intelligentImport(
+    @Body() data: { tableHeader: string; allTableMode: string },
+  ) {
+    return await this.llm.intelligentImport(data);
+  }
+
+  @Post(['/api/v2/smartdata/importData'])
+  async importData(@Body() data: { entityId: string; tableData: string }) {
+    return await this.mcdm.importData(data);
   }
 }

@@ -227,4 +227,24 @@ export class MCDMService {
       return r.data;
     });
   }
+
+  async importData(params: { entityId: string; tableData: string }) {
+    let { entityId, tableData } = params;
+    let tableDatas = JSON.parse(tableData);
+    let insertData = tableDatas.map((item: object) => ({
+      ...item,
+      id: uuidv4(),
+    }));
+    let findMdTableInfoRes = await this.findMDTableInfo(entityId);
+    let tableInfo = findMdTableInfoRes[0];
+    let result = null;
+    if (tableInfo) {
+      result = await this.batchInsertOrUpdate(
+        tableInfo.componentCode,
+        tableInfo.tableName,
+        insertData,
+      );
+    }
+    return result;
+  }
 }

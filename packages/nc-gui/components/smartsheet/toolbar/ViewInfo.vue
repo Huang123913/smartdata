@@ -11,6 +11,14 @@ const { tableUrl } = useTablesStore()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
 const { isLeftSidebarOpen } = storeToRefs(useSidebarStore())
+const intelligentImportPreviewVisible = ref(false)
+const columns = ref([])
+const tableData = ref([])
+const { $api } = useNuxtApp()
+const reloadDataHook = inject(ReloadViewDataHookInj)
+const fields = inject(FieldsInj, ref([]))
+const { filters, loadFilters } = useViewFilters(activeView, null)
+const { sorts } = useViewSorts(activeView.value, () => reloadDataHook?.trigger())
 
 const openedBaseUrl = computed(() => {
   if (!base.value) return ''
@@ -30,6 +38,59 @@ const activeTableParentCatalog = computed(() => {
     return ''
   }
 })
+const allTableMode = computed(() => {
+  let data = chataiData.value.modelData.filter((item) => !item.isCatalog && item.id).map((item) => ({ ...item, fields: [] }))
+  return data
+})
+const intelligentImport = async () => {
+  try {
+    await loadFilters('')
+    let tableHeaderColumns: any[] = fields.value.map((item) => ({
+      header: item.column_name,
+      meaning: item.description,
+      chinese: item.title,
+    }))
+    let filtersData: any[] = []
+    filters.value.map((item) => {
+      let findColumn = fields.value.find((column) => column.fk_column_id === item.fk_column_id)
+      findColumn && filtersData.push({ field: findColumn.column_name, operator: item.comparison_op, value: item.value })
+    })
+    let sort_order: any[] = []
+    sorts.value.map((item) => {
+      let findColumn = fields.value.find((column) => column.fk_column_id === item.fk_column_id)
+      findColumn && sort_order.push({ field: findColumn.column_name, direction: item.direction.toUpperCase() })
+    })
+    let table_meta = [
+      { table_name: activeTable.value.name, meaning: activeTable.value.description_cn, chinese: activeTable.value.name_cn },
+    ]
+    let tableHeader = JSON.stringify({
+      table_headers: tableHeaderColumns,
+      filters: filtersData,
+      sort_order,
+      pagination: {},
+      table_meta,
+    })
+    let result = await $api.smartData.intelligentImport({ tableHeader, allTableMode: JSON.stringify(allTableMode.value) })
+    if (result?.success && result?.data.success) {
+      console.log('result', result)
+      let fields = result?.data?.fields ?? []
+      let datas = result?.data?.datas ?? []
+      if (fields.length) {
+        setIntelligentImportPreview(true)
+        columns.value = fields
+        tableData.value = datas
+      }
+    } else {
+      console.error(result)
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const setIntelligentImportPreview = (value: boolean) => {
+  intelligentImportPreviewVisible.value = value
+}
 </script>
 
 <template>
@@ -168,7 +229,14 @@ const activeTableParentCatalog = computed(() => {
         </template>
       </LazyGeneralEmojiPicker>
 
-      <SmartsheetToolbarOpenedViewAction />
+      <SmartsheetToolbarOpenedViewAction :intelligentImport="intelligentImport" />
     </template>
   </div>
+  <SmartsheetToolbarIntelligentImportPreview
+    :closePreview="setIntelligentImportPreview"
+    :visible="intelligentImportPreviewVisible"
+    :propsColumns="columns"
+    :propsTableData="tableData"
+    :activeTable="activeTable"
+  />
 </template>

@@ -17738,11 +17738,33 @@
         }
       ]
     },
-    "/api/v2/smartdata/analyzingHeadersGenerateTable":{
+    "/api/v2/smartdata/intelligentImport":{
       "post": {
-        "summary": "analyzingHeadersGenerateTable llm",
-        "operationId": "analyzingHeadersGenerateTable",
-        "description": "analyzingHeadersGenerateTable llm",
+        "summary": "intelligentImport llm",
+        "operationId": "intelligentImport",
+        "description": "intelligentImport llm",
+        "tags": ["SmartData"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/xc-auth"
+        }
+      ]
+    },
+    "/api/v2/smartdata/importData":{
+      "post": {
+        "summary": "importData MCDM",
+        "operationId": "importData",
+        "description": "importData MCDM",
         "tags": ["SmartData"],
         "requestBody": {
           "content": {
@@ -17760,7 +17782,6 @@
         }
       ]
     }
-
   },
   "components": {
     "schemas": {

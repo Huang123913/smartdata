@@ -10,13 +10,12 @@ const props = withDefaults(
     view: ViewType
     table: TableType
     inSidebar?: boolean
+    intelligentImport?: () => void
   }>(),
   {
     inSidebar: false,
   },
 )
-
-const reloadDataHook = inject(ReloadViewDataHookInj)
 
 const emits = defineEmits(['rename', 'closeModal', 'delete'])
 
@@ -31,10 +30,6 @@ const { t } = useI18n()
 const view = computed(() => props.view)
 
 const table = computed(() => props.table)
-
-const fields = inject(FieldsInj, ref([]))
-const { filters, loadFilters } = useViewFilters(view, null)
-const { sorts } = useViewSorts(view.value, () => reloadDataHook?.trigger())
 
 const { viewsByTable } = storeToRefs(useViewsStore())
 const { loadViews, navigateToView } = useViewsStore()
@@ -151,31 +146,17 @@ const onDelete = async () => {
   emits('delete')
 }
 
-const intelligentImport = async () => {
-  await loadFilters('')
-  let tableHeaderColumns: any[] = fields.value.map((item) => ({
-    header: item.column_name,
-    meaning: item.description,
-    chinese: item.title,
-  }))
-  let filtersData: any[] = filters.value.map((item) => {
-    let findColumn = fields.value.find((column) => column.fk_column_id === item.fk_column_id)
-    return { field: findColumn.column_name, operator: item.comparison_op, value: item.value }
-  })
-  let sort_order = sorts.value.map((item) => {
-    let findColumn = fields.value.find((column) => column.fk_column_id === item.fk_column_id)
-    return { field: findColumn.column_name, direction: item.direction.toUpperCase() }
-  })
-  let table_meta = [{ table_name: table.value.name, meaning: table.value.description_cn, chinese: table.value.name_cn }]
-
-  let tableHeader = JSON.stringify({
-    table_headers: tableHeaderColumns,
-    filters: filtersData,
-    sort_order,
-    pagination: {},
-    table_meta,
-  })
-  await $api.smartData.analyzingHeadersGenerateTable({ tableHeader })
+const isImporting = ref(false)
+const handleIntelligentImport = async () => {
+  try {
+    isImporting.value = true
+    await props.intelligentImport()
+  } catch (error) {
+    console.error(error)
+  } finally {
+    emits('closeModal')
+    isImporting.value = false
+  }
 }
 </script>
 
@@ -227,9 +208,10 @@ const intelligentImport = async () => {
 
     <template v-if="view.type !== ViewTypes.FORM">
       <NcDivider />
-      <NcMenuItem @click="intelligentImport">
+      <NcMenuItem key="intelligentImport" @click="handleIntelligentImport">
         <div class="nc-base-menu-item group">
-          <icon :style="{ marginRight: '2px' }">
+          <GeneralLoader v-if="isImporting" class="menu-icon" :style="{ marginRight: '2px' }" />
+          <icon v-else :style="{ marginRight: 'px' }">
             <template #component>
               <svg
                 t="1717567800506"
@@ -252,7 +234,7 @@ const intelligentImport = async () => {
               </svg>
             </template>
           </icon>
-          {{ '智能导入' }}
+          {{ $t('general.intelligentImport') }}
         </div>
       </NcMenuItem>
       <template v-if="isUIAllowed('csvTableImport') && !isPublicView">
