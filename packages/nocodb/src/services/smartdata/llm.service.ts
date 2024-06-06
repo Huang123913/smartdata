@@ -28,6 +28,12 @@ export class LLMService {
       );
     }
 
+    this.llm.interceptors.request.use((config) => {
+      config.params.projectid = process.env.LLM_PROJECTID ?? 2;
+      config.params.orgid = process.env.LLM_ORGID ?? 2;
+      return config;
+    });
+
     this.llm.interceptors.response.use(
       (r) => r,
       (r) => {
@@ -108,7 +114,7 @@ export class LLMService {
     return await this.llm({
       method: 'POST',
       url: `/train`,
-      params: { id: uuidv4(), ddl, orgid: '1', projectid: '1' },
+      params: { id: uuidv4(), ddl },
     }).then((r) => {
       return r.data;
     });
@@ -122,8 +128,6 @@ export class LLMService {
         id: uuidv4(),
         question: prompt,
         sql: sql,
-        orgid: '1',
-        projectid: '1',
       },
     }).then((r) => {
       return r.data;
@@ -136,8 +140,6 @@ export class LLMService {
       method: 'POST',
       url: `/cleartrain`,
       params: {
-        orgid: '1',
-        projectid: '1',
         types: JSON.stringify(types ?? deftypes),
       },
     }).then((r) => {
@@ -211,19 +213,12 @@ export class LLMService {
     }
   }
 
-  async getSql(
-    question: string,
-    modelrange: string,
-    orgid: string = '1',
-    projectid: string = '1',
-  ) {
+  async getSql(question: string, modelrange: string) {
     return await this.llm({
       url: `/ask`,
       params: {
         question,
         id: uuidv4(),
-        orgid,
-        projectid,
         modelrange,
       },
       headers: {
@@ -234,19 +229,11 @@ export class LLMService {
     });
   }
 
-  async repair(
-    id: string,
-    error_msg: string,
-    question: string,
-    orgid: string = '1',
-    projectid: string = '1',
-  ) {
+  async repair(id: string, error_msg: string, question: string) {
     return await this.llm({
       url: `/repair`,
       params: {
         id,
-        orgid,
-        projectid,
         error_msg,
         question,
       },
@@ -434,36 +421,24 @@ export class LLMService {
     return result;
   }
 
-  async removetrainbyids(
-    ids: string[],
-    orgid: string = '1',
-    projectid: string = '1',
-  ) {
+  async removetrainbyids(ids: string[]) {
     return await this.llm({
       method: 'POST',
       url: '/removetrainbyids',
       params: {
         ids: JSON.stringify(ids),
-        orgid,
-        projectid,
       },
     }).then((r) => {
       return r.data;
     });
   }
 
-  async analyzingHeadersGenerateTable(
-    tableHeader: string,
-    orgid: string = '1',
-    projectid: string = '1',
-  ) {
+  async analyzingHeadersGenerateTable(tableHeader: string) {
     return await this.llm({
       method: 'POST',
       url: '/AnalyzingHeadersGenerateTable',
       params: {
         id: uuidv4(),
-        orgid,
-        projectid,
         table_headers: tableHeader,
       },
     }).then((r) => {
