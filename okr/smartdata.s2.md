@@ -127,14 +127,14 @@
    - ⚪️ /jobs/listen **进行中**
       > 异步任务: 完成, 查询任务: 进行中
 
-## 6.4
+## 6.6
    > 正式环境: http://smartdata.yindangu.com
    > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
    - 【进行中】持久化数据导入的原文件
    - 【进行中】创建目录
-   - 【联调中】智能导入数据 /AnalyzingHeadersGenerateTable
+   - 【完成】智能导入数据 /AnalyzingHeadersGenerateTable
    - 【未开始】创建表时增加描述字段 
    - 【未开始】创建字段时增加描述字段 
 
