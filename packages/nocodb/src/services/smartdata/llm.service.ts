@@ -51,7 +51,7 @@ export class LLMService {
       if (entity.isCatalog == true) continue;
       const trainResult = await this.trainByEntityId(entity.id);
       result.push(trainResult);
-      await wait(500);
+      await wait(800);
     }
     return result;
   }
