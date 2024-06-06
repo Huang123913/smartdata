@@ -2,6 +2,8 @@
 import { ChatPlaygroundViewStoreEvents } from '#imports'
 import { Empty } from 'ant-design-vue'
 
+import { CloseOutlined } from '@ant-design/icons-vue'
+
 const props = defineProps<{
   visible: boolean
   propsColumns: any[]
@@ -103,14 +105,20 @@ const handleCancel = () => {
 
 <template>
   <a-modal
+    :closable="false"
     :width="'max-content'"
     class="intelligent-import-preview"
-    title="数据预览"
     :visible="visible"
     :maskClosable="false"
-    @cancel="handleCancel"
     :style="{ '--set-height': tableData && tableData.length ? '600px' : '300px' }"
   >
+    <template #title>
+      <div class="intelligent-import-preview-header">
+        <span class="text-lg font-medium">{{ '数据预览' }}</span>
+        <close-outlined class="colse-btn" @click="handleCancel" />
+      </div>
+    </template>
+
     <div class="nc-grid-wrapper min-h-0 flex-1 relative nc-scrollbar-x-lg !overflow-auto" @scroll="onScroll">
       <table class="xc-row-table nc-grid backgroundColorDefault !h-auto bg-white sticky top-0 z-5 bg-white">
         <thead>
@@ -218,7 +226,6 @@ const handleCancel = () => {
     <div v-if="tableData.length === 0" class="no-data">
       <a-empty :description="'暂无数据'" :image="simpleImage" />
     </div>
-
     <!-- :disabled="!tableData.length" -->
     <template #footer>
       <NcButton type="secondary" @click="handleCancel">{{ $t('general.cancel') }}</NcButton>
@@ -239,10 +246,25 @@ const handleCancel = () => {
 
 <style lang="scss">
 .intelligent-import-preview {
+  .text-lg {
+    font-size: 18px;
+  }
+  .colse-btn {
+    position: relative;
+    top: 0px;
+    color: rgb(99, 107, 116);
+  }
+  .intelligent-import-preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
   .ant-modal-content {
     padding: 8px 16px 0 16px !important;
     width: max-content;
     max-width: 900px;
+    min-width: 500px;
     .ant-modal-header {
       padding: 16px 0 !important;
       .ant-modal-title {
