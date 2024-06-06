@@ -49,23 +49,22 @@ export class LLMService {
     for (let i = 0; i < entities.length; i++) {
       const entity = entities[i];
       if (entity.isCatalog == true) continue;
-      const entityProps = entity.props;
-      const ddlProp = entityProps.findLast((p) => p.code == 'belongDdlId');
-      const trainResult = await this.trainByEntityId(
-        entity.id,
-        ddlProp ? ddlProp.id : '',
-      );
+      const trainResult = await this.trainByEntityId(entity.id);
       result.push(trainResult);
       await wait(500);
     }
     return result;
   }
 
-  async trainByEntityId(entityId: string, id?: string) {
+  async trainByEntityId(entityId: string) {
     const result = Object.create({ id: entityId });
     const entities = await this.mcdm.getEntity(entityId);
     if (!entities.length) return undefined;
-
+    const entity = entities[0];
+    const entityProps = entity?.props;
+    let ddlProp = null;
+    if (entityProps)
+      ddlProp = entityProps.findLast((p) => p.code == 'belongDdlId');
     const ddl = await this.mcdm.getDDL(entityId);
     const trainrRes = await this.trainByDDL(ddl);
     if (trainrRes) {
@@ -74,7 +73,7 @@ export class LLMService {
           id: entityId,
           props: [
             {
-              id: id ? id : null,
+              id: ddlProp ? ddlProp.id : null,
               name: 'belongDdlId',
               code: 'belongDdlId',
               value: trainrRes.id,
@@ -430,7 +429,7 @@ export class LLMService {
     if (ddlProp && ddlProp.value)
       result = await this.removetrainbyids([ddlProp.value]);
     if (isUpdate) {
-      result = await this.trainByEntityId(entityId, ddlProp ? ddlProp.id : '');
+      result = await this.trainByEntityId(entityId);
     }
     return result;
   }
@@ -474,7 +473,7 @@ export class LLMService {
 
   async intelligentImport(params: { tableHeader: string }) {
     let { tableHeader } = params;
-    let exeRes = await this.analyzingHeadersGenerateTable('tableHeader');
+    let exeRes = await this.analyzingHeadersGenerateTable(tableHeader);
     if (exeRes) {
       let sql = exeRes.text;
       sql = sql.replace(/;/g, '');
