@@ -89,8 +89,8 @@
    - 🟢️ Delete Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-delete` **完成**
    - 🟢️️ Update Grid Column (字段拖拽排序) `https://meta-apis-v1.nocodb.com/#tag/DB-View/operation/ db-view-grid-column-update` **完成**
    - ⚪️ Duplicate Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-duplicate` **未开始**
-      - 1. ⚪️ 拷贝表结构 **进行中**
-      - 2. ⚪️ 拷贝表结构+数据 **进行中**
+      - 1. 🟢 拷贝表结构 **完成**
+      - 2. 🟢️ 拷贝表结构+数据 **完成**
       - 3. ⚪️ 拷贝数据
    - ⚪️ Duplicate Column `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/duplicate-column` **未开始**
    - ⚪️ Reorder Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-reorder` **未开始**
@@ -124,19 +124,21 @@
 
 ### 后台任务
    > 复制表、字段时后台起的线程，前端会轮询其状态
-   - ⚪️ /jobs/listen **进行中**
-      > 异步任务: 完成, 查询任务: 进行中
+   - 🟢️ /jobs/listen **完成**
 
-## 6.6
+## 6.7
    > 正式环境: http://smartdata.yindangu.com
    > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
-   - 【进行中】持久化数据导入的原文件
-   - 【进行中】创建目录
-   - 【完成】智能导入数据 /AnalyzingHeadersGenerateTable
-   - 【未开始】创建表时增加描述字段 
-   - 【未开始】创建字段时增加描述字段 
+   > 复制表仍有小问题需要后续跟进: 复制后排序问题
+   - 【进行中】创建表时增加描述字段 
+   - 【进行中】创建字段时增加描述字段 
+   - 【完成】复制表结构
+   - 【完成】复制表结构+数据
+   - 【完成】对接 /jobs/listen
+   - 【完成】创建目录
+   - 【暂缓】持久化数据导入的原文件
 
 ### 需求池
    - 存储 Prompt 模板
@@ -146,7 +148,7 @@
    - LLM: 修改模型元信息时重新训练 **完成**
    - LLM: 存储训练数据 (修改模型时重训) **完成**
    - 模型树: 拖拽排序
-   - 模型树: 创建目录 **进行中**
+   - 模型树: 创建目录 **完成**
    - 提问建表: 持久化会话数据
    - 提问建表: 优化选择模型范围操作体验
 
