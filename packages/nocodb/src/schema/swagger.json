@@ -5239,7 +5239,8 @@
                       }
                     ],
                     "table_name": "Sheet-1",
-                    "title": "Sheet-1"
+                    "title": "Sheet-1",
+                    "description_cn":"Sheet-1"
                   }
                 }
               }
@@ -5391,7 +5392,8 @@
                     "un": 0,
                     "unique": 0,
                     "validate": null,
-                    "virtual": null
+                    "virtual": null,
+                    "description_cn":""
                   }
                 }
               }

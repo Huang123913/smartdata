@@ -4,11 +4,12 @@ import { UITypes, isSystemColumn } from 'nocodb-sdk'
 import type { SidebarTableNode } from '~/lib/types'
 
 export function useTableNew(param: { onTableCreate?: (tableMeta: TableType) => void; baseId: string; sourceId?: string }) {
-  const table = reactive<{ title: string; table_name: string; columns: string[]; is_hybrid: boolean }>({
+  const table = reactive<{ description_cn: string; title: string; table_name: string; columns: string[]; is_hybrid: boolean }>({
     title: '',
     table_name: '',
     columns: SYSTEM_COLUMNS,
     is_hybrid: true,
+    description_cn: '',
   })
 
   const { t } = useI18n()

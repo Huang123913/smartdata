@@ -5,7 +5,7 @@ const props = defineProps<{
   baseId: string
   catalog?: any
 }>()
-
+const labelCol = { style: { width: '56px', position: 'relative', top: '3px' } }
 const emit = defineEmits(['update:modelValue', 'create'])
 
 const dialogShow = useVModel(props, 'modelValue', emit)
@@ -145,8 +145,14 @@ onMounted(() => {
       </div>
     </template>
     <div class="flex flex-col mt-2">
-      <a-form :model="table" name="create-new-table-form" @keydown.enter="_createTable" @keydown.esc="dialogShow = false">
-        <a-form-item v-bind="validateInfos.title" class="flex" :class="{ '!mb-1': isSnowflake(props.sourceId) }">
+      <a-form
+        :label-col="labelCol"
+        :model="table"
+        name="create-new-table-form"
+        @keydown.enter="_createTable"
+        @keydown.esc="dialogShow = false"
+      >
+        <a-form-item label="表名" v-bind="validateInfos.title" class="flex" :class="{ '!mb-1': isSnowflake(props.sourceId) }">
           <a-input
             ref="inputEl"
             v-model:value="table.title"
@@ -163,6 +169,18 @@ onMounted(() => {
             已选目录:{{ selectedCatalog.name_cn }}
           </div>
         </a-form-item>
+
+        <a-form-item label="表描述" class="flex" :class="{ '!mb-1': isSnowflake(props.sourceId) }">
+          <a-input
+            v-model:value="table.description_cn"
+            class="nc-input-md table-name"
+            hide-details
+            data-testid="create-table-description-input"
+            :placeholder="$t('msg.info.enterTableDescription')"
+          >
+          </a-input>
+        </a-form-item>
+
         <template v-if="isSnowflake(props.sourceId)">
           <a-checkbox v-model:checked="table.is_hybrid" class="!flex flex-row items-center"> Hybrid Table </a-checkbox>
         </template>

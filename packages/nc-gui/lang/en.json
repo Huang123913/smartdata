@@ -206,7 +206,8 @@
     "text": "Text",
     "appearance": "Appearance",
     "moveTo":"Move",
-    "intelligentImport":"Intelligent Import"
+    "intelligentImport":"Intelligent Import",
+    "description":"description"
   },
   "objects": {
     "owner": "Owner",
@@ -1349,6 +1350,8 @@
       "tablesMetadataInSync": "Tables metadata is in Sync",
       "addMultipleUsers": "You can add multiple comma(,) separated emails",
       "enterTableName": "Enter table name",
+      "enterTableDescription": "Enter table Description",
+      "enterFieldDescription": "Enter field Description",
       "enterCatalogName": "Enter catalog name",
       "enterLayoutName": "Enter Layout name",
       "enterDashboardName": "Enter Dashboard name",

@@ -47,7 +47,7 @@ const intelligentImport = async () => {
     await loadFilters('')
     let tableHeaderColumns: any[] = fields.value.map((item) => ({
       header: item.column_name,
-      meaning: item.description,
+      meaning: item.description_cn,
       chinese: item.title,
     }))
     let filtersData: any[] = []

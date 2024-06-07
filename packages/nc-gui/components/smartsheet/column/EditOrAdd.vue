@@ -262,6 +262,7 @@ if (props.fromTableExplorer) {
             />
           </div>
         </a-form-item>
+
         <a-form-item
           v-if="!props.hideTitle && !isFieldsTab"
           :label="`${columnLabel} ${$t('general.name')}`"
@@ -273,6 +274,20 @@ if (props.fromTableExplorer) {
             v-model:value="formState.title"
             class="nc-column-name-input !rounded-md !mt-1"
             :disabled="isKanban || readOnly"
+            @input="onAlter(8)"
+          />
+        </a-form-item>
+
+        <a-form-item
+          v-if="!props.hideTitle && !isFieldsTab"
+          :label="`${columnLabel} ${$t('general.description')}`"
+          :required="false"
+        >
+          <a-input
+            v-model:value="formState.description_cn"
+            class="nc-column-description_cn-input !rounded-md !mt-1"
+            :disabled="isKanban || readOnly"
+            :placeholder="$t('msg.info.enterFieldDescription')"
             @input="onAlter(8)"
           />
         </a-form-item>

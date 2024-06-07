@@ -206,7 +206,8 @@
     "text": "文本",
     "appearance": "外观",
     "moveTo": "移动至",
-    "intelligentImport":"智能导入"
+    "intelligentImport":"智能导入",
+    "description":"描述"
   },
   "objects": {
     "owner": "所有者",
@@ -1346,6 +1347,8 @@
       "tablesMetadataInSync": "表元数据同步",
       "addMultipleUsers": "可以使用多个英文逗号 (,) 分隔邮箱地址",
       "enterTableName": "输入表名",
+      "enterTableDescription": "输入表描述",
+      "enterFieldDescription": "输入字段描述",
       "enterCatalogName": "输入目录名",
       "enterLayoutName": "输入布局名称",
       "enterDashboardName": "输入仪表板名称",

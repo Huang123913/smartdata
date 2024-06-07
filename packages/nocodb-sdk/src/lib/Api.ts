@@ -530,6 +530,7 @@ export type ColumnReqType = (
   };
   title: string;
   view_id?: string;
+  description_cn?: string;
 };
 
 /**
@@ -2522,6 +2523,7 @@ export interface TableReqType {
    * @example My Table
    */
   title?: string;
+  description_cn?: string;
 }
 
 /**
