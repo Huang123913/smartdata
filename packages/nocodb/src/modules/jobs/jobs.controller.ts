@@ -7,6 +7,7 @@ import {
   Req,
   Res,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -21,6 +22,8 @@ import { GlobalGuard } from '~/guards/global/global.guard';
 import NocoCache from '~/cache/NocoCache';
 import { CacheGetType, CacheScope } from '~/utils/globals';
 import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
+
+import { JobsListen } from '~/modules/smartdata/interceptors/jobs/NocodbJobsListen';
 
 const nanoidv2 = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 14);
 const POLLING_INTERVAL = 30000;
@@ -47,6 +50,7 @@ export class JobsController implements OnModuleInit {
 
   @Post('/jobs/listen')
   @HttpCode(200)
+  @UseInterceptors(JobsListen('NocodbJobsListen', nanoidv2))
   async listen(
     @Res() res: Response & { resId?: string },
     @Req() req: Request,
