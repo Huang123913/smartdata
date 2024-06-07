@@ -191,19 +191,7 @@ const openTableCreateDialog = (catalog: any) => {
             </div>
             <div class="flex more-action-btn more-acttion-btn-to-catalog">
               <DashboardTreeViewModelListDropDown :item="item" :base="base" :isCatalogDropDown="true" />
-              <NcButton
-                class="nc-sidebar-node-btn"
-                size="xxsmall"
-                type="text"
-                data-testid="nc-sidebar-add-base-entity"
-                :class="{
-                  '!text-black !inline-block !opacity-100': isAddNewProjectChildEntityLoading,
-                }"
-                :loading="isAddNewProjectChildEntityLoading"
-                @click.stop="addNewProjectChildEntity(item)"
-              >
-                <GeneralIcon icon="plus" class="text-xl leading-5" style="-webkit-text-stroke: 0.15px" />
-              </NcButton>
+              <DashboardTreeViewModelListAddDropDown :item="item" :base="base" />
             </div>
           </div>
           <div

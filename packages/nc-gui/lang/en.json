@@ -1014,7 +1014,8 @@
       "lockedFieldTooltip": "Pre-filled value"
     },
     "getPreFilledLink": "Get Pre-filled Link",
-    "group": "Group"
+    "group": "Group",
+    "createCatalog": "Create Catalog"
   },
   "tooltip": {
     "reachedSourceLimit": "Limited to 10 data sources per base",
@@ -1348,6 +1349,7 @@
       "tablesMetadataInSync": "Tables metadata is in Sync",
       "addMultipleUsers": "You can add multiple comma(,) separated emails",
       "enterTableName": "Enter table name",
+      "enterCatalogName": "Enter catalog name",
       "enterLayoutName": "Enter Layout name",
       "enterDashboardName": "Enter Dashboard name",
       "defaultColumns": "Default fields",

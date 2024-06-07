@@ -4,8 +4,6 @@ import type { ChatPlaygroundViewStoreEvents } from '#imports'
 import { useEventBus, useNuxtApp } from '#imports'
 import { defineStore } from 'pinia'
 
-import chataiApi from '../api/chatai'
-
 export interface SessionItem {
   id: string
   textAreaValue: string
@@ -79,7 +77,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
         },
       ]
       // 模型树进行排序
-      // chataiData.modelTree.forEach((node) => sortTreeNodesByOrderNo(node))
+      chataiData.modelTree.forEach((node) => sortTreeNodesByOrderNo(node))
       chataiData.modelCatalog = chataiData.modelData.filter((item) => item.isCatalog && item.id !== null)
       chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog)
     } catch (e) {
@@ -210,9 +208,30 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     findItem.name_cn = name
   }
 
+  const addCatalog = (catalog: any) => {
+    chataiData.modelData.push({
+      ...catalog,
+      isCatalog: true,
+    })
+    chataiData.modelTree = [
+      {
+        id: null,
+        name_cn: '模型目录',
+        parentId: 'add-catalog',
+        isCatalog: true,
+        children: buildTree(chataiData.modelData),
+        title: '模型目录',
+        key: '0-0',
+      },
+    ]
+    // 模型树进行排序
+    chataiData.modelTree.forEach((node) => sortTreeNodesByOrderNo(node))
+    chataiData.modelCatalog = chataiData.modelData.filter((item) => item.isCatalog && item.id !== null)
+    chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog)
+  }
+
   return {
     chataiData,
-    chataiApi,
     setSessionItem,
     getCustomCatalogEntityTree,
     getCheckedModelData,
@@ -226,5 +245,6 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     updateCatalogName,
     findNodeById,
     updateTableColumnName,
+    addCatalog,
   }
 })

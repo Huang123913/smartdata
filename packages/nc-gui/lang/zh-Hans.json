@@ -1012,7 +1012,8 @@
       "lockedFieldTooltip": "预填值"
     },
     "getPreFilledLink": "获取预填链接",
-    "group": "分组"
+    "group": "分组",
+    "createCatalog": "创建新的目录"
   },
   "tooltip": {
     "reachedSourceLimit": "暂时只限于一个数据源",
@@ -1345,6 +1346,7 @@
       "tablesMetadataInSync": "表元数据同步",
       "addMultipleUsers": "可以使用多个英文逗号 (,) 分隔邮箱地址",
       "enterTableName": "输入表名",
+      "enterCatalogName": "输入目录名",
       "enterLayoutName": "输入布局名称",
       "enterDashboardName": "输入仪表板名称",
       "defaultColumns": "默认字段",

@@ -648,8 +648,8 @@ const setIsLoadingModel = (value: boolean) => {
                 </NcMenu>
               </template>
             </NcDropdown>
-
-            <NcButton
+            <DashboardTreeViewModelListAddDropDown :item="null" :base="base" />
+            <!-- <NcButton
               v-if="isUIAllowed('tableCreate', { roles: baseRole })"
               v-e="['c:base:create-table']"
               :disabled="!base?.sources?.[0]?.enabled"
@@ -665,7 +665,8 @@ const setIsLoadingModel = (value: boolean) => {
               @click.stop="addNewProjectChildEntity"
             >
               <GeneralIcon icon="plus" class="text-xl leading-5" style="-webkit-text-stroke: 0.15px" />
-            </NcButton>
+              
+            </NcButton> -->
 
             <NcButton
               v-e="['c:base:expand']"
