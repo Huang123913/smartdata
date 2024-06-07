@@ -166,7 +166,7 @@ const setIntelligentImportPreview = (value: boolean) => {
           </template>
         </span>
       </NcTooltip>
-      <div class="px-1.75 text-gray-500">/</div>
+      <div class="px-1.75 text-gray-500">></div>
     </template>
 
     <template v-if="!(isMobileMode && !activeView?.is_default)">
