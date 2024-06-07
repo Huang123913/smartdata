@@ -26,7 +26,7 @@ onMounted(() => {
 })
 
 watch(elementATree, () => {
-  resizeObserver.observe(elementATree.value)
+  elementATree.value && resizeObserver.observe(elementATree.value)
 })
 
 const resizeObserver = new ResizeObserver((entries) => {
