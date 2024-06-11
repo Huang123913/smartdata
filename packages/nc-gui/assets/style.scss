@@ -652,6 +652,7 @@ a {
 .ant-tooltip-inner {
   @apply !px-1.5 !py-1 text-xs text-white bg-black;
   min-height: 0 !important;
+  word-break: break-all;
 }
 
 .ant-skeleton-input {
