@@ -275,6 +275,9 @@ const openTableCreateDialog = (catalog: any) => {
     flex: 1;
     overflow: hidden;
   }
+  ::v-deep .ant-tree-drop-indicator {
+    top: 3px !important;
+  }
   ::v-deep .ant-tree-switcher {
     top: -1px !important;
   }
@@ -287,7 +290,6 @@ const openTableCreateDialog = (catalog: any) => {
   .model-text-content {
     display: flex;
     align-items: center;
-    // height: 1.77rem;
     border-radius: 4px;
     position: relative;
     padding: 2px 0;
