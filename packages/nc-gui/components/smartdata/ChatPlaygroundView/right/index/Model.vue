@@ -98,13 +98,14 @@ const handleSearchModel = () => {
           getSearchModelResult(item.children)
         }
       })
-      console.log('searchModelResult::', searchModelResult.value)
     } else {
       searchModelResultTree.value = []
       searchModelResult.value = []
     }
     isShowModelResult.value = true
   }
+  !expandedKeys.value.includes('0-0') && expandedKeys.value.push('0-0')
+  !expandedKeys.value.includes('catalog') && expandedKeys.value.push('catalog')
 }
 
 // 递归搜索
