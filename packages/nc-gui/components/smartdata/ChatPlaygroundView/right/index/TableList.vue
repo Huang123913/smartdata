@@ -5,6 +5,9 @@ import { CloseOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons-v
 
 import { useChatPlaygroundViewStore } from '../../../../../store/chatPlaygroundView'
 
+const { loadProjectTables } = useTablesStore()
+const router = useRouter()
+const route = router.currentRoute
 const { $api } = useNuxtApp()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
@@ -118,8 +121,9 @@ const handleOk = async (selectedCatalog: object) => {
   } catch (e: any) {
     console.log(e)
   } finally {
+    isPublishCatalog.value && (await loadProjectTables(route.value.params.baseId, true))
     isShowLoading.value = false
-    await getCustomCatalogEntityTree()
+    // await getCustomCatalogEntityTree()
   }
 }
 
