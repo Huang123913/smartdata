@@ -202,7 +202,6 @@ const handleClickCleanBtn = () => {
           {{ chataiData.sessionItem?.sql }}
         </a-typography-text>
       </div>
-      <!-- <a-button class="save-btn" type="primary" size="middle" @click="handleSaveBtn()"> 发布 </a-button> -->
       <a-dropdown :trigger="['click']" placement="bottom" overlay-class-name="publish-model" v-model:visible="dropVisible">
         <NcButton class="!bg-primary !border-none !mr-3 ml-3" size="small">
           <span class="text-sm font-weight-medium">发布至</span>
@@ -228,8 +227,22 @@ const handleClickCleanBtn = () => {
                     v-for="item in isShowSearchModelRes ? searchModelRes : existingModelData"
                     :key="item.id"
                     @click="handleSelectExistingModel(item)"
-                    >{{ item.name_cn }}</a-menu-item
                   >
+                    <NcTooltip class="truncate" show-on-truncate-only>
+                      <template #title>
+                        {{ item.name_cn }}
+                      </template>
+                      <span
+                        class="text-ellipsis overflow-hidden"
+                        :style="{
+                          wordBreak: 'keep-all',
+                          whiteSpace: 'nowrap',
+                        }"
+                      >
+                        {{ item.name_cn }}
+                      </span>
+                    </NcTooltip>
+                  </a-menu-item>
                   <div class="no-data" v-if="isShowSearchModelRes && searchModelRes.length === 0">暂无数据</div>
                 </div>
               </a-sub-menu>
@@ -268,6 +281,10 @@ const handleClickCleanBtn = () => {
 .edit-icon .anticon-edit {
   color: #0b6bcb;
 }
+.ant-menu-sub {
+  border-radius: 5px;
+  max-width: 270px;
+}
 .existing-model {
   max-height: 300px;
   overflow-y: auto;
@@ -287,9 +304,7 @@ const handleClickCleanBtn = () => {
     background-color: #e0e0e0;
     border-radius: 10px;
   }
-  .ant-menu-sub {
-    border-radius: 5px;
-  }
+
   .no-data {
     height: 72px;
     display: flex;
