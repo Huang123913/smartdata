@@ -30,6 +30,24 @@ const selectOption = [
 ]
 onMounted(() => {
   expandedKeys.value = []
+  modelUpdateTypeValue.value = 'realTimeView'
+})
+
+watch(
+  () => props.visible,
+  (newVisible) => {
+    props.visible && !expandedKeys.value.length && getExpandKeys()
+  },
+)
+
+watch(
+  () => chataiData.value.modelCatalogTree,
+  (newVisible) => {
+    getExpandKeys()
+  },
+)
+
+const getExpandKeys = () => {
   const findParanent = (data: any[]) => {
     data.map((item) => {
       if (item?.children && item.children.length) {
@@ -39,8 +57,7 @@ onMounted(() => {
     })
   }
   findParanent(chataiData.value.modelCatalogTree)
-  modelUpdateTypeValue.value = 'realTimeView'
-})
+}
 
 const handleModalOk = () => {
   if (props.isCatalog) {
@@ -54,7 +71,6 @@ const handleModalOk = () => {
     props.targetField.map((item: any) => {
       if (!fieldMappingResult.value.hasOwnProperty(item.fieldName)) fieldMappingResult.value[item.fieldName] = null
     })
-    console.log('fieldMappingResult.value', fieldMappingResult.value)
     props.handleOk(fieldMappingResult.value)
   }
 }
