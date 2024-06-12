@@ -92,8 +92,8 @@ const handleClickChange = (visible: boolean) => {
     border-radius: 10px;
   }
   &::-webkit-scrollbar-track {
-    // background-color: #e0e0e0;
-    // border-radius: 10px;
+    background-color: #e0e0e0;
+    border-radius: 10px;
   }
 }
 .model-item {
