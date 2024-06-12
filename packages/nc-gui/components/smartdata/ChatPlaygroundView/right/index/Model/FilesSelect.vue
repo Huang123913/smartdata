@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref } from '#imports'
 
-import { CloseOutlined, EllipsisOutlined } from '@ant-design/icons-vue'
+import { CloseOutlined, DownOutlined, SearchOutlined } from '@ant-design/icons-vue'
 
 import { useChatPlaygroundViewStore } from '../../../../../../store/chatPlaygroundView'
 
@@ -33,10 +33,16 @@ const handleLoadFiles = async () => {
     }
     isShowLoading.value = true
     clicked.value = false
-    let modelInfo = await $api.smartData.entity({ entityId: props.modelItem.id })
+    let modelInfo = await $api.smartData.entity({
+      entityId: props.modelItem.id,
+    })
     let fields = modelInfo[0].fields ?? []
     selectOptionData.value = fields.map((item: any) => {
-      return { ...item, value: item.fieldName, label: item?.fieldName_cn ?? item.fieldName }
+      return {
+        ...item,
+        value: item.fieldName,
+        label: item?.fieldName_cn ?? item.fieldName,
+      }
     })
   } catch (e: any) {
     console.log(e)
@@ -60,7 +66,7 @@ const handleChange = (value: string[], option: any) => {
 <template>
   <a-popover
     trigger="click"
-    placement="bottomRight"
+    placement="bottom"
     color="white"
     :visible="clicked"
     :overlayClassName="'chatai1-tooltip'"
@@ -75,32 +81,41 @@ const handleChange = (value: string[], option: any) => {
         v-model:value="checkedValues"
         mode="multiple"
         style="width: 300px"
-        placeholder="请选择"
+        placeholder="请选择字段"
         :allowClear="true"
         :options="selectOptionData"
         @change="handleChange"
       ></a-select>
     </template>
-    <ellipsis-outlined class="more-btn" @click="handleLoadFiles()" />
+    <div class="model-text" @click="handleLoadFiles()">
+      {{ modelItem.title }}
+      <GeneralIcon
+        icon="chevronRight"
+        class="show-fields-icon flex justify-center items-center group-hover:visible cursor-pointer transform transition-transform duration-200 text-[20px]"
+        :class="{ '!rotate-90': clicked, 'has-rotate-90': clicked }"
+      />
+    </div>
   </a-popover>
-  <SmartdataChatPlaygroundViewCommonLoading :isShow="isShowLoading" />
+  <SmartdataChatPlaygroundViewCommonLoading v-if="isShowLoading" :isShow="isShowLoading" />
 </template>
 
 <style lang="scss">
+.model-text {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  white-space: nowrap;
+}
+.show-fields-icon {
+  width: 23px;
+  height: 23px;
+  position: absolute;
+  margin-left: -67px;
+}
 .ant-select-selection-item {
   display: flex;
   align-items: center;
-}
-.ant-tree-title {
-  &:hover .more-btn {
-    opacity: 1;
-  }
-  .more-btn {
-    margin-left: 30px;
-    position: relative !important;
-    top: -2px;
-    opacity: 0;
-  }
 }
 
 .chatai1-tooltip {

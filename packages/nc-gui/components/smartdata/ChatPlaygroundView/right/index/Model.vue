@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ChatPlaygroundViewStoreEvents, ref } from '#imports'
 
-import { CloseOutlined, SearchOutlined } from '@ant-design/icons-vue'
+import { CloseOutlined, DownOutlined, SearchOutlined } from '@ant-design/icons-vue'
 
 import catalog from '../../../../../assets/img/catalog.svg'
 import model from '../../../../../assets/img/model.svg'
@@ -187,6 +187,21 @@ const cancelParentNode = (nodeId: string) => {
   checkedKeys.value = checkedKeys.value.filter((item) => item !== nodeId)
   cancelParentNode(findNode.parentId)
 }
+const handleExpand = (expandedKeys1: any, e: any) => {
+  if (e.expanded) {
+    expandedKeys.value.push(e.node.id)
+  } else {
+    expandedKeys.value = expandedKeys.value.filter((item) => item !== e.node.id && item !== e.node.key)
+  }
+}
+
+const handleClickCatalog = (catalog: any) => {
+  if (expandedKeys.value.includes(catalog.id ?? catalog.key)) {
+    expandedKeys.value = expandedKeys.value.filter((item) => item !== catalog.id && item !== catalog.key)
+  } else {
+    expandedKeys.value.push(catalog.id ?? catalog.key)
+  }
+}
 </script>
 
 <template>
@@ -232,17 +247,26 @@ const cancelParentNode = (nodeId: string) => {
           :height="scrollYHeight"
           :checkedKeys="checkedKeys"
           v-model:expandedKeys="expandedKeys"
+          @expand="handleExpand"
           checkable
           :tree-data="isShowModelResult ? searchModelResultTree : chataiData.modelTree"
           @check="handleCheckModel"
         >
+          <template #switcherIcon="item">
+            <GeneralIcon
+              icon="chevronRight"
+              class="flex justify-center items-center cursor-pointer transform transition-transform duration-200 text-[20px]"
+              :class="{ '!rotate-90': expandedKeys.includes(item.id ?? item.key) }"
+            />
+          </template>
+
           <template #title="item">
-            <span v-if="item.isCatalog">
+            <div class="model-catalog" v-if="item.isCatalog" @click="handleClickCatalog(item)">
               <img :src="catalog" width="16" height="16" class="catlog-img" />
-              {{ item.title }}</span
-            >
-            <div v-else class="model-text">
               {{ item.title }}
+            </div>
+            <div class="table-item" v-else>
+              <GeneralTableIcon :meta="item" class="text-gray-500" />
               <SmartdataChatPlaygroundViewRightIndexModelFilesSelect :modelItem="item" />
             </div>
           </template>
@@ -272,6 +296,13 @@ const cancelParentNode = (nodeId: string) => {
 }
 </style>
 <style scoped lang="scss">
+.table-item {
+  display: flex;
+  align-items: center;
+  .nc-icon {
+    margin-left: 0px !important;
+  }
+}
 .catlog-img {
   display: inline-block;
   vertical-align: -3px;
@@ -295,26 +326,25 @@ const cancelParentNode = (nodeId: string) => {
   .ant-tree-treenode {
     width: calc(100% - 13px) !important;
   }
-}
-
-::v-deep .ant-tree-switcher {
-  top: -2px;
+  .ant-tree-node-selected {
+    background-color: transparent;
+  }
 }
 
 ::v-deep .ant-tree-node-content-wrapper {
   width: 100% !important;
+  padding: 2px 6px 2px 3px;
+  position: relative;
+  top: -3px;
+  &:hover {
+    --tw-bg-opacity: 0.8;
+    background-color: rgba(231, 231, 233, var(--tw-bg-opacity));
+  }
 }
 
-::v-deep .ant-tree-title {
-  div {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    span {
-      position: relative;
-      top: 1px;
-    }
-  }
+::v-deep .ant-tree-node-content-wrapper:has(.has-rotate-90) {
+  --tw-bg-opacity: 0.8;
+  background-color: rgba(231, 231, 233, var(--tw-bg-opacity));
 }
 
 .model-content {
@@ -336,6 +366,9 @@ const cancelParentNode = (nodeId: string) => {
     border-color: rgba(99, 107, 116, 0.2);
     flex-direction: column;
     overflow: hidden;
+    ::v-deep .ant-tree-switcher {
+      top: 1px;
+    }
   }
   .top-title {
     width: 100%;
@@ -414,6 +447,9 @@ const cancelParentNode = (nodeId: string) => {
     //   background-color: #e0e0e0;
     //   border-radius: 10px;
     // }
+  }
+  ::v-deep .ant-tree-checkbox {
+    margin: 4px 6px 0 0;
   }
   .total {
     display: flex;
