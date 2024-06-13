@@ -55,6 +55,7 @@ export class MCDMService {
 
     this.logger.debug(`${req.method} ${req.originalUrl} > ${operation}`);
 
+    req.user.display_name ??= req.user.email;
     const config: AxiosRequestConfig<any> = {
       url: '/module-operation!executeOperation',
       params: {
