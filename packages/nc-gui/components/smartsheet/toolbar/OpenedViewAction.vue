@@ -184,6 +184,7 @@ function openDeleteDialog() {
         'max-w-1/2': isMobileMode,
         'text-gray-500': activeView?.is_default,
         'text-gray-800 font-medium': !activeView?.is_default,
+        'min-w-1/8': !isSharedBase && !isMobileMode && activeView?.is_default,
       }"
     >
       <NcTooltip class="truncate xs:pl-1.25 flex-1 text-inherit" show-on-truncate-only>

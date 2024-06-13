@@ -105,11 +105,13 @@ const setIntelligentImportPreview = (value: boolean) => {
   >
     <template v-if="!isMobileMode">
       <NuxtLink
-        class="!hover:(text-black underline-gray-600) !underline-transparent ml-0.75 max-w-1/4"
+        class="flex-shrink-style !hover:(text-black underline-gray-600) !underline-transparent ml-0.75 max-w-1/4"
         :class="{
           '!max-w-none': isSharedBase && !isMobileMode,
           '!text-gray-500': activeTable,
           '!text-gray-700': !activeTable,
+          'first-breadcrumb': !isMobileMode && !isLeftSidebarOpen,
+          'first-breadcrumb-side-open': !isMobileMode && isLeftSidebarOpen,
         }"
         :to="openedBaseUrl"
       >
@@ -140,12 +142,28 @@ const setIntelligentImportPreview = (value: boolean) => {
           </div>
         </NcTooltip>
       </NuxtLink>
-      <div class="px-1.75 text-gray-500">></div>
+      <div
+        class="px-1.75 text-gray-500"
+        :class="{
+          'first-breadcrumb': !isMobileMode && !isLeftSidebarOpen,
+          'first-breadcrumb-side-open': !isMobileMode && isLeftSidebarOpen,
+        }"
+      >
+        >
+      </div>
     </template>
 
     <!-- 父级目录 -->
     <template v-if="activeTableParentCatalog">
-      <NcTooltip class="truncate nc-active-table-title max-w-full" show-on-truncate-only>
+      <NcTooltip
+        :class="{
+          'second-breadcrumb': !isMobileMode && !isLeftSidebarOpen,
+          'second-breadcrumb-side-open': !isMobileMode && isLeftSidebarOpen,
+          'flex-shrink-style': !isMobileMode,
+        }"
+        class="truncate nc-active-table-title max-w-full"
+        show-on-truncate-only
+      >
         <template #title>
           {{ activeTableParentCatalog }}
         </template>
@@ -166,7 +184,15 @@ const setIntelligentImportPreview = (value: boolean) => {
           </template>
         </span>
       </NcTooltip>
-      <div class="px-1.75 text-gray-500">></div>
+      <div
+        class="px-1.75 text-gray-500"
+        :class="{
+          'second-breadcrumb': !isMobileMode && !isLeftSidebarOpen,
+          'second-breadcrumb-side-open': !isMobileMode && isLeftSidebarOpen,
+        }"
+      >
+        >
+      </div>
     </template>
 
     <template v-if="!(isMobileMode && !activeView?.is_default)">
@@ -187,6 +213,9 @@ const setIntelligentImportPreview = (value: boolean) => {
           'max-w-1/2': isMobileMode || activeView?.is_default,
           'max-w-20/100': !isSharedBase && !isMobileMode && !activeView?.is_default,
           'max-w-none': isSharedBase && !isMobileMode,
+          'flex-shrink-style': !isMobileMode,
+          'third-breadcrumb': !isMobileMode && !isLeftSidebarOpen,
+          'third-breadcrumb-side-open': !isMobileMode && isLeftSidebarOpen,
         }"
       >
         <NcTooltip class="truncate nc-active-table-title max-w-full" show-on-truncate-only>
@@ -219,8 +248,16 @@ const setIntelligentImportPreview = (value: boolean) => {
         </NcTooltip>
       </div>
     </template>
-
-    <div v-if="!isMobileMode" class="pl-1.25 text-gray-500">></div>
+    <div
+      v-if="!isMobileMode"
+      class="pl-1.25 text-gray-500"
+      :class="{
+        'third-breadcrumb': !isMobileMode && !isLeftSidebarOpen,
+        'third-breadcrumb-side-open': !isMobileMode && isLeftSidebarOpen,
+      }"
+    >
+      >
+    </div>
 
     <template v-if="!(isMobileMode && activeView?.is_default)">
       <LazyGeneralEmojiPicker v-if="isMobileMode" :emoji="activeView?.meta?.icon" readonly size="xsmall">
@@ -240,3 +277,44 @@ const setIntelligentImportPreview = (value: boolean) => {
     :activeTable="activeTable"
   />
 </template>
+
+<style lang="scss">
+@media (max-width: 850px) {
+  .first-breadcrumb {
+    display: none;
+  }
+}
+@media (max-width: 750px) {
+  .second-breadcrumb {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .third-breadcrumb {
+    display: none;
+  }
+}
+.flex-shrink-style {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 970px) {
+  .first-breadcrumb-side-open {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .second-breadcrumb-side-open {
+    display: none;
+  }
+}
+
+@media (max-width: 850px) {
+  .third-breadcrumb-side-open {
+    display: none;
+  }
+}
+</style>
