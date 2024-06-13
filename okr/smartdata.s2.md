@@ -63,8 +63,8 @@
    - 🟢 List Views `/api/v1/db/meta/tables/{tableId}/views` **完成**
    - 🟢 List Columns In View `/api/v1/db/meta/views/{viewId}/columns` **完成**
    - 🟢️ List Table View Rows `/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}` **完成**
-   - 🟡️ Get View Filter `/api/v1/db/meta/views/{viewId}/filters` **模拟返回**
-   - 🟡️ List View Sorts `/api/v1/db/meta/views/{viewId}/sorts` **模拟返回**
+   - 🟢️ Get View Filter `/api/v1/db/meta/views/{viewId}/filters` **完成**
+   - 🟢️ List View Sorts `/api/v1/db/meta/views/{viewId}/sorts` **完成**
 
 ### 编辑: 表格数据
    - 🟢️ Update Table View Row `https://data-apis-v1.nocodb.com/#tag/DB-View-Row/operation/db-view-row-update` **完成**
@@ -91,7 +91,7 @@
    - 🟡️ Duplicate Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-duplicate` **未开始**
       - 1. 🟢 拷贝表结构 **完成**
       - 2. 🟢️ 拷贝表结构+数据 **完成**
-      - 3. 🟡 拷贝数据 **进行中**
+      - 3. 🟡 表间数据复制 **进行中**
    - 🟢 Duplicate Column `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/duplicate-column` **完成**
    - ⚪️ Reorder Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-reorder` **未开始**
 
@@ -143,7 +143,7 @@
    - 存储 Prompt 模板
    - MCMD: 发布模型时, 允许编辑表名及字段名 **完成**
    - MCDM: 发布模型时, 更新频率接口对接
-   - MCDM: 表间数据复制
+   - MCDM: 表间数据复制 **进行中**
    - LLM: TalkData 智能分析
    - LLM: 修改模型元信息时重新训练 **完成**
    - LLM: 存储训练数据 (修改模型时重训) **完成**
@@ -153,7 +153,7 @@
    - 模型树: 拖拽排序
    - 模型树: 创建目录 **完成**
    - 提问建表: 持久化会话数据
-   - 提问建表: 优化选择模型范围操作体验 **进行中**
+   - 提问建表: 优化选择模型范围操作体验 **完成**
 
 ### 平台
    - 【完成】V: 小数精度显示问题
