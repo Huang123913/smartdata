@@ -88,11 +88,11 @@
    - 🟢 Update Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-update` **完成**
    - 🟢️ Delete Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-delete` **完成**
    - 🟢️️ Update Grid Column (字段拖拽排序) `https://meta-apis-v1.nocodb.com/#tag/DB-View/operation/ db-view-grid-column-update` **完成**
-   - ⚪️ Duplicate Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-duplicate` **未开始**
+   - 🟡️ Duplicate Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-duplicate` **未开始**
       - 1. 🟢 拷贝表结构 **完成**
       - 2. 🟢️ 拷贝表结构+数据 **完成**
-      - 3. ⚪️ 拷贝数据
-   - 🟡 Duplicate Column `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/duplicate-column` **联调中**
+      - 3. 🟡 拷贝数据 **进行中**
+   - 🟢 Duplicate Column `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/duplicate-column` **完成**
    - ⚪️ Reorder Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-reorder` **未开始**
 
 ### 显示: 过滤
@@ -126,24 +126,18 @@
    > 复制表、字段时后台起的线程，前端会轮询其状态
    - 🟢️ /jobs/listen **完成**
 
-## 6.7
+## 6.13
    > 正式环境: http://smartdata.yindangu.com
    > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
    > 复制表仍有小问题需要后续跟进: 复制后排序问题
-   - 【进行中】提问建表: 优化选择模型范围操作体验
-   - 【联调中】复制字段
-   - 【完成】创建表时增加描述字段 
-   - 【完成】创建字段时增加描述字段 
-   - 【完成】问题修复 
-      - 修复发布模型至目录后打开表格一直loading
-      - 现有模型列表宽度调整，超出范围的模型名称增加提示框
-      - 修复选择模型弹窗目录偶尔不展开问题
-      - 搜索模型时展开最外一层目录
-      - 提示框样式修改
-      - 模型树表格拖拽指示器样式调节
-      - 删除多余图片
+   - 【进行中】表间数据复制 (预计周五完成)
+   - 【完成】提问建表: 优化选择模型范围操作体验
+   - 【完成】优化&修复
+      - 小数精度显示问题
+      - 请求拦截器公共参数调整
+      - 缩小窗体宽度时，表格顶部标题从左往右依次隐藏
 
 ### 需求池
    - 存储 Prompt 模板
@@ -162,7 +156,7 @@
    - 提问建表: 优化选择模型范围操作体验 **进行中**
 
 ### 平台
-   - 【进行中】V: 小数精度显示问题
+   - 【完成】V: 小数精度显示问题
    - 【暂缓】V: 前端导出规则不要把隐藏的字段也导出来 (项目不急)
 
 ### 后端
