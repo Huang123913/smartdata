@@ -207,7 +207,8 @@
     "appearance": "外观",
     "moveTo": "移动至",
     "intelligentImport":"智能导入",
-    "description":"描述"
+    "description":"描述",
+    "dataMigration":"复制数据"
   },
   "objects": {
     "owner": "所有者",

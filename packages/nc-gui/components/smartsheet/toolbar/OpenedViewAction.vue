@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 const props = defineProps<{
   intelligentImport?: () => void
+  dataMigration?: () => void
 }>()
 
 const { activeTable } = storeToRefs(useTablesStore())
@@ -207,6 +208,7 @@ function openDeleteDialog() {
         @rename="onRenameMenuClick"
         @delete="openDeleteDialog"
         :intelligentImport="intelligentImport"
+        :dataMigration="dataMigration"
       />
     </template>
   </NcDropdown>

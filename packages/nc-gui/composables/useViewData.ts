@@ -62,8 +62,9 @@ export function useViewData(
   const { isUIAllowed } = useRoles()
 
   const routeQuery = computed(() => route.value.query as Record<string, string>)
-
-  const { isPaginationLoading } = storeToRefs(useViewsStore())
+  const viewsStore = useViewsStore()
+  const { isPaginationLoading } = storeToRefs(viewsStore)
+  const { setShowTableDatas } = viewsStore
 
   const paginationData = computed({
     get: () => (isPublic.value ? sharedPaginationData.value : _paginationData.value),
@@ -200,6 +201,7 @@ export function useViewData(
     }
     formattedData.value = formatData(response.list)
     paginationData.value = response.pageInfo || paginationData.value || {}
+    setShowTableDatas(formattedData.value)
 
     // if public then update sharedPaginationData
     if (isPublic.value) {

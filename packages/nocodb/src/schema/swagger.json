@@ -17783,6 +17783,28 @@
           "$ref": "#/components/parameters/xc-auth"
         }
       ]
+    },
+    "/api/v2/smartdata/copyTableData":{
+      "post": {
+        "summary": "copyTableData MCDM",
+        "operationId": "copyTableData",
+        "description": "copyTableData MCDM",
+        "tags": ["SmartData"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/xc-auth"
+        }
+      ]
     }
   },
   "components": {

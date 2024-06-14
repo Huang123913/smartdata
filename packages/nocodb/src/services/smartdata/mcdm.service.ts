@@ -248,4 +248,20 @@ export class MCDMService {
     }
     return result;
   }
+
+  async copyTableData(params: {
+    type: string;
+    fromTableId: string;
+    toTableId: string;
+    columnMappings: { fromColumnId: string; toColumnId: string }[];
+    recordIds?: string[];
+  }) {
+    return await this.mcdm({
+      method: 'POST',
+      url: `/module-operation!executeOperation?operation=NocodbDBTableDuplicateToTable`,
+      data: params,
+    }).then((r) => {
+      return r.data;
+    });
+  }
 }

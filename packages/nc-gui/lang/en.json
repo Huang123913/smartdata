@@ -207,7 +207,8 @@
     "appearance": "Appearance",
     "moveTo":"Move",
     "intelligentImport":"Intelligent Import",
-    "description":"description"
+    "description":"description",
+    "dataMigration":"Copy Data"
   },
   "objects": {
     "owner": "Owner",

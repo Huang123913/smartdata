@@ -119,4 +119,18 @@ export class SmartDataController {
   async importData(@Body() data: { entityId: string; tableData: string }) {
     return await this.mcdm.importData(data);
   }
+
+  @Post(['/api/v2/smartdata/copyTableData'])
+  async copyTableData(
+    @Body()
+    data: {
+      type: string;
+      fromTableId: string;
+      toTableId: string;
+      columnMappings: { fromColumnId: string; toColumnId: string }[];
+      recordIds?: string[];
+    },
+  ) {
+    return await this.mcdm.copyTableData(data);
+  }
 }

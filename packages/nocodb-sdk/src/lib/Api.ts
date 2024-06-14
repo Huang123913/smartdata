@@ -11894,5 +11894,22 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+     * @description copyTableData MCDM
+     *
+     * @tags SmartData
+     * @name CopyTableData
+     * @summary copyTableData MCDM
+     * @request POST:/api/v2/smartdata/copyTableData
+     */
+    copyTableData: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/copyTableData`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
 }

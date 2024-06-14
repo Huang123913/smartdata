@@ -19,6 +19,7 @@ const reloadDataHook = inject(ReloadViewDataHookInj)
 const fields = inject(FieldsInj, ref([]))
 const { filters, loadFilters } = useViewFilters(activeView, null)
 const { sorts } = useViewSorts(activeView.value, () => reloadDataHook?.trigger())
+const dataMigrationVisible = ref(false)
 
 const openedBaseUrl = computed(() => {
   if (!base.value) return ''
@@ -90,6 +91,14 @@ const intelligentImport = async () => {
 
 const setIntelligentImportPreview = (value: boolean) => {
   intelligentImportPreviewVisible.value = value
+}
+
+const dataMigration = () => {
+  setDataMigrateionVisible(true)
+}
+
+const setDataMigrateionVisible = (value: boolean) => {
+  dataMigrationVisible.value = value
 }
 </script>
 
@@ -266,15 +275,25 @@ const setIntelligentImportPreview = (value: boolean) => {
         </template>
       </LazyGeneralEmojiPicker>
 
-      <SmartsheetToolbarOpenedViewAction :intelligentImport="intelligentImport" />
+      <SmartsheetToolbarOpenedViewAction :intelligentImport="intelligentImport" :dataMigration="dataMigration" />
     </template>
   </div>
-  <SmartsheetToolbarIntelligentImportPreview
-    :closePreview="setIntelligentImportPreview"
-    :visible="intelligentImportPreviewVisible"
-    :propsColumns="columns"
-    :propsTableData="tableData"
-    :activeTable="activeTable"
+  <template v-if="intelligentImportPreviewVisible">
+    <SmartsheetToolbarIntelligentImportPreview
+      :closePreview="setIntelligentImportPreview"
+      :visible="intelligentImportPreviewVisible"
+      :propsColumns="columns"
+      :propsTableData="tableData"
+      :activeTable="activeTable"
+    />
+  </template>
+
+  <SmartsheetToolbarDataMigrationModal
+    :visible="dataMigrationVisible"
+    :closeModal="setDataMigrateionVisible"
+    :fromFields="fields"
+    :fromTabled="activeTable"
+    :base="base"
   />
 </template>
 

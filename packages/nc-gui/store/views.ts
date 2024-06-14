@@ -17,7 +17,7 @@ export const useViewsStore = defineStore('viewsStore', () => {
     workspaceId: string
     baseId: string
   }
-
+  const showTableDatas = ref<any[]>([])
   const router = useRouter()
   // Store recent views from all Workspaces
   const allRecentViews = ref<RecentView[]>([])
@@ -390,6 +390,10 @@ export const useViewsStore = defineStore('viewsStore', () => {
     },
   )
 
+  const setShowTableDatas = (datas: any[]) => {
+    showTableDatas.value = datas
+  }
+
   return {
     isLockedView,
     isViewsLoading,
@@ -413,6 +417,8 @@ export const useViewsStore = defineStore('viewsStore', () => {
     isActiveViewLocked,
     preFillFormSearchParams,
     refreshViewTabTitle: refreshViewTabTitle.trigger,
+    showTableDatas,
+    setShowTableDatas,
   }
 })
 

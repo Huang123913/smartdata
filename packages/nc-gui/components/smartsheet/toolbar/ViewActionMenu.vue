@@ -11,6 +11,7 @@ const props = withDefaults(
     table: TableType
     inSidebar?: boolean
     intelligentImport?: () => void
+    dataMigration?: () => void
   }>(),
   {
     inSidebar: false,
@@ -158,6 +159,12 @@ const handleIntelligentImport = async () => {
     isImporting.value = false
   }
 }
+
+//数据迁移
+const handleDataMigration = async () => {
+  emits('closeModal')
+  props.dataMigration()
+}
 </script>
 
 <template>
@@ -211,7 +218,7 @@ const handleIntelligentImport = async () => {
       <NcMenuItem key="intelligentImport" @click="handleIntelligentImport">
         <div class="nc-base-menu-item group">
           <GeneralLoader v-if="isImporting" class="menu-icon" :style="{ marginRight: '2px' }" />
-          <icon v-else :style="{ marginRight: 'px' }">
+          <icon v-else :style="{ marginRight: '2px' }">
             <template #component>
               <svg
                 t="1717567800506"
@@ -235,6 +242,12 @@ const handleIntelligentImport = async () => {
             </template>
           </icon>
           {{ $t('general.intelligentImport') }}
+        </div>
+      </NcMenuItem>
+      <NcMenuItem key="dataMigration" @click="handleDataMigration">
+        <div class="nc-base-menu-item group">
+          <GeneralIcon icon="duplicate" class="text-gray-700" />
+          {{ $t('general.dataMigration') }}
         </div>
       </NcMenuItem>
       <template v-if="isUIAllowed('csvTableImport') && !isPublicView">
