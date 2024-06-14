@@ -82,16 +82,16 @@
 ### 编辑: 表格结构
    - 🟢️ Delete Column `/api/v1/db/meta/columns/{columnId}` **完成**
    - 🟡️ Update Column `/api/v1/db/meta/columns/{columnId}` **完成: 部分类型**
-   - 🟡 Create Column `/api/v1/db/meta/tables/{tableId}/columns` **完成: 部分类型**
-      - 1. ⚪️ 在指定位置插入 **未开始**
+   - 🟢 Create Column `/api/v1/db/meta/tables/{tableId}/columns` **完成: 部分类型**
+      - 1. 🟢 在指定位置插入 **完成**
    - 🟢️ Create Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-create` **完成**
    - 🟢 Update Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-update` **完成**
    - 🟢️ Delete Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-delete` **完成**
    - 🟢️️ Update Grid Column (字段拖拽排序) `https://meta-apis-v1.nocodb.com/#tag/DB-View/operation/ db-view-grid-column-update` **完成**
-   - 🟡️ Duplicate Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-duplicate` **未开始**
+   - 🟢️️ Duplicate Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-duplicate` **未开始**
       - 1. 🟢 拷贝表结构 **完成**
       - 2. 🟢️ 拷贝表结构+数据 **完成**
-      - 3. 🟡 表间数据复制 **进行中**
+      - 3. 🟢️️ 表间数据复制 **完成**
    - 🟢 Duplicate Column `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/duplicate-column` **完成**
    - ⚪️ Reorder Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-reorder` **未开始**
 
@@ -126,31 +126,27 @@
    > 复制表、字段时后台起的线程，前端会轮询其状态
    - 🟢️ /jobs/listen **完成**
 
-## 6.13
+## 6.14
    > 正式环境: http://smartdata.yindangu.com
    > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
-   > 复制表仍有小问题需要后续跟进: 复制后排序问题
-   - 【进行中】表间数据复制 (预计周五完成)
-   - 【完成】提问建表: 优化选择模型范围操作体验
-   - 【完成】优化&修复
-      - 小数精度显示问题
-      - 请求拦截器公共参数调整
-      - 缩小窗体宽度时，表格顶部标题从左往右依次隐藏
+   - 【联调中】模板树: 模型拖拽排序
+   - 【完成】表间数据复制
+   - 【完成】在指定位置插入列
 
 ### 需求池
    - 存储 Prompt 模板
    - MCMD: 发布模型时, 允许编辑表名及字段名 **完成**
    - MCDM: 发布模型时, 更新频率接口对接
-   - MCDM: 表间数据复制 **进行中**
+   - MCDM: 表间数据复制 **完成**
    - LLM: TalkData 智能分析
    - LLM: 修改模型元信息时重新训练 **完成**
    - LLM: 存储训练数据 (修改模型时重训) **完成**
    - LLM: 报告模板管理
    - LLM: 报告生成
    - Workflow: Docker 部署
-   - 模型树: 拖拽排序
+   - 模型树: 拖拽排序 **进行中**
    - 模型树: 创建目录 **完成**
    - 提问建表: 持久化会话数据
    - 提问建表: 优化选择模型范围操作体验 **完成**
@@ -159,20 +155,3 @@
    - 【完成】V: 小数精度显示问题
    - 【暂缓】V: 前端导出规则不要把隐藏的字段也导出来 (项目不急)
 
-### 后端
-1. 生成 DDL 接口-调整 （2024-04-28）
-   - a.【完成】物理表名调整为模型名
-
-2. SQL 查询接口-调整
-   - a.【完成】SQL 中表名接受模型名（2024-04-28）
-   - b.【完成】对于模型名重复的，支持结合传入的企业 ID，项目标识进行唯一定位（2024-04-28）
-   - c.【进行中】查询结果集中支持追溯结果集列的来源物理表字段，得到字段中文名，返回到列元信息中（五一后）
-   - d.【完成】查询结果集中空列名的兜底处理（2024-04-29）
-
-3. 模型发布&保存接口-调整（2024-04-30）
-   - a.【完成】支持删除模型表的发布功能
-
-4. 模型复制接口-新实现（2024-04-30）
-   - a.【完成】支持模型的复制
-   - b.支持模型复制的物理表结构发布
-   - c.支持模型复制的物理表数据复制
