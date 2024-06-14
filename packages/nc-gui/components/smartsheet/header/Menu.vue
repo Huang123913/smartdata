@@ -209,17 +209,20 @@ const addColumn = async (before = false) => {
   const currentColumnIndex = gridViewColumnList.findIndex((f) => f.fk_column_id === column!.value.id)
 
   let newColumnOrder
+  let prependToColumnId
   if (before) {
     if (currentColumnIndex === 0) {
       newColumnOrder = gridViewColumnList[currentColumnIndex].order / 2
     } else {
       newColumnOrder = (gridViewColumnList[currentColumnIndex].order! + gridViewColumnList[currentColumnIndex - 1]?.order) / 2
     }
+    prependToColumnId = gridViewColumnList[currentColumnIndex].id
   } else {
     if (currentColumnIndex === gridViewColumnList.length - 1) {
       newColumnOrder = gridViewColumnList[currentColumnIndex].order + 1
     } else {
       newColumnOrder = (gridViewColumnList[currentColumnIndex].order! + gridViewColumnList[currentColumnIndex + 1]?.order) / 2
+      prependToColumnId = gridViewColumnList[currentColumnIndex + 1].id
     }
   }
 
@@ -227,6 +230,7 @@ const addColumn = async (before = false) => {
     column_order: {
       order: newColumnOrder,
       view_id: view.value?.id as string,
+      prependToColumnId,
     },
   })
 }
