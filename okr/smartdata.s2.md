@@ -93,7 +93,7 @@
       - 2. 🟢️ 拷贝表结构+数据 **完成**
       - 3. 🟢️️ 表间数据复制 **完成**
    - 🟢 Duplicate Column `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/duplicate-column` **完成**
-   - ⚪️ Reorder Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-reorder` **未开始**
+   - ⚪️ Reorder Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-reorder` **联调中**
 
 ### 显示: 过滤
    - 🟢️️ Get View Filter **完成**
@@ -146,7 +146,7 @@
    - LLM: 报告模板管理
    - LLM: 报告生成
    - Workflow: Docker 部署
-   - 模型树: 拖拽排序 **进行中**
+   - 模型树: 拖拽排序 **联调中**
    - 模型树: 创建目录 **完成**
    - 提问建表: 持久化会话数据
    - 提问建表: 优化选择模型范围操作体验 **完成**
