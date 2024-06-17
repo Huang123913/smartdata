@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-import { CloseOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons-vue'
+import { h } from 'vue'
+
+import Icon, { CloseOutlined, EditOutlined, LoadingOutlined, SearchOutlined } from '@ant-design/icons-vue'
 
 const props = defineProps<{
   visible: boolean
@@ -32,6 +34,12 @@ const tablesfields = ref<{
   [key: string]: any
 }>({})
 const visibleOfTip = ref(false)
+const indicator = h(LoadingOutlined, {
+  style: {
+    fontSize: '24px',
+  },
+  spin: true,
+})
 
 const tip = ref('正在处理，请稍后查看')
 const isLoading = ref(false)
@@ -145,8 +153,8 @@ const getProgress = (id: string) => {
     }) => {
       if (data.status !== 'close') {
         if (data.status === JobStatus.COMPLETED) {
-          tip.value = '完成数据复制'
           isLoading.value = false
+          tip.value = '完成数据复制'
         } else if (data.status === JobStatus.FAILED) {
           console.log('data', data)
         }
@@ -271,10 +279,34 @@ const openTable = () => {
     </template>
   </a-modal>
   <div class="tip-content" v-if="visibleOfTip">
-    <div class="loading" v-if="isLoading"><a-spin /></div>
-    <div>
+    <div class="loading">
+      <a-spin v-if="isLoading" :indicator="indicator" />
+      <icon v-else>
+        <template #component>
+          <svg
+            t="1718591103874"
+            class="icon"
+            viewBox="0 0 1024 1024"
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            p-id="2318"
+            width="24"
+            height="24"
+          >
+            <path
+              d="M511.8 63.3c-246.7 0-448.5 201.8-448.5 448.5s201.8 448.5 448.5 448.5 448.5-201.8 448.5-448.5S758.5 63.3 511.8 63.3z m253.1 307.1L446.2 724 262.9 536.3c-17.5-17.5-17.5-43.7 0-61.1s43.7-17.5 61.1 0l122.2 122.2 253.2-283.7c17.5-17.5 43.7-17.5 61.1-4.4 17.5 17.5 17.5 43.7 4.4 61.1z"
+              fill="#52c41a"
+              p-id="2319"
+            ></path>
+          </svg>
+        </template>
+      </icon>
+    </div>
+    <div class>
       <div class="tip">{{ tip }}</div>
-      <div class="look" @click="openTable()"><a-button type="link" size="middle" :disabled="isLoading">马上查看</a-button></div>
+      <div class="look" @click="openTable()">
+        <a-button type="link" size="middle" :disabled="isLoading">马上查看</a-button>
+      </div>
     </div>
   </div>
 </template>
@@ -442,14 +474,16 @@ const openTable = () => {
   transform: translate(-50%, -50%);
   background-color: #fff;
   z-index: 999;
-  padding: 8px 41px;
+  padding: 8px 22px;
   border-radius: 5px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
   .loading {
-    margin-right: 28px;
+    margin-right: 10px;
+    position: relative;
+    top: 2px;
   }
   .tip {
     margin-top: 5px;
