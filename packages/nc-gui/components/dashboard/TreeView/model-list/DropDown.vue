@@ -74,21 +74,20 @@ const handleShowSelectCatalog = (value: boolean, item?: any) => {
 
 const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
   try {
-    if (updatedModel.value?.parentId === selectedCatalogParam.id) {
+    if (selectedCatalogParam && updatedModel.value?.parentId === selectedCatalogParam.id) {
       message.warning('此表已经在该目录下')
       return
     }
     // let orderNo = selectedCatalogParam ? 0 : chataiData.value.modelTree[0].children.length + 1
-    handleShowSelectCatalog(false, null)
     isShowLoading.value = true
-    updateModelCatalog(updatedModel.value?.id, selectedCatalogParam.id)
+    updateModelCatalog(updatedModel.value?.id, selectedCatalogParam ? selectedCatalogParam.id : null)
     if (updatedModel.value?.isCatalog) {
       await $api.smartData.saveCustomCatalog({
         id: updatedModel.value?.id,
         name: null,
         name_cn: null,
         catalogType: null,
-        parentId: selectedCatalogParam.id,
+        parentId: selectedCatalogParam ? selectedCatalogParam.id : props.base.id,
         code: null,
         label: null,
         description: null,
@@ -107,8 +106,10 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
       })
     }
   } catch (error) {
+    console.log(error)
   } finally {
     isShowLoading.value = false
+    handleShowSelectCatalog(false, null)
   }
 }
 
