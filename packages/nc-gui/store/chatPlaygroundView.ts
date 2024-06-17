@@ -100,9 +100,15 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
   const sortTreeNodesByOrderNo = (node: any) => {
     if (node?.children && node.children.length > 0) {
       // 对当前节点的 children 进行排序
-      node.children.sort((a: any, b: any) => {
-        return b.orderNo - a.orderNo
+      let catalog = node.children.filter((item) => item.isCatalog)
+      let model = node.children.filter((item) => !item.isCatalog)
+      catalog.sort((a: any, b: any) => {
+        return a.orderNo - b.orderNo
       })
+      model.sort((a: any, b: any) => {
+        return a.orderNo - b.orderNo
+      })
+      node.children = [...catalog, ...model]
       // 递归对每个子节点进行排序
       node.children.forEach((child: any) => sortTreeNodesByOrderNo(child))
     }
