@@ -25,12 +25,12 @@ const selectValue = ref<{
   [key: string]: any
 }>({})
 const selectOption = [
-  { value: 'regularUpdate', label: '定时更新' },
-  { value: 'realTimeView', label: '实时视图' },
+  { value: 'ScheduledRefresh', label: '定时更新' },
+  { value: 'RealTimeView', label: '实时视图' },
 ]
 onMounted(() => {
   expandedKeys.value = []
-  modelUpdateTypeValue.value = 'realTimeView'
+  modelUpdateTypeValue.value = 'RealTimeView'
 })
 
 watch(
@@ -76,12 +76,12 @@ const handleModalOk = () => {
 }
 
 const handleChange = (value: string) => {
-  value === 'regularUpdate' && eventBus.emit(ChatPlaygroundViewStoreEvents.OPEN_SET_MODEL_DATA_UPDATE_TIME_MODAL)
-  value === 'realTimeView' && props.setUpdateTimeValue(value)
+  props.setUpdateTimeValue(value)
+  value === 'ScheduledRefresh' && eventBus.emit(ChatPlaygroundViewStoreEvents.OPEN_SET_MODEL_DATA_UPDATE_TIME_MODAL)
 }
 
 const hanldeAfterClose = () => {
-  modelUpdateTypeValue.value = 'realTimeView'
+  modelUpdateTypeValue.value = 'RealTimeView'
 }
 
 //选择字段
@@ -103,6 +103,7 @@ const handleSelectSourceField = (option: any, targetFieldItem: any) => {
     :visible="visible"
     :afterClose="hanldeAfterClose"
     @cancel="handleCancel"
+    zIndex="888"
   >
     <a-tree
       class="catalog catalog-tree"

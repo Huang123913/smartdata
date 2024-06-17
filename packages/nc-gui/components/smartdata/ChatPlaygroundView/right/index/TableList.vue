@@ -11,7 +11,7 @@ const route = router.currentRoute
 const { $api } = useNuxtApp()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
-const { getCustomCatalogEntityTree, setSessionItem } = store
+const { setSessionItem } = store
 const isShowSelectCatalogModal = ref<boolean>(false) //是否显示选择目录弹框
 const isEdited = ref<boolean>(false)
 const editText = ref<string>('')
@@ -20,7 +20,7 @@ const tableWidth = ref<number>(0)
 const tableHeight = ref<number>(0)
 const elementRef1 = ref(null)
 const myTable = ref(null)
-const updateTimeValue = ref<string>('realTimeView') //模型数据更新方式-默认实时视图
+const belongSQLDataType = ref<string>('RealTimeView') //模型数据更新方式-默认实时视图
 const isShowLoading = ref<boolean>(false)
 const isPublishCatalog = ref<boolean>(true) //是否发布至模型目录
 const targetField = ref<any[]>([]) //目标字段
@@ -33,6 +33,7 @@ const existingModelField = ref<{
 }>({})
 const selectPublishMode = ref<object>({})
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
+const belongSQLDataRefreshPlan = ref({})
 const isShow = computed(() => {
   return chataiData.value.sessionItem?.sql
 })
@@ -107,6 +108,8 @@ const handleOk = async (selectedCatalog: object) => {
         question: chataiData.value.sessionItem.tip,
         modelName: chataiData.value.sessionItem.textAreaValue,
         belongCatalog: selectedCatalog.id,
+        belongSQLDataRefreshPlan: belongSQLDataRefreshPlan.value,
+        belongSQLDataType: belongSQLDataType.value,
       }
       exeRes = await $api.smartData.publicModelToCatalog(params)
     } else {
@@ -114,6 +117,8 @@ const handleOk = async (selectedCatalog: object) => {
         mapingData: selectedCatalog,
         tableData: JSON.stringify({ fields, datas }),
         existingModelId: selectPublishMode.value.id,
+        belongSQLDataRefreshPlan: belongSQLDataRefreshPlan.value,
+        belongSQLDataType: belongSQLDataType.value,
       }
       exeRes = await $api.smartData.publishModelToExistingModel(params)
     }
@@ -133,12 +138,12 @@ const handleCancel = () => {
 }
 
 // 设置模型数据更新频率
-const handleOkBySetUpdateTime = (value: string) => {
-  updateTimeValue.value = value
+const handleOkBySetUpdateTime = (value: object) => {
+  belongSQLDataRefreshPlan.value = value
 }
 
 const setUpdateTimeValue = (value: string) => {
-  updateTimeValue.value = value
+  belongSQLDataType.value = value
 }
 
 const handleSelectExistingModel = async (item: any) => {

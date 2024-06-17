@@ -53,6 +53,8 @@ export class SmartDataController {
       mapingData: object;
       tableData: string;
       existingModelId: string;
+      belongSQLDataRefreshPlan: object;
+      belongSQLDataType: string;
     },
   ) {
     return await this.mcdm.publishModelToExistingModel(data);
@@ -67,6 +69,8 @@ export class SmartDataController {
       question: string;
       modelName: string;
       belongCatalog: string;
+      belongSQLDataRefreshPlan: object;
+      belongSQLDataType: string;
     },
   ) {
     return await this.llm.publicModelToCatalog(data);

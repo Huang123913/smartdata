@@ -325,8 +325,18 @@ export class LLMService {
     question: string;
     modelName: string;
     belongCatalog: string;
+    belongSQLDataRefreshPlan: object;
+    belongSQLDataType: string;
   }) {
-    let { tableData, sql, question, modelName, belongCatalog } = params;
+    let {
+      tableData,
+      sql,
+      question,
+      modelName,
+      belongCatalog,
+      belongSQLDataRefreshPlan,
+      belongSQLDataType,
+    } = params;
     let tableDataObj = JSON.parse(tableData);
     let tableDatas = tableDataObj.datas ?? [];
     let tableFields = tableDataObj.fields ?? [];
@@ -361,6 +371,16 @@ export class LLMService {
             name: 'belongQuestion',
             code: 'belongQuestion',
             jsonValue: JSON.stringify({ question }),
+          },
+          {
+            name: 'belongSQLDataRefreshPlan',
+            code: 'belongSQLDataRefreshPlan',
+            jsonValue: JSON.stringify(belongSQLDataRefreshPlan),
+          },
+          {
+            name: 'belongSQLDataType',
+            code: 'belongSQLDataType',
+            value: belongSQLDataType,
           },
         ],
         fields,

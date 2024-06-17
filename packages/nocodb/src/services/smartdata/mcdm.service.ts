@@ -167,8 +167,16 @@ export class MCDMService {
     mapingData: object;
     tableData: string;
     existingModelId: string;
+    belongSQLDataRefreshPlan: object;
+    belongSQLDataType: string;
   }) {
-    let { tableData, existingModelId, mapingData } = params;
+    let {
+      tableData,
+      existingModelId,
+      mapingData,
+      belongSQLDataRefreshPlan,
+      belongSQLDataType,
+    } = params;
     let tableDataObj = JSON.parse(tableData);
     let tableDatas = tableDataObj.datas ?? [];
     let insertData: any[] = [];
@@ -189,6 +197,37 @@ export class MCDMService {
         tableInfo.tableName,
         insertData,
       ));
+    let entities = await this.getEntity(existingModelId);
+    const entity = entities[0];
+    const entityProps = entity?.props;
+    if (entityProps) {
+      let dataTypeProp = entityProps.findLast(
+        (p) => p.code == 'belongSQLDataType',
+      );
+      let dataRefreshPlan = entityProps.findLast(
+        (p) => p.code == 'belongSQLDataRefreshPlan',
+      );
+      let saveDdlProps = [
+        {
+          id: existingModelId,
+          props: [
+            {
+              id: dataTypeProp ? dataTypeProp.id : null,
+              name: 'belongSQLDataType',
+              code: 'belongSQLDataType',
+              value: belongSQLDataType,
+            },
+            {
+              id: dataRefreshPlan ? dataRefreshPlan.id : null,
+              name: 'belongSQLDataRefreshPlan',
+              code: 'belongSQLDataRefreshPlan',
+              jsonValue: JSON.stringify(belongSQLDataRefreshPlan),
+            },
+          ],
+        },
+      ];
+      await this.saveModel({ entities: saveDdlProps });
+    }
     return { success: true };
   }
 
