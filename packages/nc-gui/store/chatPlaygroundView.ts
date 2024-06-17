@@ -54,6 +54,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     try {
       let bizCatalogEntityCustom = await $api.smartData.entities()
       if (!bizCatalogEntityCustom.length) return
+      bizCatalogEntityCustom = bizCatalogEntityCustom.map((item) => ({ ...item, parentId: item.parentId ? item.parentId : null }))
       chataiData.modelData = [
         ...bizCatalogEntityCustom,
         {
@@ -100,7 +101,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     if (node?.children && node.children.length > 0) {
       // 对当前节点的 children 进行排序
       node.children.sort((a: any, b: any) => {
-        return a.orderNo - b.orderNo
+        return b.orderNo - a.orderNo
       })
       // 递归对每个子节点进行排序
       node.children.forEach((child: any) => sortTreeNodesByOrderNo(child))
