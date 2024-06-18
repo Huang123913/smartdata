@@ -93,7 +93,7 @@
       - 2. 🟢️ 拷贝表结构+数据 **完成**
       - 3. 🟢️️ 表间数据复制 **完成**
    - 🟢 Duplicate Column `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/duplicate-column` **完成**
-   - ⚪️ Reorder Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-reorder` **联调中**
+   - 🟢 Reorder Table `https://meta-apis-v1.nocodb.com/#tag/DB-Table/operation/db-table-reorder` **联调中**
 
 ### 显示: 过滤
    - 🟢️️ Get View Filter **完成**
@@ -126,13 +126,15 @@
    > 复制表、字段时后台起的线程，前端会轮询其状态
    - 🟢️ /jobs/listen **完成**
 
-## 6.17
+## 6.18
    > 正式环境: http://smartdata.yindangu.com
    > 测试环境: http://smartdata-server.yindangu.com
 
 ### 前端
-   - 【联调中】模板树: 模型&目录拖拽排序
-   - 【联调中】MCDM: 发布模型时, 更新频率接口对接 (按接口要求重构UI)
+   - 【进行中】储存数据导入的原文件 (Excel、CSV)
+   - 【完成】模板树: 模型&目录拖拽排序
+   - 【完成】LLM: 持久化智能导入返回的ID
+   - 🟡️【前端完成】MCDM: 发布模型时, 更新频率接口对接 (按接口要求重构UI)
 
 ### 需求池
    - 存储 Prompt 模板
