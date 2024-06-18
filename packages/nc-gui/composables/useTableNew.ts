@@ -170,7 +170,7 @@ export function useTableNew(param: { onTableCreate?: (tableMeta: TableType) => v
       })
 
     try {
-      const tableMeta = await $api.source.tableCreate(catalogId ?? baseId, sourceId!, {
+      const tableMeta = await $api.source.tableCreate(catalogId ?? '__root__', sourceId!, {
         ...table,
         columns,
       })
