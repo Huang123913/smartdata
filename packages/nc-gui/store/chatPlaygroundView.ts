@@ -54,7 +54,6 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     try {
       let bizCatalogEntityCustom = await $api.smartData.entities()
       if (!bizCatalogEntityCustom.length) return
-      bizCatalogEntityCustom = bizCatalogEntityCustom.map((item) => ({ ...item, parentId: item.parentId ? item.parentId : null }))
       chataiData.modelData = [
         ...bizCatalogEntityCustom,
         {
@@ -89,7 +88,10 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
   // 构建树
   const buildTree = (datas: any[], parentId = null): any[] => {
     return datas
-      .filter((item: any) => item.parentId === parentId)
+      .filter((item: any) => {
+        let itemParantId = item.parentId ? item.parentId : null
+        return itemParantId === parentId
+      })
       .map((item: any) => {
         let children: any[] = item.isCatalog ? buildTree(datas, item.id) : []
         return { ...item, title: item.name_cn, key: item.id, children, fields: [] }
@@ -98,10 +100,9 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
 
   // 排序
   const sortTreeNodesByOrderNo = (node: any) => {
-    if (node?.children && node.children.length > 0) {
-      // 对当前节点的 children 进行排序
-      let catalog = node.children.filter((item) => item.isCatalog)
-      let model = node.children.filter((item) => !item.isCatalog)
+    if (node?.children && node.children.length) {
+      let catalog = node.children.filter((item: any) => item.isCatalog)
+      let model = node.children.filter((item: any) => !item.isCatalog)
       catalog.sort((a: any, b: any) => {
         return a.orderNo - b.orderNo
       })
@@ -112,6 +113,19 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
       // 递归对每个子节点进行排序
       node.children.forEach((child: any) => sortTreeNodesByOrderNo(child))
     }
+  }
+
+  // 在模型树根据id查找节点
+  const findNodeById: any = (nodes: any, nodeId: string) => {
+    for (const node of nodes) {
+      if (node.id === nodeId) {
+        return node
+      } else if (node?.children && node.children.length) {
+        const found = findNodeById(node.children, nodeId)
+        if (found) return found
+      }
+    }
+    return null
   }
 
   //设置展示的会话信息
@@ -177,6 +191,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     // chataiData.modelTree.forEach((node) => sortTreeNodesByOrderNo(node))
   }
 
+  //修改目录名称
   const updateCatalogName = (catalog: any, rename: string) => {
     let findCatalog = chataiData.modelData.find((item) => item.id === catalog.id)
     findCatalog.name = rename
@@ -196,25 +211,13 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog)
   }
 
-  // 在模型树根据id查找节点
-  const findNodeById: any = (nodes: any, nodeId: string) => {
-    for (const node of nodes) {
-      if (node.id === nodeId) {
-        return node
-      } else if (node?.children && node.children.length > 0) {
-        const found = findNodeById(node.children, nodeId)
-        if (found) return found
-      }
-    }
-    return null
-  }
-
   //修改表字段名称
   const updateTableColumnName = (column: object, name: string) => {
     let findItem = chataiData.sessionItem.columns.find((item) => item.id === column.id)
     findItem.name_cn = name
   }
 
+  //增加目录
   const addCatalog = (catalog: any) => {
     chataiData.modelData.push({
       ...catalog,
@@ -237,6 +240,39 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog)
   }
 
+  //移动模型
+  const moveModel = (modelId: string, originalParentId: string, newParentId: string, prependToTableId: string) => {
+    let findModel = findNodeById(chataiData.modelTree, modelId)
+    findModel.parentId = newParentId
+    let originalParentIdCatlog = findNodeById(chataiData.modelTree, originalParentId)
+    originalParentIdCatlog.children = originalParentIdCatlog.children.filter((item) => item.id !== modelId)
+    let newCatalog = findNodeById(chataiData.modelTree, newParentId)
+    if (prependToTableId) {
+      let findIndex = newCatalog.children.findIndex((item) => item.id === prependToTableId)
+      newCatalog.children.splice(findIndex, 0, findModel)
+    } else {
+      newCatalog.children.push(findModel)
+    }
+  }
+
+  //移动目录
+  const moveCatalog = (catalogId: string, originalParentId: string, newParentId: string, prependToTableId: string) => {
+    let findCatalog = findNodeById(chataiData.modelTree, catalogId)
+    findCatalog.parentId = newParentId
+    let originalParentIdCatlog = findNodeById(chataiData.modelTree, originalParentId)
+    originalParentIdCatlog.children = originalParentIdCatlog.children.filter((item: any) => item.id !== catalogId)
+    let newCatalog = newParentId ? findNodeById(chataiData.modelTree, newParentId) : chataiData.modelTree[0]
+    if (prependToTableId) {
+      let findIndex = newCatalog.children.findIndex((item: any) => item.id === prependToTableId)
+      findIndex = findIndex === -1 ? 0 : findIndex
+      newCatalog.children.splice(findIndex, 0, findCatalog)
+    } else {
+      let findLastIndex = newCatalog.children.findLastIndex((item: any) => item.isCatalog === true)
+      findLastIndex = findLastIndex === -1 ? 0 : findLastIndex
+      newCatalog.children.splice(findLastIndex + 1, 0, findCatalog)
+    }
+  }
+
   return {
     chataiData,
     setSessionItem,
@@ -253,5 +289,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     findNodeById,
     updateTableColumnName,
     addCatalog,
+    moveModel,
+    moveCatalog,
   }
 })

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { BaseType, TableType } from 'nocodb-sdk'
+import type { BaseType } from 'nocodb-sdk'
 
 import catalog from '../../../assets/img/catalog.svg'
 import { useChatPlaygroundViewStore } from '../../../store/chatPlaygroundView'
@@ -13,7 +13,7 @@ onMounted(async () => {
   layoutLfetHeaderElem.value = document.querySelector('.layout-left-header')
   layoutLfetFooterElem.value = document.querySelector('.layout-left-footer')
   props.setIsLoadingModel(true)
-  await loadProjectTables(props.base.id as string)
+  props.base && (await loadProjectTables(props.base.id as string))
   props.setIsLoadingModel(false)
 })
 
@@ -23,32 +23,35 @@ const { $api } = useNuxtApp()
 const route = useRoute()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
-const { updateModelCatalog } = store
+const { moveModel, moveCatalog } = store
 const expandedKeys = ref([])
 const isShowLoading = ref(false)
-const isAddNewProjectChildEntityLoading = ref(false)
-const elementATree = ref(null)
-const layoutLfetHeaderElem = ref(null)
-const layoutLfetFooterElem = ref(null)
+const modelTreeRef = ref<any>(null)
+const layoutLfetHeaderElem = ref<any>(null)
+const layoutLfetFooterElem = ref<any>(null)
 const scrollYHeight = ref(0)
-const showModelTree = computed(() => {
-  if (elementATree.value) resizeObserver.observe(elementATree.value)
+const modelTreeData = computed(() => {
+  if (modelTreeRef.value) resizeObserver.observe(modelTreeRef.value)
   if (!layoutLfetHeaderElem.value) layoutLfetHeaderElem.value = document.querySelector('.layout-left-header')
   if (!layoutLfetFooterElem.value) layoutLfetFooterElem.value = document.querySelector('.layout-left-footer')
   return chataiData.value.modelTree.length ? chataiData.value.modelTree[0].children : []
 })
-const openedTableId = computed(() => route.params.viewId)
 
-const otherHeight = computed(() => {
+const openedTableId = computed(() => {
+  return route && route?.params && route.params?.viewId ? route.params?.viewId : ''
+})
+
+const otherContentHeight = computed(() => {
   if (layoutLfetHeaderElem.value && layoutLfetFooterElem.value)
     return Math.ceil(layoutLfetHeaderElem.value.offsetHeight + layoutLfetFooterElem.value.offsetHeight) + 73
   return 0
 })
 
+//监听模型树内容高度变化
 const resizeObserver = new ResizeObserver((entries) => {
   for (const entry of entries) {
-    if (entry.target === elementATree.value) {
-      scrollYHeight.value = parseInt(entry.contentRect.height)
+    if (entry.target === modelTreeRef.value) {
+      scrollYHeight.value = parseInt(`${entry.contentRect.height}`)
     }
   }
 })
@@ -88,94 +91,78 @@ const onDragEnter = (info: any) => {
 
 const onDrop = async (info: any) => {
   try {
-    const dragNode = info.dragNode //拖拽节点
-    const dragNodeKey = info.dragNode.key //拖拽节点id
-    const dragNodeParentId = info.dragNode.parentId //拖拽节点的父级id
-    let dropNode = info.node //归属节点
-    let dropNodeKey = dropNode.isCatalog ? info.node.key : dropNode.parentId //归属节点id
-    // let belongCatalog = dropNode.isCatalog ? info.node.key : dropNode.parentId //归属节点id
-    const dropPosition = info.dropPosition
-    if (Number(dropPosition) < 0 || !dropNodeKey) {
-      dropNodeKey = props.base.id
-    }
     isShowLoading.value = true
-
-    updateModelCatalog(dragNodeKey, dropNodeKey)
-    if (dragNode.isCatalog) {
-      await $api.smartData.saveCustomCatalog({
-        id: dragNodeKey,
-        name: null,
-        name_cn: null,
-        catalogType: null,
-        parentId: dropNodeKey,
-        code: null,
-        label: null,
-        description: null,
-        description_cn: null,
-        disabled: null,
-        orderNo: null,
-        customDateTime: null,
-        customGroupId: null,
-        customGroupName: null,
-        customOwnerId: null,
-        customOwnerName: null,
-      })
+    if (info.dragNode.isCatalog) {
+      await dropCatalog(info)
     } else {
-      await $api.smartData.updateModelCatalog({ entities: [{ id: dragNodeKey, belongCatalog: dropNodeKey }] })
+      await dropModel(info)
     }
   } catch (error) {
-    console.log('error', error)
+    console.error(error)
   } finally {
     isShowLoading.value = false
   }
 }
 
-const addNewProjectChildEntity = (catalog: any) => {
-  if (isAddNewProjectChildEntityLoading.value) return
-  isAddNewProjectChildEntityLoading.value = true
-  try {
-    openTableCreateDialog(catalog)
-  } finally {
-    isAddNewProjectChildEntityLoading.value = false
+const dropModel = async (info: any) => {
+  console.log('info', info)
+  const dropPosition = info.dropPosition
+  //拖拽节点
+  const dragNode = info.dragNode
+  //拖拽节点id
+  const dragNodeKey = dragNode.key
+  //拖拽节点的父级id
+  const dragNodeParentId = dragNode.parentId
+  //目标节点
+  let dropNode = info.node
+  //模型新的父级id
+  let newParentId = dropNode.parentId === dragNodeParentId ? dragNodeParentId : dropNode.parentId
+  if (Number(dropPosition) < 0 || !newParentId) {
+    newParentId = '__root__'
   }
+  let prependToTableId = dropNode.isCatalog ? '' : dropNode.key
+  if (Number(dropPosition) < 0) prependToTableId = ''
+  let params = {
+    baseId: props.base.id,
+    catalogId: newParentId, //调整到哪个目录ID下，若传空则认为在原目录下调整位置
+    tableId: dragNodeKey, //要调整位置的表ID
+    prependToTableId, //要插入到哪个表ID前，若传空则插入到目录的最后
+  }
+  console.log('params', params)
+  await $api.smartData.moveModel(params)
+  moveModel(dragNodeKey, dragNodeParentId, newParentId === '__root__' ? null : newParentId, prependToTableId)
 }
 
-const openTableCreateDialog = (catalog: any) => {
-  const isOpen = ref(true)
-  console.log('props.base', props.base)
-  let sourceId = props.base?.sources?.[0].id
-  const { close } = useDialog(resolveComponent('DlgTableCreate'), {
-    'modelValue': isOpen,
-    sourceId,
-    'baseId': props.base.id,
-    'onCreate': closeDialog,
-    'onUpdate:modelValue': () => closeDialog(),
-    'catalog': catalog,
-  })
-
-  function closeDialog(table?: TableType) {
-    isOpen.value = false
-    if (!table) return
-    setTimeout(() => {
-      const newTableDom = document.querySelector(`[data-table-id="${table.id}"]`)
-      if (!newTableDom) return
-      newTableDom?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    }, 1000)
-    close(1000)
+const dropCatalog = async (info: any) => {
+  const dropPosition = info.dropPosition
+  //拖拽对象
+  const dragNode = info.dragNode
+  //拖拽对象id
+  const dragNodeKey = dragNode.key
+  //拖拽对象的父级id
+  const dragNodeParentId = dragNode.parentId
+  //目标节点
+  let dropNode = info.node
+  //目录新的父级id
+  let newParentId = dropNode.isCatalog && dropNode.parentId === dragNodeParentId ? dragNodeParentId : dropNode.parentId
+  newParentId = info.dropPosition < 0 ? null : newParentId
+  let prependToTableId = dropNode.isCatalog ? dropNode.key : null
+  if (dropPosition < 0) prependToTableId = null
+  let params = {
+    sourceCatalogId: dragNodeKey, //源目录id
+    targetCatalogId: prependToTableId ?? newParentId, //目标移动目录id
+    ismoveCustomCatalogLast: !prependToTableId,
   }
+  moveCatalog(dragNodeKey, dragNodeParentId, newParentId, prependToTableId)
+  await $api.smartData.moveCatalog(params)
 }
 </script>
 
 <template>
-  <div
-    class="model-list rounded-md w-full"
-    ref="elementATree"
-    :style="{ height: `calc(100vh  - ${otherHeight}px)` }"
-    if="showModelTree.length"
-  >
+  <div ref="modelTreeRef" class="model-list rounded-md w-full" :style="{ height: `calc(100vh  - ${otherContentHeight}px)` }">
     <a-tree
       :height="scrollYHeight"
-      :tree-data="showModelTree"
+      :tree-data="modelTreeData"
       v-model:expandedKeys="expandedKeys"
       @expand="handleExpand"
       draggable

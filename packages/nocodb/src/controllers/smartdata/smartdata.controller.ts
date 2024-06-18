@@ -142,4 +142,29 @@ export class SmartDataController {
   ) {
     return await this.mcdm.copyTableData(data);
   }
+
+  @Post(['/api/v2/smartdata/moveModel'])
+  async moveModel(
+    @Body()
+    data: {
+      baseId: string;
+      catalogId: string;
+      tableId: string;
+      prependToTableId: string;
+    },
+  ) {
+    return await this.mcdm.moveModel(data);
+  }
+
+  @Post(['/api/v2/smartdata/moveCatalog'])
+  async moveCatalog(
+    @Body()
+    data: {
+      sourceCatalogId: string;
+      targetCatalogId: string;
+      ismoveCustomCatalogLast: boolean;
+    },
+  ) {
+    return await this.mcdm.moveCatalog(data);
+  }
 }

@@ -11911,5 +11911,39 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+     * @description moveModel MCDM
+     *
+     * @tags SmartData
+     * @name MoveModel
+     * @summary moveModel MCDM
+     * @request POST:/api/v2/smartdata/moveModel
+     */
+    moveModel: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/moveModel`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description moveCatalog MCDM
+     *
+     * @tags SmartData
+     * @name MoveCatalog
+     * @summary moveCatalog MCDM
+     * @request POST:/api/v2/smartdata/moveCatalog
+     */
+    moveCatalog: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/moveCatalog`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
 }

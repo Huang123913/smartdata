@@ -17805,6 +17805,50 @@
           "$ref": "#/components/parameters/xc-auth"
         }
       ]
+    },
+    "/api/v2/smartdata/moveModel":{
+      "post": {
+        "summary": "moveModel MCDM",
+        "operationId": "moveModel",
+        "description": "moveModel MCDM",
+        "tags": ["SmartData"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/xc-auth"
+        }
+      ]
+    },
+    "/api/v2/smartdata/moveCatalog":{
+      "post": {
+        "summary": "moveCatalog MCDM",
+        "operationId": "moveCatalog",
+        "description": "moveCatalog MCDM",
+        "tags": ["SmartData"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/xc-auth"
+        }
+      ]
     }
   },
   "components": {

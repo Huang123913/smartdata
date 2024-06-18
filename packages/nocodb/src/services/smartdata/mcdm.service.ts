@@ -303,4 +303,65 @@ export class MCDMService {
       return r.data;
     });
   }
+
+  async moveModel(params: {
+    baseId: string;
+    catalogId: string;
+    tableId: string;
+    prependToTableId: string;
+  }) {
+    return await this.mcdm({
+      method: 'GET',
+      url: '/module-operation!executeOperation?operation=NocodbDBTableReorderTable',
+      params: params,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async moveCatalog(params: {
+    sourceCatalogId: string;
+    targetCatalogId: string;
+    ismoveCustomCatalogLast: boolean;
+  }) {
+    let result = null;
+    if (params.ismoveCustomCatalogLast) {
+      result = await this.moveCustomCatalogLast(params);
+    } else {
+      result = await this.moveCustomCatalog(params);
+    }
+    return result;
+  }
+
+  async moveCustomCatalog(params: {
+    sourceCatalogId: string;
+    targetCatalogId: string;
+  }) {
+    let { sourceCatalogId, targetCatalogId } = params;
+    return await this.mcdm({
+      url: `/webapi/ydg_vmcdm_custom_api/moveCustomCatalog`,
+      params: {
+        sourceCatalogId: sourceCatalogId,
+        targetCatalogId: targetCatalogId,
+      },
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async moveCustomCatalogLast(params: {
+    sourceCatalogId: string;
+    targetCatalogId: string;
+  }) {
+    let { sourceCatalogId, targetCatalogId } = params;
+    return await this.mcdm({
+      url: `/webapi/ydg_vmcdm_custom_api/moveCustomCatalogLast`,
+      params: {
+        sourceCatalogId: sourceCatalogId,
+        targetCatalogId: targetCatalogId,
+      },
+    }).then((r) => {
+      return r.data;
+    });
+  }
 }
