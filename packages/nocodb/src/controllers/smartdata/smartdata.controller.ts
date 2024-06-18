@@ -114,7 +114,12 @@ export class SmartDataController {
 
   @Post(['/api/v2/smartdata/intelligentImport'])
   async intelligentImport(
-    @Body() data: { tableHeader: string; allTableMode: string },
+    @Body()
+    data: {
+      tableId: string;
+      tableHeader: string;
+      allTableMode: string;
+    },
   ) {
     return await this.llm.intelligentImport(data);
   }

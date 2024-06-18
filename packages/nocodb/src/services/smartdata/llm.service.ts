@@ -29,8 +29,15 @@ export class LLMService {
     }
 
     this.llm.interceptors.request.use((config) => {
-      config.params.projectid = process.env.LLM_PROJECTID ?? 2;
-      config.params.orgid = process.env.LLM_ORGID ?? 2;
+      let projectid = process.env.LLM_PROJECTID ?? '2';
+      let orgid = process.env.LLM_ORGID ?? '2';
+      if (config?.data) {
+        config.data.projectid = projectid;
+        config.data.orgid = orgid;
+      } else {
+        config.params.projectid = projectid;
+        config.params.orgid = orgid;
+      }
       return config;
     });
 
@@ -215,14 +222,12 @@ export class LLMService {
 
   async getSql(question: string, modelrange: string) {
     return await this.llm({
+      method: 'POST',
       url: `/ask`,
-      params: {
+      data: {
         question,
         id: uuidv4(),
         modelrange,
-      },
-      headers: {
-        'ngrok-skip-browser-warning': 'true',
       },
     }).then((r) => {
       return r.data;
@@ -250,14 +255,15 @@ export class LLMService {
     for (let i = 0; i < selectedModel.length; i++) {
       let modelItem = selectedModel[i];
       if (modelItem?.fields && modelItem.fields.length === 0) {
-        let modelInfo = await this.mcdm.getEntity(modelItem.id);
-        let fields = modelInfo.length ? modelInfo[0].fields : [];
+        let entities = await this.mcdm.getEntity(modelItem.id);
+        let fields =
+          entities.length && entities[0]?.fields ? entities[0]?.fields : [];
         modelItem.fields = fields;
       }
     }
     modelrange = selectedModel.map((model) => {
       let props = [];
-      if (model.fields.length) {
+      if (model?.fields && model.fields.length) {
         props = model.fields.map((field) => {
           return { prop_name: field.fieldName };
         });
@@ -457,7 +463,7 @@ export class LLMService {
     return await this.llm({
       method: 'POST',
       url: '/AnalyzingHeadersGenerateTable',
-      params: {
+      data: {
         id: uuidv4(),
         table_headers: tableHeader,
       },
@@ -467,10 +473,11 @@ export class LLMService {
   }
 
   async intelligentImport(params: {
+    tableId: string;
     tableHeader: string;
     allTableMode: string;
   }) {
-    let { tableHeader, allTableMode } = params;
+    let { tableId, tableHeader, allTableMode } = params;
     let modelList = await this.getModelrange(JSON.parse(allTableMode));
     let tableHeaderObj = JSON.parse(tableHeader);
     let tableHeaders = {
@@ -483,10 +490,40 @@ export class LLMService {
     let exeRes = await this.analyzingHeadersGenerateTable(
       JSON.stringify(tableHeaders),
     );
-    if (exeRes && typeof exeRes === 'string' && exeRes.indexOf('SELECT') > -1) {
-      let sql = exeRes.replace(/;/g, '');
+    if (exeRes && exeRes.text.indexOf('SELECT') > -1) {
+      let sql = exeRes.text.replace(/;/g, '');
+      let sqlId = exeRes.id;
       let exeSqlRes = await this.mcdm.exeSql({ sql });
+      let entities = await this.mcdm.getEntity(tableId);
+      const entity = entities.length ? entities[0] : null;
+      const entityProps = entity ? entity?.props : null;
+      if (entityProps) {
+        let belongIntelligentImportSQLProp = entityProps.findLast(
+          (p) => p.code == 'belongIntelligentImportSQLId',
+        );
+        let savedValue = belongIntelligentImportSQLProp
+          ? [...belongIntelligentImportSQLProp.value, sqlId]
+          : [sqlId];
+        let saveDdlProps = [
+          {
+            id: tableId,
+            props: [
+              {
+                id: belongIntelligentImportSQLProp
+                  ? belongIntelligentImportSQLProp.id
+                  : null,
+                name: 'belongIntelligentImportSQLId',
+                code: 'belongIntelligentImportSQLId',
+                value: savedValue,
+              },
+            ],
+          },
+        ];
+        await this.mcdm.saveModel({ entities: saveDdlProps });
+      }
       exeSqlRes.sql = sql;
+      exeSqlRes.sqlId = sqlId;
+
       return exeSqlRes;
     }
     return exeRes;

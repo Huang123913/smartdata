@@ -71,7 +71,11 @@ const intelligentImport = async () => {
       pagination: {},
       table_meta,
     })
-    let result = await $api.smartData.intelligentImport({ tableHeader, allTableMode: JSON.stringify(allTableMode.value) })
+    let result = await $api.smartData.intelligentImport({
+      tableId: activeTable.value.id,
+      tableHeader,
+      allTableMode: JSON.stringify(allTableMode.value),
+    })
     if (result?.success && result?.data.success) {
       console.log('result', result)
       let fields = result?.data?.fields ?? []
