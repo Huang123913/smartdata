@@ -40,6 +40,7 @@ const useForm = Form.useForm
 
 const formState = reactive({
   title: '',
+  description_cn: '',
 })
 
 const validators = computed(() => {
@@ -87,7 +88,10 @@ const { validateInfos } = useForm(formState, validators)
 
 watchEffect(
   () => {
-    if (tableMeta?.title) formState.title = `${tableMeta.title}`
+    if (tableMeta?.title) {
+      formState.title = `${tableMeta.title}`
+      formState.description_cn = tableMeta.description_cn ? `${tableMeta.description_cn}` : ''
+    }
 
     nextTick(() => {
       const input = inputEl.value?.$el as HTMLInputElement
@@ -108,14 +112,15 @@ const renameTable = async (undo = false, disableTitleDiffCheck?: boolean | undef
     formState.title = formState.title.trim()
   }
 
-  if (formState.title === tableMeta.title && !disableTitleDiffCheck) return
-
+  if (formState.description_cn === tableMeta.description_cn && formState.title === tableMeta.title && !disableTitleDiffCheck)
+    return
   loading.value = true
   try {
     await $api.dbTable.update(tableMeta.id as string, {
       base_id: tableMeta.base_id,
       table_name: formState.title,
       title: formState.title,
+      description_cn: formState.description_cn ? formState.description_cn : '',
     })
     await $api.smartData.retraining({ isUpdate: true, entityId: tableMeta.id })
     dialogShow.value = false
@@ -183,7 +188,7 @@ const renameTable = async (undo = false, disableTitleDiffCheck?: boolean | undef
     </template>
     <div class="mt-2">
       <a-form :model="formState" name="create-new-table-form">
-        <a-form-item v-bind="validateInfos.title">
+        <a-form-item label="表名" v-bind="validateInfos.title" class="flex mb-1 rename-to-table">
           <a-input
             ref="inputEl"
             v-model:value="formState.title"
@@ -194,14 +199,28 @@ const renameTable = async (undo = false, disableTitleDiffCheck?: boolean | undef
             @keydown.enter="() => renameTable()"
           />
         </a-form-item>
+        <a-form-item label="表描述" class="rename-to-table">
+          <a-input
+            v-model:value="formState.description_cn"
+            class="nc-input-md"
+            hide-details
+            data-testid="create-table-description-input"
+            :placeholder="$t('msg.info.enterTableDescription')"
+          >
+          </a-input>
+        </a-form-item>
       </a-form>
+
       <div class="flex flex-row justify-end gap-x-2 mt-6">
         <NcButton type="secondary" @click="dialogShow = false">{{ $t('general.cancel') }}</NcButton>
 
         <NcButton
           key="submit"
           type="primary"
-          :disabled="validateInfos.title.validateStatus === 'error' || formState.title?.trim() === tableMeta.title"
+          :disabled="
+            validateInfos.title.validateStatus === 'error' ||
+            (formState.description_cn?.trim() === tableMeta.description_cn && formState.title?.trim() === tableMeta.title)
+          "
           label="Rename Table"
           loading-label="Renaming Table"
           :loading="loading"
@@ -214,3 +233,13 @@ const renameTable = async (undo = false, disableTitleDiffCheck?: boolean | undef
     </div>
   </NcModal>
 </template>
+
+<style lang="scss">
+.rename-to-table {
+  .ant-form-item-label {
+    width: 56px;
+    position: relative;
+    top: 5px;
+  }
+}
+</style>
