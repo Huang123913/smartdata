@@ -502,7 +502,7 @@ export class LLMService {
           (p) => p.code == 'belongIntelligentImportSQLId',
         );
         let savedValue = belongIntelligentImportSQLProp
-          ? [...belongIntelligentImportSQLProp.value, sqlId]
+          ? [...JSON.parse(belongIntelligentImportSQLProp.jsonValue), sqlId]
           : [sqlId];
         let saveDdlProps = [
           {
@@ -514,7 +514,7 @@ export class LLMService {
                   : null,
                 name: 'belongIntelligentImportSQLId',
                 code: 'belongIntelligentImportSQLId',
-                value: savedValue,
+                jsonValue: JSON.stringify(savedValue),
               },
             ],
           },
