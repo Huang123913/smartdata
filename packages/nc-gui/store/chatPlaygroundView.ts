@@ -107,6 +107,15 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
         return a.orderNo - b.orderNo
       })
       model.sort((a: any, b: any) => {
+        if (a.orderNo === null && b.orderNo === null) {
+          return 0
+        }
+        if (a.orderNo === null) {
+          return 1
+        }
+        if (b.orderNo === null) {
+          return -1
+        }
         return a.orderNo - b.orderNo
       })
       node.children = [...catalog, ...model]
