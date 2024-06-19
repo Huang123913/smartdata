@@ -10,7 +10,7 @@ const props = defineProps<{
 const { $api } = useNuxtApp()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
-const { updateModelCatalog, findNodeById } = store
+const { moveCatalog, moveModel } = store
 const { isUIAllowed } = useRoles()
 const { openRenameTableDialog, duplicateTable } = inject(TreeViewInj)!
 const baseRole = inject(ProjectRoleInj)
@@ -78,32 +78,11 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
       message.warning('此表已经在该目录下')
       return
     }
-    // let orderNo = selectedCatalogParam ? 0 : chataiData.value.modelTree[0].children.length + 1
     isShowLoading.value = true
-    updateModelCatalog(updatedModel.value?.id, selectedCatalogParam ? selectedCatalogParam.id : null)
     if (updatedModel.value?.isCatalog) {
-      await $api.smartData.saveCustomCatalog({
-        id: updatedModel.value?.id,
-        name: null,
-        name_cn: null,
-        catalogType: null,
-        parentId: selectedCatalogParam ? selectedCatalogParam.id : props.base.id,
-        code: null,
-        label: null,
-        description: null,
-        description_cn: null,
-        disabled: null,
-        orderNo: null,
-        customDateTime: null,
-        customGroupId: null,
-        customGroupName: null,
-        customOwnerId: null,
-        customOwnerName: null,
-      })
+      await moveCatalogTo(selectedCatalogParam)
     } else {
-      await $api.smartData.updateModelCatalog({
-        entities: [{ id: updatedModel.value?.id, belongCatalog: selectedCatalogParam.id }],
-      })
+      await moveModelTo(selectedCatalogParam)
     }
   } catch (error) {
     console.log(error)
@@ -111,6 +90,27 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
     isShowLoading.value = false
     handleShowSelectCatalog(false, null)
   }
+}
+
+const moveCatalogTo = async (selectedCatalogParam: any) => {
+  let params = {
+    sourceCatalogId: updatedModel.value?.id, //源目录id
+    targetCatalogId: selectedCatalogParam ? selectedCatalogParam.id : null, //目标移动目录id
+    ismoveCustomCatalogLast: true,
+  }
+  await $api.smartData.moveCatalog(params)
+  moveCatalog(updatedModel.value?.id, updatedModel.value?.parentId, selectedCatalogParam ? selectedCatalogParam.id : null, null)
+}
+
+const moveModelTo = async (selectedCatalogParam: any) => {
+  let params = {
+    baseId: props.base.id,
+    catalogId: selectedCatalogParam ? selectedCatalogParam.id : '__root__', //调整到哪个目录ID下，若传空则认为在原目录下调整位置
+    tableId: updatedModel.value?.id, //要调整位置的表ID
+    prependToTableId: '', //要插入到哪个表ID前，若传空则插入到目录的最后
+  }
+  moveModel(params.tableId, updatedModel.value?.parentId, selectedCatalogParam ? selectedCatalogParam.id : null, '')
+  await $api.smartData.moveModel(params)
 }
 
 const handleSetIsCatalogDeleteDialogVisible = (value: boolean) => {

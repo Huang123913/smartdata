@@ -13,7 +13,7 @@ const props = defineProps<{
 const { $api } = useNuxtApp()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
-const { addCatalog, findNodeById } = store
+const { createCatalog, findNodeById } = store
 const inputEl = ref<HTMLInputElement>()
 const useForm = Form.useForm
 const selectedCatalog = ref(null)
@@ -52,29 +52,28 @@ const _createCatalog = async () => {
   if (creating.value) return
   try {
     creating.value = true
-    let lastChild = null
-    let catalogId = selectedCatalog.value ? selectedCatalog.value.id : null
-    let findCatalog = findNodeById(chataiData.value.modelTree, catalogId)
-    if (findCatalog && findCatalog?.children && findCatalog?.children.length) {
-      lastChild = findCatalog.children[findCatalog.children.length - 1]
-    }
-    if (!catalogId && chataiData.value.modelTree.length) {
-      let childrenCatalog = chataiData.value.modelTree[0].children
-      lastChild = childrenCatalog[childrenCatalog.length - 1]
+    let lastCatalogChild = null
+    let parentId = selectedCatalog.value ? selectedCatalog.value.id : null
+    if (parentId) {
+      let findCatalog = findNodeById(chataiData.value.modelTree, parentId)
+      lastCatalogChild = findCatalog.children.findLast((item: any) => item.isCatalog)
+    } else {
+      lastCatalogChild = chataiData.value.modelTree[0].children.findLast((item: any) => item.isCatalog)
     }
     let savedCatalog = {
       id: uuidv4(),
       name: formState.title,
       name_cn: formState.title,
-      parentId: catalogId,
+      parentId: parentId,
       code: uuidv4(),
-      orderNo: lastChild ? lastChild.orderNo + 1 : 1,
+      orderNo: lastCatalogChild ? lastCatalogChild.orderNo + 1 : 1,
       catalogType: 'default',
       disabled: false,
       customDateTime: getNowDateDetail(),
+      isCatalog: true,
     }
-    addCatalog(savedCatalog)
     await $api.smartData.saveCustomCatalog(savedCatalog)
+    createCatalog(savedCatalog)
   } catch (e: any) {
     console.error(e)
   } finally {

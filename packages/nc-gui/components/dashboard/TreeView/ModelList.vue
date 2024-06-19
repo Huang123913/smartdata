@@ -128,12 +128,12 @@ const dropModel = async (info: any) => {
     tableId: dragNodeKey, //要调整位置的表ID
     prependToTableId, //要插入到哪个表ID前，若传空则插入到目录的最后
   }
-  console.log('params', params)
-  await $api.smartData.moveModel(params)
   moveModel(dragNodeKey, dragNodeParentId, newParentId === '__root__' ? null : newParentId, prependToTableId)
+  await $api.smartData.moveModel(params)
 }
 
 const dropCatalog = async (info: any) => {
+  console.log('info', info)
   const dropPosition = info.dropPosition
   //拖拽对象
   const dragNode = info.dragNode
@@ -144,17 +144,17 @@ const dropCatalog = async (info: any) => {
   //目标节点
   let dropNode = info.node
   //目录新的父级id
-  let newParentId = dropNode.isCatalog && dropNode.parentId === dragNodeParentId ? dragNodeParentId : dropNode.parentId
+  let newParentId = dropNode.parentId
   newParentId = info.dropPosition < 0 ? null : newParentId
   let prependToTableId = dropNode.isCatalog ? dropNode.key : null
-  if (dropPosition < 0) prependToTableId = null
+  prependToTableId = dropPosition < 0 ? null : prependToTableId
   let params = {
     sourceCatalogId: dragNodeKey, //源目录id
     targetCatalogId: prependToTableId ?? newParentId, //目标移动目录id
     ismoveCustomCatalogLast: !prependToTableId,
   }
-  moveCatalog(dragNodeKey, dragNodeParentId, newParentId, prependToTableId)
   await $api.smartData.moveCatalog(params)
+  moveCatalog(dragNodeKey, dragNodeParentId, newParentId, prependToTableId)
 }
 </script>
 

@@ -191,53 +191,10 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     // chataiData.modelTree.forEach((node) => sortTreeNodesByOrderNo(node))
   }
 
-  //修改目录名称
-  const updateCatalogName = (catalog: any, rename: string) => {
-    let findCatalog = chataiData.modelData.find((item) => item.id === catalog.id)
-    findCatalog.name = rename
-    findCatalog.name_cn = rename
-    chataiData.modelTree = [
-      {
-        id: null,
-        name_cn: '模型目录',
-        parentId: 'add-catalog',
-        isCatalog: true,
-        children: buildTree(chataiData.modelData),
-        title: '模型目录',
-        key: '0-0',
-      },
-    ]
-    chataiData.modelCatalog = chataiData.modelData.filter((item) => item.isCatalog && item.id !== null)
-    chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog)
-  }
-
   //修改表字段名称
   const updateTableColumnName = (column: object, name: string) => {
     let findItem = chataiData.sessionItem.columns.find((item) => item.id === column.id)
     findItem.name_cn = name
-  }
-
-  //增加目录
-  const addCatalog = (catalog: any) => {
-    chataiData.modelData.push({
-      ...catalog,
-      isCatalog: true,
-    })
-    chataiData.modelTree = [
-      {
-        id: null,
-        name_cn: '模型目录',
-        parentId: 'add-catalog',
-        isCatalog: true,
-        children: buildTree(chataiData.modelData),
-        title: '模型目录',
-        key: '0-0',
-      },
-    ]
-    // 模型树进行排序
-    chataiData.modelTree.forEach((node) => sortTreeNodesByOrderNo(node))
-    chataiData.modelCatalog = chataiData.modelData.filter((item) => item.isCatalog && item.id !== null)
-    chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog)
   }
 
   //移动模型
@@ -255,11 +212,43 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     }
   }
 
+  //修改目录名称
+  const updateCatalogName = (catalog: any, rename: string) => {
+    let findCatalog = chataiData.modelData.find((item) => item.id === catalog.id)
+    findCatalog.name = rename
+    findCatalog.name_cn = rename
+
+    let findCatalogById = findNodeById(chataiData.modelTree, catalog.id)
+    findCatalogById.name = rename
+    findCatalogById.name_cn = rename
+    findCatalogById.title = rename
+
+    chataiData.modelCatalog = chataiData.modelData.filter((item) => item.isCatalog && item.id !== null)
+    chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog)
+  }
+
+  //创建目录
+  const createCatalog = (catalog: any) => {
+    chataiData.modelData.push({ ...catalog })
+    chataiData.modelCatalog.push({ ...catalog })
+    chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog)
+    let findCatalog = catalog.parentId ? findNodeById(chataiData.modelTree, catalog.parentId) : chataiData.modelTree[0]
+    let findLastIndex = findCatalog.children.findLastIndex((item: any) => item.isCatalog)
+    findCatalog.children.splice(findLastIndex + 1, 0, {
+      ...catalog,
+      title: catalog.name_cn,
+      key: catalog.id,
+      isCatalog: true,
+      children: [],
+      fields: [],
+    })
+  }
+
   //移动目录
   const moveCatalog = (catalogId: string, originalParentId: string, newParentId: string, prependToTableId: string) => {
     let findCatalog = findNodeById(chataiData.modelTree, catalogId)
     findCatalog.parentId = newParentId
-    let originalParentIdCatlog = findNodeById(chataiData.modelTree, originalParentId)
+    let originalParentIdCatlog = originalParentId ? findNodeById(chataiData.modelTree, originalParentId) : chataiData.modelTree[0]
     originalParentIdCatlog.children = originalParentIdCatlog.children.filter((item: any) => item.id !== catalogId)
     let newCatalog = newParentId ? findNodeById(chataiData.modelTree, newParentId) : chataiData.modelTree[0]
     if (prependToTableId) {
@@ -267,8 +256,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
       findIndex = findIndex === -1 ? 0 : findIndex
       newCatalog.children.splice(findIndex, 0, findCatalog)
     } else {
-      let findLastIndex = newCatalog.children.findLastIndex((item: any) => item.isCatalog === true)
-      findLastIndex = findLastIndex === -1 ? 0 : findLastIndex
+      let findLastIndex = newCatalog.children.findLastIndex((item: any) => item.isCatalog)
       newCatalog.children.splice(findLastIndex + 1, 0, findCatalog)
     }
   }
@@ -288,7 +276,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     updateCatalogName,
     findNodeById,
     updateTableColumnName,
-    addCatalog,
+    createCatalog,
     moveModel,
     moveCatalog,
   }
