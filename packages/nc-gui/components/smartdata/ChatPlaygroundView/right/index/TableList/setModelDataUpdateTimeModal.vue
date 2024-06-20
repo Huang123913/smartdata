@@ -92,13 +92,13 @@ const hourPlanTypeOption = [
   { value: 'incrementHours', label: '按一定增量触发' },
 ]
 const weekOption = [
-  { value: '1', label: '星期一' },
-  { value: '2', label: '星期二' },
-  { value: '3', label: '星期三' },
-  { value: '4', label: '星期四' },
-  { value: '5', label: '星期五' },
-  { value: '6', label: '星期六' },
-  { value: '6', label: '星期日' },
+  { value: 2, label: '星期一' },
+  { value: 3, label: '星期二' },
+  { value: 4, label: '星期三' },
+  { value: 5, label: '星期四' },
+  { value: 6, label: '星期五' },
+  { value: 7, label: '星期六' },
+  { value: 1, label: '星期日' },
 ]
 const monthOption = computed(() => {
   return [...Array(12)].map((item, index) => ({ value: index + 1, label: index + 1 }))
@@ -129,7 +129,6 @@ const timestampToTime = (timestamp: string) => {
 
 const handleOkBySetUpdateTime = () => {
   visible.value = false
-  console.log()
   props.handleOk({
     fromDate: fromDate.value ? timestampToTime(fromDate.value.$d.getTime()) : '',
     endDate: endDate.value ? timestampToTime(endDate.value.$d.getTime()) : '',
