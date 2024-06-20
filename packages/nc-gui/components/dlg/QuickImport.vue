@@ -14,7 +14,7 @@ interface Props {
 }
 
 const { importType, importDataOnly = false, sourceId, ...rest } = defineProps<Props>()
-
+const route = useRoute()
 const emit = defineEmits(['update:modelValue'])
 
 const { $api } = useNuxtApp()
@@ -76,6 +76,8 @@ const isImportTypeJson = computed(() => importType === 'json')
 const isImportTypeCsv = computed(() => importType === 'csv')
 
 const IsImportTypeExcel = computed(() => importType === 'excel')
+
+const uploadFiles = ref<UploadChangeParam[]>([])
 
 const validators = computed(() => ({
   url: [fieldRequiredValidator(), importUrlValidator, isImportTypeCsv.value ? importCsvUrlValidator : importExcelUrlValidator],
@@ -186,6 +188,7 @@ async function handleImport() {
     }
     importLoading.value = true
     await templateEditorRef.value.importTemplate()
+    if (route && route?.params && route.params?.viewId) saveFileInfoToTable()
   } catch (e: any) {
     return message.error(await extractSdkResponseErrorMsg(e))
   } finally {
@@ -235,6 +238,7 @@ function handleChange(info: UploadChangeParam) {
   }
 
   if (status === 'done') {
+    uploadFiles.value.push(info)
     message.success(`Uploaded file ${info.file.name} successfully`)
   } else if (status === 'error') {
     message.error(`${t('msg.error.fileUploadFailed')} ${info.file.name}`)
@@ -258,6 +262,18 @@ function populateUniqueTableName(tn: string) {
     tn = `${tn}_${c++}`
   }
   return tn
+}
+
+//保存表格曾上传过的文件’
+const saveFileInfoToTable = async () => {
+  for (let i = 0; i < uploadFiles.value.length; i++) {
+    let info = uploadFiles.value[i]
+    let form = new FormData()
+    form.append('file', info.file.originFileObj)
+    form.append('tableId', route.params.viewId)
+    const hostname = window.location.hostname
+    await axios.post(`http://${hostname}:8080/api/v2/smartdata/saveUFileInfoToTable`, form)
+  }
 }
 
 function getAdapter(val: any) {

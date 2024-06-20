@@ -1,5 +1,7 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios';
 import { Request } from 'express';
+import FormData from 'form-data';
+import * as fs from 'fs';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -363,5 +365,56 @@ export class MCDMService {
     }).then((r) => {
       return r.data;
     });
+  }
+
+  async uploadFile(file: Express.Multer.File) {
+    const formData = new FormData();
+    const fileStream = fs.createReadStream(file.path);
+    formData.append(
+      'file',
+      fileStream,
+      Buffer.from(file.originalname, 'latin1').toString('utf8'),
+    );
+    return await this.mcdm({
+      method: 'POST',
+      url: `/module-operation!executeOperation?operation=FileUpload`,
+      data: formData,
+    }).then((r) => {
+      fs.unlinkSync(file.path); // 删除本地存储的文件
+      return r.data;
+    });
+  }
+
+  async saveUFileInfoToTable(file: Express.Multer.File, tableId: string) {
+    let fileInfo = await this.uploadFile(file);
+    let entities = await this.getEntity(tableId);
+    const entity = entities.length ? entities[0] : null;
+    const entityProps = entity ? entity?.props : null;
+    let res = null;
+    if (entityProps) {
+      let belongIntelligentImportSQLProp = entityProps.findLast(
+        (p) => p.code == 'belongUploadFileInfo',
+      );
+      let savedValue = belongIntelligentImportSQLProp
+        ? [...JSON.parse(belongIntelligentImportSQLProp.jsonValue), fileInfo]
+        : [fileInfo];
+      let saveDdlProps = [
+        {
+          id: tableId,
+          props: [
+            {
+              id: belongIntelligentImportSQLProp
+                ? belongIntelligentImportSQLProp.id
+                : null,
+              name: 'belongUploadFileInfo',
+              code: 'belongUploadFileInfo',
+              jsonValue: JSON.stringify(savedValue),
+            },
+          ],
+        },
+      ];
+      res = await this.saveModel({ entities: saveDdlProps });
+    }
+    return res;
   }
 }

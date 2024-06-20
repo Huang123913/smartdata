@@ -1,7 +1,18 @@
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { LLMService } from '~/services/smartdata/llm.service';
 import { MCDMService } from '~/services/smartdata/mcdm.service';
 
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller()
 export class SmartDataController {
@@ -166,5 +177,27 @@ export class SmartDataController {
     },
   ) {
     return await this.mcdm.moveCatalog(data);
+  }
+
+  @Post('/api/v2/smartdata/saveUFileInfoToTable')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const randomName = Array(32)
+            .fill(null)
+            .map(() => Math.round(Math.random() * 16).toString(16))
+            .join('');
+          cb(null, `${randomName}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  async saveUFileInfoToTable(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: any,
+  ) {
+    return await this.mcdm.saveUFileInfoToTable(file, body.tableId);
   }
 }

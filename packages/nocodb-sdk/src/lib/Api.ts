@@ -11945,5 +11945,51 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+ * @description saveUFileInfoToTable MCDM
+ * 
+ * @tags SmartData
+ * @name SaveUFileInfoToTable
+ * @summary saveUFileInfoToTable MCDM
+ * @request POST:/api/v2/smartdata/saveUFileInfoToTable
+ * @response `200` `{
+  \** Name of the uploaded file *\
+  filename?: string,
+
+}` File uploaded successfully
+ * @response `400` `{
+  \** Error message *\
+  msg?: string,
+
+}` Bad Request
+ */
+    saveUFileInfoToTable: (
+      data: {
+        /**
+         * File to be uploaded
+         * @format binary
+         */
+        file: File;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<
+        {
+          /** Name of the uploaded file */
+          filename?: string;
+        },
+        {
+          /** Error message */
+          msg?: string;
+        }
+      >({
+        path: `/api/v2/smartdata/saveUFileInfoToTable`,
+        method: 'POST',
+        body: data,
+        type: ContentType.FormData,
+        format: 'json',
+        ...params,
+      }),
   };
 }
