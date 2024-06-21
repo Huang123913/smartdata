@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { TableType } from 'nocodb-sdk'
 import type { UploadChangeParam, UploadFile } from 'ant-design-vue'
 import { Upload } from 'ant-design-vue'
-import { toRaw, unref } from '@vue/runtime-core'
+import axios from 'axios'
+import type { TableType } from 'nocodb-sdk'
 // import worker script according to the doc of Vite
 import importWorkerUrl from '~/workers/importWorker?worker&url'
 
