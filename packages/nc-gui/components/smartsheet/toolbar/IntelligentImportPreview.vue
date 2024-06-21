@@ -10,6 +10,7 @@ const props = defineProps<{
   propsTableData: any[]
   closePreview: (value: boolean) => void
   activeTable: any
+  isDetailImport?: boolean
 }>()
 const { eventBus: eventBusChatPlayGround } = useChatPlaygroundViewStore()
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
@@ -84,12 +85,17 @@ const onScroll = (event: any) => {
 const handleModalOk = async () => {
   try {
     loading.value = true
-    let result = await $api.smartData.importData({
-      entityId: props.activeTable.id,
-      tableData: JSON.stringify(props.propsTableData),
-      belongSQLDataRefreshPlan: belongSQLDataRefreshPlan.value,
-      belongSQLDataType: modelUpdateTypeValue.value,
-    })
+    let result = null
+    if (props.isDetailImport) {
+      result = await $api.smartData.insertDataToTable({ insertDatas: props.propsTableData, tableId: props.activeTable.id })
+    } else {
+      result = await $api.smartData.importData({
+        entityId: props.activeTable.id,
+        tableData: JSON.stringify(props.propsTableData),
+        belongSQLDataRefreshPlan: belongSQLDataRefreshPlan.value,
+        belongSQLDataType: modelUpdateTypeValue.value,
+      })
+    }
     if (result && result?.success) {
       await loadData()
       eventBus.emit(SmartsheetStoreEvents.DATA_RELOAD)
@@ -130,7 +136,7 @@ const handleSelectOptionClick = (item: any) => {
   >
     <template #title>
       <div class="intelligent-import-preview-header">
-        <span class="text-lg font-medium">{{ '数据预览' }}</span>
+        <span class="text-lg font-medium">{{ isDetailImport ? '查询结果' : '数据预览' }}</span>
         <close-outlined class="colse-btn" @click="handleCancel" />
       </div>
     </template>
@@ -245,12 +251,16 @@ const handleSelectOptionClick = (item: any) => {
     </div>
 
     <template #footer>
-      <SmartdataChatPlaygroundViewRightIndexTableListSelectTableUpdateType
-        :handleSelectOptionClick="handleSelectOptionClick"
-        selectLabel="表格数据"
-        selectTip="选择表格更新方式"
-      />
-      <div>
+      <template v-if="!isDetailImport">
+        <SmartdataChatPlaygroundViewRightIndexTableListSelectTableUpdateType
+          :handleSelectOptionClick="handleSelectOptionClick"
+          selectLabel="表格数据"
+          selectTip="选择表格更新方式"
+        />
+      </template>
+      <div v-else></div>
+
+      <div class="right-btn">
         <NcButton type="secondary" @click="handleCancel">{{ $t('general.cancel') }}</NcButton>
         <NcButton
           key="submit"

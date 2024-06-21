@@ -280,38 +280,36 @@ export class MCDMService {
     belongSQLDataType: string,
     belongSQLDataRefreshPlan: object,
   ) {
-    if (belongSQLDataType) {
-      let entities = await this.getEntity(entityId);
-      const entity = entities[0];
-      const entityProps = entity?.props;
-      if (entityProps) {
-        let dataTypeProp = entityProps.findLast(
-          (p) => p.code == 'belongSQLDataType',
-        );
-        let dataRefreshPlan = entityProps.findLast(
-          (p) => p.code == 'belongSQLDataRefreshPlan',
-        );
-        let saveDdlProps = [
-          {
-            id: entityId,
-            props: [
-              {
-                id: dataTypeProp ? dataTypeProp.id : null,
-                name: 'belongSQLDataType',
-                code: 'belongSQLDataType',
-                value: belongSQLDataType,
-              },
-              {
-                id: dataRefreshPlan ? dataRefreshPlan.id : null,
-                name: 'belongSQLDataRefreshPlan',
-                code: 'belongSQLDataRefreshPlan',
-                jsonValue: JSON.stringify(belongSQLDataRefreshPlan),
-              },
-            ],
-          },
-        ];
-        await this.saveModel({ entities: saveDdlProps });
-      }
+    let entities = await this.getEntity(entityId);
+    const entity = entities[0];
+    const entityProps = entity?.props;
+    if (entityProps) {
+      let dataTypeProp = entityProps.findLast(
+        (p) => p.code == 'belongSQLDataType',
+      );
+      let dataRefreshPlan = entityProps.findLast(
+        (p) => p.code == 'belongSQLDataRefreshPlan',
+      );
+      let saveDdlProps = [
+        {
+          id: entityId,
+          props: [
+            {
+              id: dataTypeProp ? dataTypeProp.id : null,
+              name: 'belongSQLDataType',
+              code: 'belongSQLDataType',
+              value: belongSQLDataType,
+            },
+            {
+              id: dataRefreshPlan ? dataRefreshPlan.id : null,
+              name: 'belongSQLDataRefreshPlan',
+              code: 'belongSQLDataRefreshPlan',
+              jsonValue: JSON.stringify(belongSQLDataRefreshPlan),
+            },
+          ],
+        },
+      ];
+      await this.saveModel({ entities: saveDdlProps });
     }
   }
 
@@ -439,6 +437,24 @@ export class MCDMService {
         },
       ];
       res = await this.saveModel({ entities: saveDdlProps });
+    }
+    return res;
+  }
+
+  async insertDataToTable(insertDatas: any[], tableId: string) {
+    let res = null;
+    let findMdTableInfoRes = await this.findMDTableInfo(tableId);
+    let tableInfo = findMdTableInfoRes[0];
+    if (tableInfo && insertDatas) {
+      let datas = insertDatas.map((item: object) => ({
+        ...item,
+        id: uuidv4(),
+      }));
+      res = await this.batchInsertOrUpdate(
+        tableInfo.componentCode,
+        tableInfo.tableName,
+        datas,
+      );
     }
     return res;
   }

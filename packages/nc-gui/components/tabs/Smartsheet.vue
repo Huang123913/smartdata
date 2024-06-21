@@ -184,7 +184,7 @@ const onResize = (sizes: { min: number; max: number; size: number }[]) => {
         </Pane>
         <ExtensionsPane />
       </Splitpanes>
-      <SmartsheetDetails v-else />
+      <SmartsheetDetailsNew v-else />
     </div>
     <LazySmartsheetExpandedFormDetached />
   </div>

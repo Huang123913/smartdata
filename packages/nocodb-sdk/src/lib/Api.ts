@@ -11991,5 +11991,56 @@ export class Api<
         format: 'json',
         ...params,
       }),
+
+    /**
+     * @description saveModelPropsToRefresh MCDM
+     *
+     * @tags SmartData
+     * @name SaveModelPropsToRefresh
+     * @summary saveModelPropsToRefresh MCDM
+     * @request POST:/api/v2/smartdata/saveModelPropsToRefresh
+     */
+    saveModelPropsToRefresh: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/saveModelPropsToRefresh`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description insertDataToTable MCDM
+     *
+     * @tags SmartData
+     * @name InsertDataToTable
+     * @summary insertDataToTable MCDM
+     * @request POST:/api/v2/smartdata/insertDataToTable
+     */
+    insertDataToTable: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/insertDataToTable`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description exeSql MCDM
+     *
+     * @tags SmartData
+     * @name ExeSql
+     * @summary exeSql MCDM
+     * @request POST:/api/v2/smartdata/exeSql
+     */
+    exeSql: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/exeSql`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
 }
