@@ -4,6 +4,8 @@ import 'dayjs/locale/zh-cn'
 import { ChatPlaygroundViewStoreEvents, ref } from '#imports'
 import dayjs, { Dayjs } from 'dayjs'
 
+import { CloseOutlined } from '@ant-design/icons-vue'
+
 const props = defineProps<{
   handleOk: (value: object) => void
 }>()
@@ -143,21 +145,27 @@ eventBus.on((event) => {
     visible.value = true
   }
 })
-
-const hanldeAfterClose = () => {}
+const handleCancel = () => {
+  visible.value = false
+}
 </script>
 
 <template>
   <a-modal
+    :closable="false"
     class="set-update-time-modal"
-    title="设置更新时间"
     cancelText="取消"
     okText="确认"
     v-model:visible="visible"
     @ok="handleOkBySetUpdateTime"
-    :afterClose="hanldeAfterClose"
     zIndex="999"
   >
+    <template #title>
+      <div class="set-update-time-modal-header">
+        <span class="text-lg font-medium">{{ '设置更新时间' }}</span>
+        <close-outlined class="colse-btn" @click="handleCancel" />
+      </div>
+    </template>
     <a-form layout="vertical">
       <a-form-item label="开始执行时间">
         <a-date-picker
@@ -272,100 +280,90 @@ const hanldeAfterClose = () => {}
 
 <style lang="scss">
 .set-update-time-modal {
-  .ant-modal-body {
-    min-height: 200px;
-    padding: 16px 0px 16px 8px !important;
-    .ant-form-vertical {
-      height: 290px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding-right: 8px;
-      &::-webkit-scrollbar {
-        width: 6px;
-      }
-      &::-webkit-scrollbar-thumb {
-        background-color: #c1c1c1;
-        border-radius: 10px;
-      }
-      &::-webkit-scrollbar-thumb:hover {
-        background-color: rgb(168, 168, 168);
-        border-radius: 10px;
-      }
-    }
-    .ant-picker {
-      width: 100%;
-    }
-    .range-days-of-month {
-      display: flex;
-      align-items: center;
-      margin-top: 10px;
-      .ant-input-number {
-        flex: 1;
-        .ant-input-number-handler-wrap {
-          display: none;
-        }
-        .ant-input-number-input {
-          text-align: right;
-        }
-      }
-    }
-    .ant-form-item {
-      margin: 0 0 13px;
-    }
-  }
   .ant-modal-content {
     padding: 16px 16px 0 16px !important;
     .ant-modal-header {
-      padding: 16px 0 !important;
+      padding: 8px 0 16px 0 !important;
+      .ant-modal-title {
+        font-size: 1.125rem;
+        font-weight: 550;
+      }
+      .set-update-time-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        .colse-btn {
+          position: relative;
+          top: 0px;
+          color: rgb(99, 107, 116);
+        }
+      }
     }
-
+    .ant-modal-body {
+      min-height: 200px;
+      padding: 16px 0px 16px 8px !important;
+      .ant-form-vertical {
+        height: 290px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 8px;
+        &::-webkit-scrollbar {
+          width: 6px;
+        }
+        &::-webkit-scrollbar-thumb {
+          background-color: #c1c1c1;
+          border-radius: 10px;
+        }
+        &::-webkit-scrollbar-thumb:hover {
+          background-color: rgb(168, 168, 168);
+          border-radius: 10px;
+        }
+      }
+      .ant-picker {
+        width: 100%;
+      }
+      .range-days-of-month {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+        .ant-input-number {
+          flex: 1;
+          .ant-input-number-handler-wrap {
+            display: none;
+          }
+          .ant-input-number-input {
+            text-align: right;
+          }
+        }
+      }
+      .ant-form-item {
+        margin: 0 0 13px;
+      }
+    }
     .ant-modal-footer {
       padding: 16px;
+      .ant-btn {
+        border-radius: 0.5rem;
+        color: rgb(55, 65, 81);
+        font-weight: 550;
+        &:hover {
+          background-color: rgba(244, 244, 245);
+          border-color: rgba(231, 231, 233);
+        }
+      }
+      .ant-btn-primary {
+        color: white;
+        border: none;
+        &:hover {
+          background-color: rgba(41, 82, 204);
+        }
+      }
     }
   }
   .ant-modal-close {
     top: 32px !important;
     right: 15px;
   }
-  .ant-modal-footer {
-    .ant-btn {
-      border-radius: 0.5rem;
-      color: rgb(55, 65, 81);
-      font-weight: 550;
-      &:hover {
-        background-color: rgba(244, 244, 245);
-        border-color: rgba(231, 231, 233);
-      }
-    }
-    .ant-btn-primary {
-      color: white;
-      border: none;
-      &:hover {
-        background-color: rgba(41, 82, 204);
-      }
-    }
-  }
-  // .ant-select .ant-select-selector {
-  //   border-radius: none;
-  //   top: -1px;
-  // }
-  // .ant-input-number-sm input {
-  //   height: 29px;
-  // }
-
-  // .ant-input-number {
-  //   width: 115px !important;
-  // }
-  // .frequency {
-  //   width: 290px !important;
-  // }
-  // .ant-form-item {
-  //   margin: 0 0 18px !important;
-  // }
-  // .type-in-moth {
-  //   .ant-form-item-control-input-content {
-  //     padding-left: 118px;
-  //   }
-  // }
 }
 </style>

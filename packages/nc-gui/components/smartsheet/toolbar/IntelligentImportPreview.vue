@@ -120,13 +120,13 @@ const handleSelectOptionClick = (item: any) => {
 
 <template>
   <a-modal
+    class="intelligent-import-preview"
+    zIndex="998"
     :closable="false"
     :width="'max-content'"
-    class="intelligent-import-preview"
     :visible="visible"
     :maskClosable="false"
     :style="{ '--set-height': tableData && tableData.length ? '600px' : '300px' }"
-    zIndex="998"
   >
     <template #title>
       <div class="intelligent-import-preview-header">
@@ -194,7 +194,7 @@ const handleSelectOptionClick = (item: any) => {
           class="xc-row-table nc-grid backgroundColorDefault !h-auto bg-white relative pr-1 pb-1"
         >
           <tbody>
-            <tr v-for="(row, rowIndex) of visibleItems" class="nc-grid-row !xs:h-14" :style="{ height: `32px` }">
+            <tr v-for="(row, rowIndex) of visibleItems" class="!xs:h-14" :style="{ height: `32px` }">
               <td
                 :key="rowIndex"
                 class="caption nc-grid-cell w-[64px] min-w-[64px] text-gray-500"
@@ -239,10 +239,11 @@ const handleSelectOptionClick = (item: any) => {
         </table>
       </div>
     </div>
+
     <div v-if="tableData.length === 0" class="no-data">
       <a-empty :description="'暂无数据'" :image="simpleImage" />
     </div>
-    <!-- :disabled="!tableData.length" -->
+
     <template #footer>
       <SmartdataChatPlaygroundViewRightIndexTableListSelectTableUpdateType
         :handleSelectOptionClick="handleSelectOptionClick"
@@ -270,20 +271,6 @@ const handleSelectOptionClick = (item: any) => {
 
 <style lang="scss">
 .intelligent-import-preview {
-  .text-lg {
-    font-size: 18px;
-  }
-  .colse-btn {
-    position: relative;
-    top: 0px;
-    color: rgb(99, 107, 116);
-  }
-  .intelligent-import-preview-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-  }
   .ant-modal-content {
     padding: 8px 16px 0 16px !important;
     width: max-content;
@@ -294,6 +281,20 @@ const handleSelectOptionClick = (item: any) => {
       .ant-modal-title {
         font-size: 1.125rem;
         font-weight: 550;
+        .intelligent-import-preview-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+          .colse-btn {
+            position: relative;
+            top: 0px;
+            color: rgb(99, 107, 116);
+          }
+          .text-lg {
+            font-size: 18px;
+          }
+        }
       }
     }
     .ant-modal-body {
@@ -322,41 +323,19 @@ const handleSelectOptionClick = (item: any) => {
       }
     }
   }
-  .ant-modal-close {
-    top: 4px !important;
-  }
+  .no-data {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translateX(-50%);s
+}
 }
 </style>
 
 <style lang="scss" scoped>
 .nc-grid-wrapper {
   position: relative;
-}
-.no-data {
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translateX(-50%);s
-}
-.nc-grid-pagination-wrapper .ant-dropdown-button {
-  > .ant-btn {
-    @apply !p-0 !rounded-l-lg hover:border-gray-300;
-  }
-
-  > .ant-dropdown-trigger {
-    @apply !rounded-r-lg;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-  }
-
-  @apply !rounded-lg;
-}
-.nc-grid-wrapper {
   @apply h-full w-full;
-
-  .nc-grid-add-new-cell:hover tr {
-    @apply text-black !bg-gray-50;
-  }
 
   td,
   th {
@@ -364,172 +343,28 @@ const handleSelectOptionClick = (item: any) => {
     min-height: 32px !important;
     height: 32px !important;
     position: relative;
+    font-size: 13px;
+    @apply px-3;
+    & > div {
+      overflow: hidden;
+      @apply flex h-auto;
+    }
   }
 
   th {
     @apply border-b-1 border-gray-200;
     @apply border-t-1 border-gray-200;
-
-    :deep(.name) {
-      @apply text-small;
-    }
-
-    :deep(.nc-cell-icon),
-    :deep(.nc-virtual-cell-icon) {
-      @apply !w-3.5 !h-3.5 !text-small;
-    }
-  }
-
-  .nc-grid-header th:last-child {
-    @apply !border-b-1;
   }
 
   td {
     @apply bg-white border-b;
-  }
-
-  td,
-  th {
-    font-size: 13px;
-    @apply px-3;
-
-    &.align-top {
-      @apply py-2;
-    }
-
-    &.align-middle {
-      @apply py-0;
-    }
-
-    & > div {
-      overflow: hidden;
-      @apply flex h-auto;
-    }
-
-    :deep(.nc-cell),
-    :deep(.nc-virtual-cell) {
-      @apply !text-small;
-
-      .nc-cell-field,
-      input,
-      textarea {
-        @apply !text-small !p-0 m-0;
-      }
-
-      &:not(.nc-display-value-cell) {
-        @apply text-gray-600;
-        font-weight: 500;
-
-        .nc-cell-field,
-        input,
-        textarea {
-          @apply text-gray-600;
-          font-weight: 500;
-        }
-      }
-
-      .nc-cell-field,
-      a.nc-cell-field-link,
-      input,
-      textarea {
-        @apply !p-0 m-0;
-      }
-
-      &.nc-cell-longtext {
-        @apply leading-[18px];
-
-        textarea {
-          @apply pr-2;
-        }
-      }
-
-      .ant-picker-input {
-        @apply text-small leading-4;
-        font-weight: 500;
-
-        input {
-          @apply text-small leading-4;
-          font-weight: 500;
-        }
-      }
-
-      &.nc-cell-attachment {
-        .nc-attachment-cell {
-          .nc-attachment-wrapper {
-            @apply !py-0.5;
-
-            .nc-attachment {
-              @apply !min-h-4;
-            }
-          }
-        }
-      }
-
-      &.nc-cell-longtext .long-text-wrapper .nc-rich-text-grid {
-        @apply pl-0 -ml-1;
-      }
-
-      .ant-select:not(.ant-select-customize-input) {
-        .ant-select-selector {
-          @apply !border-none flex-nowrap pr-4.5;
-        }
-        .ant-select-arrow {
-          @apply right-[3px];
-        }
-      }
-      .ant-select-selection-search-input {
-        @apply !h-[23px];
-      }
-    }
+    text-overflow: ellipsis;
   }
 
   table {
     background-color: var(--nc-grid-bg);
-
     border-collapse: separate;
     border-spacing: 0;
-  }
-
-  td {
-    text-overflow: ellipsis;
-  }
-
-  td.active::after {
-    content: '';
-    position: absolute;
-    z-index: 3;
-    height: calc(100% + 2px);
-    width: calc(100% + 2px);
-    left: -1px;
-    top: -1px;
-    pointer-events: none;
-  }
-
-  td.active::after {
-    @apply text-primary border-current bg-primary bg-opacity-5;
-  }
-
-  td.active.readonly::after {
-    @apply text-primary bg-grey-50 bg-opacity-5 !border-gray-200;
-  }
-
-  td.active-cell::after {
-    @apply border-1 border-solid text-primary border-current bg-primary bg-opacity-3;
-  }
-
-  td.filling::after {
-    content: '';
-    position: absolute;
-    z-index: 3;
-    height: calc(100% + 2px);
-    width: calc(100% + 2px);
-    left: -1px;
-    top: -1px;
-    pointer-events: none;
-  }
-
-  td.filling::after {
-    @apply border-1 border-dashed text-primary border-current bg-gray-100 bg-opacity-50;
   }
 
   thead th:nth-child(1) {
@@ -547,134 +382,5 @@ const handleSelectOptionClick = (item: any) => {
     @apply border-l-1;
     border-color: rgb(244, 244, 245);
   }
-
-  .desktop {
-    thead th:nth-child(2) {
-      position: sticky !important;
-      z-index: 5;
-      left: 64px;
-      @apply border-r-1;
-      border-color: rgb(244, 244, 245);
-    }
-
-    tbody tr:not(.nc-grid-add-new-cell) td:nth-child(2) {
-      position: sticky !important;
-      z-index: 4;
-      left: 64px;
-      background: white;
-      @apply border-r-1;
-      border-color: rgb(244, 244, 245);
-    }
-  }
-
-  .nc-grid-skeleton-loader {
-    thead th:nth-child(2) {
-      @apply border-r-1 !border-r-gray-50;
-    }
-
-    tbody td:nth-child(2) {
-      @apply border-r-1 !border-r-gray-50;
-    }
-  }
-}
-
-:deep(.resizer:hover),
-:deep(.resizer:active),
-:deep(.resizer:focus) {
-  @apply bg-blue-500/50;
-  cursor: col-resize;
-}
-
-.nc-grid-row {
-  .nc-row-expand-and-checkbox {
-    @apply !xs:hidden w-full items-center justify-between;
-  }
-
-  .nc-expand {
-    &:not(.nc-comment) {
-      @apply hidden;
-    }
-
-    &.nc-comment {
-      display: flex;
-    }
-  }
-
-  &.active-row,
-  &:not(.mouse-down):hover {
-    .nc-row-no.toggle {
-      @apply hidden;
-    }
-
-    .nc-expand {
-      @apply flex;
-    }
-
-    .nc-row-expand-and-checkbox {
-      @apply !xs:hidden flex;
-    }
-
-    &:not(.selected-row) {
-      td.nc-grid-cell:not(.active),
-      td:nth-child(2):not(.active) {
-        @apply !bg-gray-50 border-b-gray-200 border-r-gray-200;
-      }
-    }
-  }
-
-  &.selected-row {
-    td.nc-grid-cell:not(.active),
-    td:nth-child(2):not(.active) {
-      @apply !bg-[#F0F3FF] border-b-gray-200 border-r-gray-200;
-    }
-  }
-
-  &:not(.selected-row):has(+ .selected-row) {
-    td.nc-grid-cell:not(.active),
-    td:nth-child(2):not(.active) {
-      @apply border-b-gray-200;
-    }
-  }
-
-  &:not(.active-row):has(+ .active-row),
-  &:not(.mouse-down):has(+ :hover) {
-    &:not(.selected-row) {
-      td.nc-grid-cell:not(.active),
-      td:nth-child(2):not(.active) {
-        @apply border-b-gray-200;
-      }
-    }
-  }
-}
-
-.nc-grid-header {
-  &:hover {
-    .nc-no-label {
-      @apply hidden;
-    }
-
-    .nc-check-all {
-      @apply flex;
-    }
-  }
-}
-
-.nc-required-cell {
-  box-shadow: inset 0 0 2px #f00;
-}
-
-.nc-fill-handle {
-  @apply w-[6px] h-[6px] absolute rounded-full bg-red-500 !pointer-events-auto mt-[-4px] ml-[-4px];
-}
-
-.nc-fill-handle:hover,
-.nc-fill-handle:active,
-.nc-fill-handle:focus {
-  @apply w-[8px] h-[8px] mt-[-5px] ml-[-5px];
-}
-
-:deep(.ant-skeleton-input) {
-  @apply rounded text-gray-100 !bg-gray-100 !bg-opacity-65;
-  animation: slow-show-1 5s ease 5s forwards;
 }
 </style>
