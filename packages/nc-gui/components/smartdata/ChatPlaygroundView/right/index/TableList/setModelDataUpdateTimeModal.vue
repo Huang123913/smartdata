@@ -94,27 +94,27 @@ const hourPlanTypeOption = [
   { value: 'incrementHours', label: '按一定增量触发' },
 ]
 const weekOption = [
-  { value: 2, label: '星期一' },
-  { value: 3, label: '星期二' },
-  { value: 4, label: '星期三' },
-  { value: 5, label: '星期四' },
-  { value: 6, label: '星期五' },
-  { value: 7, label: '星期六' },
-  { value: 1, label: '星期日' },
+  { value: '2', label: '星期一' },
+  { value: '3', label: '星期二' },
+  { value: '4', label: '星期三' },
+  { value: '5', label: '星期四' },
+  { value: '6', label: '星期五' },
+  { value: '7', label: '星期六' },
+  { value: '1', label: '星期日' },
 ]
 const monthOption = computed(() => {
-  return [...Array(12)].map((item, index) => ({ value: index + 1, label: index + 1 }))
+  return [...Array(12)].map((item, index) => ({ value: `${index + 1}`, label: index + 1 }))
 })
 const dayOption = computed(() => {
-  return [...Array(31)].map((item, index) => ({ value: index + 1, label: index + 1 }))
+  return [...Array(31)].map((item, index) => ({ value: `${index + 1}`, label: index + 1 }))
 })
 
 const hourOption = computed(() => {
   return [...Array(24)].map((item, index) => {
     if (index < 10) {
-      return { value: index, label: `0${index}`, showLabel: `${index}时` }
+      return { value: `${index}`, label: `0${index}`, showLabel: `${index}时` }
     } else {
-      return { value: index, label: index, showLabel: `${index}时` }
+      return { value: `${index}`, label: index, showLabel: `${index}时` }
     }
   })
 })
@@ -131,6 +131,17 @@ const timestampToTime = (timestamp: string) => {
 
 const handleOkBySetUpdateTime = () => {
   visible.value = false
+  //天
+  if (dayPlan.value.rangeStartDayOfMonth) dayPlan.value.rangeStartDayOfMonth = `${dayPlan.value.rangeStartDayOfMonth}`
+  if (dayPlan.value.rangeEndDayOfMonth) dayPlan.value.rangeEndDayOfMonth = `${dayPlan.value.rangeEndDayOfMonth}`
+  if (dayPlan.value.incrementStartDayOfMonth) dayPlan.value.incrementStartDayOfMonth = `${dayPlan.value.incrementStartDayOfMonth}`
+  if (dayPlan.value.incrementIntervalDayOfMonth)
+    dayPlan.value.incrementIntervalDayOfMonth = `${dayPlan.value.incrementIntervalDayOfMonth}`
+  //小时
+  if (dayPlan.value.rangeStartHour) dayPlan.value.rangeStartHour = `${dayPlan.value.rangeStartHour}`
+  if (dayPlan.value.rangeEndHour) dayPlan.value.rangeEndHour = `${dayPlan.value.rangeEndHour}`
+  if (dayPlan.value.incrementStartHour) dayPlan.value.incrementStartHour = `${dayPlan.value.incrementStartHour}`
+  if (dayPlan.value.incrementIntervalHour) dayPlan.value.incrementIntervalHour = `${dayPlan.value.incrementIntervalHour}`
   props.handleOk({
     fromDate: fromDate.value ? timestampToTime(fromDate.value.$d.getTime()) : '',
     endDate: endDate.value ? timestampToTime(endDate.value.$d.getTime()) : '',
