@@ -136,7 +136,15 @@ export class SmartDataController {
   }
 
   @Post(['/api/v2/smartdata/importData'])
-  async importData(@Body() data: { entityId: string; tableData: string }) {
+  async importData(
+    @Body()
+    data: {
+      entityId: string;
+      tableData: string;
+      belongSQLDataRefreshPlan: object;
+      belongSQLDataType: string;
+    },
+  ) {
     return await this.mcdm.importData(data);
   }
 

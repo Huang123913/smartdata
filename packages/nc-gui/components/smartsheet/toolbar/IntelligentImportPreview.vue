@@ -11,7 +11,7 @@ const props = defineProps<{
   closePreview: (value: boolean) => void
   activeTable: any
 }>()
-
+const { eventBus: eventBusChatPlayGround } = useChatPlaygroundViewStore()
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 const tableContainerHeight = 568
 let frame: number | null = null
@@ -21,6 +21,13 @@ const startIndex = ref(0) // 当前滚动的起始索引
 const offsetY = ref(0) // 滚动偏移量
 const loading = ref(false)
 const { $api } = useNuxtApp()
+const belongSQLDataRefreshPlan = ref({})
+const modelUpdateTypeValue = ref<string>('') //模型数据更新方式
+const { xWhere } = useSmartsheetStoreOrThrow()
+const meta = inject(MetaInj, ref())
+const { activeView } = storeToRefs(useViewsStore())
+const { loadData } = useViewData(meta, activeView, xWhere)
+const { eventBus } = useSmartsheetStoreOrThrow()
 const columns = computed(() => {
   if (!props.propsColumns.length) return []
   let fileds = props.propsColumns.filter((item) => item.name !== 'id')
@@ -73,17 +80,15 @@ const onScroll = (event: any) => {
     offsetY.value = scrollTop - (scrollTop % itemHeight)
   })
 }
-const { xWhere } = useSmartsheetStoreOrThrow()
-const meta = inject(MetaInj, ref())
-const { activeView } = storeToRefs(useViewsStore())
-const { loadData } = useViewData(meta, activeView, xWhere)
-const { eventBus } = useSmartsheetStoreOrThrow()
+
 const handleModalOk = async () => {
   try {
     loading.value = true
     let result = await $api.smartData.importData({
       entityId: props.activeTable.id,
       tableData: JSON.stringify(props.propsTableData),
+      belongSQLDataRefreshPlan: belongSQLDataRefreshPlan.value,
+      belongSQLDataType: modelUpdateTypeValue.value,
     })
     if (result && result?.success) {
       await loadData()
@@ -101,6 +106,16 @@ const handleModalOk = async () => {
 const handleCancel = () => {
   props.closePreview(false)
 }
+
+const handleOkBySetUpdateTime = (value) => {
+  belongSQLDataRefreshPlan.value = value
+}
+const handleSelectOptionClick = (item: any) => {
+  modelUpdateTypeValue.value = item.value
+  if (item.value === 'ScheduledRefresh') {
+    eventBusChatPlayGround.emit(ChatPlaygroundViewStoreEvents.OPEN_SET_MODEL_DATA_UPDATE_TIME_MODAL)
+  }
+}
 </script>
 
 <template>
@@ -111,6 +126,7 @@ const handleCancel = () => {
     :visible="visible"
     :maskClosable="false"
     :style="{ '--set-height': tableData && tableData.length ? '600px' : '300px' }"
+    zIndex="998"
   >
     <template #title>
       <div class="intelligent-import-preview-header">
@@ -228,20 +244,28 @@ const handleCancel = () => {
     </div>
     <!-- :disabled="!tableData.length" -->
     <template #footer>
-      <NcButton type="secondary" @click="handleCancel">{{ $t('general.cancel') }}</NcButton>
-      <NcButton
-        key="submit"
-        type="primary"
-        label="导入数据"
-        loading-label="导入数据"
-        :loading="loading"
-        @click="() => handleModalOk()"
-      >
-        {{ '导入数据' }}
-        <template #loading> {{ '导入数据' }}</template>
-      </NcButton>
+      <SmartdataChatPlaygroundViewRightIndexTableListSelectTableUpdateType
+        :handleSelectOptionClick="handleSelectOptionClick"
+        selectLabel="表格数据"
+        selectTip="选择表格更新方式"
+      />
+      <div>
+        <NcButton type="secondary" @click="handleCancel">{{ $t('general.cancel') }}</NcButton>
+        <NcButton
+          key="submit"
+          type="primary"
+          label="导入数据"
+          loading-label="导入数据"
+          :loading="loading"
+          @click="() => handleModalOk()"
+        >
+          {{ '导入数据' }}
+          <template #loading> {{ '导入数据' }}</template>
+        </NcButton>
+      </div>
     </template>
   </a-modal>
+  <SmartdataChatPlaygroundViewRightIndexTableListSetModelDataUpdateTimeModal :handleOk="handleOkBySetUpdateTime" />
 </template>
 
 <style lang="scss">
@@ -277,29 +301,29 @@ const handleCancel = () => {
       padding: 16px 0 16px 8px !important;
     }
     .ant-modal-footer {
-      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      padding: 16px 0;
+      .ant-btn {
+        border-radius: 0.5rem;
+        color: rgb(55, 65, 81);
+        font-weight: 550;
+        &:hover {
+          background-color: rgba(244, 244, 245);
+          border-color: rgba(231, 231, 233);
+        }
+      }
+      .ant-btn-primary {
+        color: white;
+        border: none;
+        &:hover {
+          background-color: rgba(41, 82, 204);
+        }
+      }
     }
   }
   .ant-modal-close {
     top: 4px !important;
-  }
-  .ant-modal-footer {
-    .ant-btn {
-      border-radius: 0.5rem;
-      color: rgb(55, 65, 81);
-      font-weight: 550;
-      &:hover {
-        background-color: rgba(244, 244, 245);
-        border-color: rgba(231, 231, 233);
-      }
-    }
-    .ant-btn-primary {
-      color: white;
-      border: none;
-      &:hover {
-        background-color: rgba(41, 82, 204);
-      }
-    }
   }
 }
 </style>

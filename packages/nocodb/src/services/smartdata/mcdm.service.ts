@@ -199,37 +199,11 @@ export class MCDMService {
         tableInfo.tableName,
         insertData,
       ));
-    let entities = await this.getEntity(existingModelId);
-    const entity = entities[0];
-    const entityProps = entity?.props;
-    if (entityProps) {
-      let dataTypeProp = entityProps.findLast(
-        (p) => p.code == 'belongSQLDataType',
-      );
-      let dataRefreshPlan = entityProps.findLast(
-        (p) => p.code == 'belongSQLDataRefreshPlan',
-      );
-      let saveDdlProps = [
-        {
-          id: existingModelId,
-          props: [
-            {
-              id: dataTypeProp ? dataTypeProp.id : null,
-              name: 'belongSQLDataType',
-              code: 'belongSQLDataType',
-              value: belongSQLDataType,
-            },
-            {
-              id: dataRefreshPlan ? dataRefreshPlan.id : null,
-              name: 'belongSQLDataRefreshPlan',
-              code: 'belongSQLDataRefreshPlan',
-              jsonValue: JSON.stringify(belongSQLDataRefreshPlan),
-            },
-          ],
-        },
-      ];
-      await this.saveModel({ entities: saveDdlProps });
-    }
+    await this.saveModelPropsToRefresh(
+      existingModelId,
+      belongSQLDataType,
+      belongSQLDataRefreshPlan,
+    );
     return { success: true };
   }
 
@@ -270,8 +244,14 @@ export class MCDMService {
     });
   }
 
-  async importData(params: { entityId: string; tableData: string }) {
-    let { entityId, tableData } = params;
+  async importData(params: {
+    entityId: string;
+    tableData: string;
+    belongSQLDataRefreshPlan: object;
+    belongSQLDataType: string;
+  }) {
+    let { entityId, tableData, belongSQLDataRefreshPlan, belongSQLDataType } =
+      params;
     let tableDatas = JSON.parse(tableData);
     let insertData = tableDatas.map((item: object) => ({
       ...item,
@@ -287,7 +267,52 @@ export class MCDMService {
         insertData,
       );
     }
+    await this.saveModelPropsToRefresh(
+      entityId,
+      belongSQLDataType,
+      belongSQLDataRefreshPlan,
+    );
     return result;
+  }
+
+  async saveModelPropsToRefresh(
+    entityId: string,
+    belongSQLDataType: string,
+    belongSQLDataRefreshPlan: object,
+  ) {
+    if (belongSQLDataType) {
+      let entities = await this.getEntity(entityId);
+      const entity = entities[0];
+      const entityProps = entity?.props;
+      if (entityProps) {
+        let dataTypeProp = entityProps.findLast(
+          (p) => p.code == 'belongSQLDataType',
+        );
+        let dataRefreshPlan = entityProps.findLast(
+          (p) => p.code == 'belongSQLDataRefreshPlan',
+        );
+        let saveDdlProps = [
+          {
+            id: entityId,
+            props: [
+              {
+                id: dataTypeProp ? dataTypeProp.id : null,
+                name: 'belongSQLDataType',
+                code: 'belongSQLDataType',
+                value: belongSQLDataType,
+              },
+              {
+                id: dataRefreshPlan ? dataRefreshPlan.id : null,
+                name: 'belongSQLDataRefreshPlan',
+                code: 'belongSQLDataRefreshPlan',
+                jsonValue: JSON.stringify(belongSQLDataRefreshPlan),
+              },
+            ],
+          },
+        ];
+        await this.saveModel({ entities: saveDdlProps });
+      }
+    }
   }
 
   async copyTableData(params: {

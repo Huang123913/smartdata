@@ -75,9 +75,9 @@ const handleModalOk = () => {
   }
 }
 
-const handleChange = (value: string) => {
-  props.setUpdateTimeValue(value)
-  value === 'ScheduledRefresh' && eventBus.emit(ChatPlaygroundViewStoreEvents.OPEN_SET_MODEL_DATA_UPDATE_TIME_MODAL)
+const handleSelectOptionClick = (option: any) => {
+  props.setUpdateTimeValue(option.value)
+  option.value === 'ScheduledRefresh' && eventBus.emit(ChatPlaygroundViewStoreEvents.OPEN_SET_MODEL_DATA_UPDATE_TIME_MODAL)
 }
 
 const hanldeAfterClose = () => {
@@ -137,16 +137,11 @@ const handleSelectSourceField = (option: any, targetFieldItem: any) => {
     </div>
 
     <template #footer>
-      <div class="footer-left">
-        <span>模型数据</span>
-        <a-select
-          v-model:value="modelUpdateTypeValue"
-          :style="{ width: '150px', marginLeft: '8px' }"
-          :allowClear="true"
-          :options="selectOption"
-          @change="handleChange"
-        ></a-select>
-      </div>
+      <SmartdataChatPlaygroundViewRightIndexTableListSelectTableUpdateType
+        :handleSelectOptionClick="handleSelectOptionClick"
+        selectLabel="模型数据"
+        selectTip="选择模型更新方式"
+      />
       <div>
         <a-button key="back" @click="handleCancel">取消</a-button>
         <a-button key="submit" type="primary" @click="handleModalOk">确认</a-button>
