@@ -54,6 +54,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     try {
       let bizCatalogEntityCustom = await $api.smartData.entities()
       if (!bizCatalogEntityCustom.length) return
+      bizCatalogEntityCustom = bizCatalogEntityCustom.map((item) => ({ ...item, parentId: item.parentId ? item.parentId : null }))
       chataiData.modelData = [
         ...bizCatalogEntityCustom,
         {
@@ -71,7 +72,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
           name_cn: '模型目录',
           parentId: 'add-catalog',
           isCatalog: true,
-          children: buildTree(bizCatalogEntityCustom),
+          children: buildTree(bizCatalogEntityCustom, true),
           title: '模型目录',
           key: '0-0',
         },
@@ -79,22 +80,40 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
       // 模型树进行排序
       chataiData.modelTree.forEach((node) => sortTreeNodesByOrderNo(node))
       chataiData.modelCatalog = chataiData.modelData.filter((item) => item.isCatalog && item.id !== null)
-      chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog)
+      chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog, false)
     } catch (e) {
       console.error(e)
     }
   }
 
   // 构建树
-  const buildTree = (datas: any[], parentId = null): any[] => {
+  const buildTree = (datas: any[], isAddEmptyChild: boolean, parentId = null): any[] => {
     return datas
       .filter((item: any) => {
-        let itemParantId = item.parentId ? item.parentId : null
-        return itemParantId === parentId
+        return item.parentId === parentId
       })
       .map((item: any) => {
-        let children: any[] = item.isCatalog ? buildTree(datas, item.id) : []
-        return { ...item, title: item.name_cn, key: item.id, children, fields: [] }
+        let children: any[] = item.isCatalog ? buildTree(datas, isAddEmptyChild, item.id) : []
+        children = children.length
+          ? children
+          : item.isCatalog && isAddEmptyChild
+          ? [
+              {
+                title: 'Empty',
+                key: 'Empty' + item.id,
+                children: [],
+                fields: [],
+                parentId: item.id,
+              },
+            ]
+          : []
+        return {
+          ...item,
+          title: item.name_cn,
+          key: item.id,
+          children,
+          fields: [],
+        }
       })
   }
 
@@ -192,7 +211,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
         name_cn: '模型目录',
         parentId: 'add-catalog',
         isCatalog: true,
-        children: buildTree(chataiData.modelData),
+        children: buildTree(chataiData.modelData, false),
         title: '模型目录',
         key: '0-0',
       },
@@ -212,7 +231,22 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     findModel.parentId = newParentId
     let originalParentIdCatlog = findNodeById(chataiData.modelTree, originalParentId)
     originalParentIdCatlog.children = originalParentIdCatlog.children.filter((item) => item.id !== modelId)
+    if (!originalParentIdCatlog.children.length) {
+      originalParentIdCatlog.children = [
+        {
+          title: 'Empty',
+          key: 'Empty' + originalParentId,
+          children: [],
+          fields: [],
+          parentId: originalParentId,
+        },
+      ]
+    }
     let newCatalog = findNodeById(chataiData.modelTree, newParentId)
+    if (newCatalog.children.length === 1 && newCatalog.children[0].key.indexOf('Empty') > -1) {
+      newCatalog.children = [findModel]
+      return
+    }
     if (prependToTableId) {
       let findIndex = newCatalog.children.findIndex((item) => item.id === prependToTableId)
       newCatalog.children.splice(findIndex, 0, findModel)
@@ -233,14 +267,14 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     findCatalogById.title = rename
 
     chataiData.modelCatalog = chataiData.modelData.filter((item) => item.isCatalog && item.id !== null)
-    chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog)
+    chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog, false)
   }
 
   //创建目录
   const createCatalog = (catalog: any) => {
     chataiData.modelData.push({ ...catalog })
     chataiData.modelCatalog.push({ ...catalog })
-    chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog)
+    chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog, false)
     let findCatalog = catalog.parentId ? findNodeById(chataiData.modelTree, catalog.parentId) : chataiData.modelTree[0]
     let findLastIndex = findCatalog.children.findLastIndex((item: any) => item.isCatalog)
     findCatalog.children.splice(findLastIndex + 1, 0, {
@@ -248,7 +282,15 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
       title: catalog.name_cn,
       key: catalog.id,
       isCatalog: true,
-      children: [],
+      children: [
+        {
+          title: 'Empty',
+          key: 'Empty' + catalog.id,
+          fields: [],
+          isCatalog: false,
+          parentId: catalog.id,
+        },
+      ],
       fields: [],
     })
   }
@@ -259,7 +301,22 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     findCatalog.parentId = newParentId
     let originalParentIdCatlog = originalParentId ? findNodeById(chataiData.modelTree, originalParentId) : chataiData.modelTree[0]
     originalParentIdCatlog.children = originalParentIdCatlog.children.filter((item: any) => item.id !== catalogId)
+    if (!originalParentIdCatlog.children.length) {
+      originalParentIdCatlog.children = [
+        {
+          title: 'Empty',
+          key: 'Empty' + originalParentId,
+          children: [],
+          fields: [],
+          parentId: originalParentId,
+        },
+      ]
+    }
     let newCatalog = newParentId ? findNodeById(chataiData.modelTree, newParentId) : chataiData.modelTree[0]
+    if (newCatalog.children.length === 1 && newCatalog.children[0].key.indexOf('Empty') > -1) {
+      newCatalog.children = [findCatalog]
+      return
+    }
     if (prependToTableId) {
       let findIndex = newCatalog.children.findIndex((item: any) => item.id === prependToTableId)
       findIndex = findIndex === -1 ? 0 : findIndex

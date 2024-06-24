@@ -11,7 +11,7 @@ import { useChatPlaygroundViewStore } from '../../../../../store/chatPlaygroundV
 
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
-const { getCheckedModelData, setChataiDataIsOpenMode, eventBus } = store
+const { getCheckedModelData, setChataiDataIsOpenMode, eventBus, buildTree } = store
 const searchModelText = ref<string>('') //搜索模型文本
 const isShowModelResult = ref<boolean>(false) //是否显示搜索模型的结果
 const searchModelResult = ref<any[]>([]) //搜索模型的结果
@@ -23,6 +23,23 @@ const scrollYHeight = ref(0)
 onMounted(() => {
   getCheckedModelData(checkedKeys.value)
   if (elementATree.value) scrollYHeight.value = parseInt(elementATree.value?.clientHeight) - 2
+})
+
+const showTableTree = computed(() => {
+  let data = chataiData.value.modelData
+    .filter((item) => item.key !== '0-0')
+    .map((item) => ({ ...item, parantId: item.parantId ? item.parantId : null }))
+  return [
+    {
+      id: null,
+      name_cn: '模型目录',
+      parentId: 'add-catalog',
+      isCatalog: true,
+      children: buildTree(data, false),
+      title: '模型目录',
+      key: '0-0',
+    },
+  ]
 })
 
 watch(elementATree, () => {
@@ -249,7 +266,7 @@ const handleClickCatalog = (catalog: any) => {
           v-model:expandedKeys="expandedKeys"
           @expand="handleExpand"
           checkable
-          :tree-data="isShowModelResult ? searchModelResultTree : chataiData.modelTree"
+          :tree-data="isShowModelResult ? searchModelResultTree : showTableTree"
           @check="handleCheckModel"
         >
           <template #switcherIcon="item">
