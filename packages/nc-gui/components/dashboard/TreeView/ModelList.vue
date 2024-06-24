@@ -57,6 +57,7 @@ const resizeObserver = new ResizeObserver((entries) => {
 })
 
 const onClickToTableView = (item: any) => {
+  if (item.key.indexOf('Empty') > -1) return
   _openTable({
     ...item,
     base_id: props.base.id,
@@ -116,12 +117,13 @@ const dropModel = async (info: any) => {
   //目标节点
   let dropNode = info.node
   //模型新的父级id
-  let newParentId = dropNode.parentId === dragNodeParentId ? dragNodeParentId : dropNode.parentId
+  let newParentId = dropNode.parentId
+  console.log('newParentId', newParentId)
   if (Number(dropPosition) < 0 || !newParentId) {
     newParentId = '__root__'
   }
   let prependToTableId = dropNode.isCatalog ? '' : dropNode.key
-  if (Number(dropPosition) < 0) prependToTableId = ''
+  if (Number(dropPosition) < 0 || prependToTableId.indexOf('Empty') > -1) prependToTableId = ''
   let params = {
     baseId: props.base.id,
     catalogId: newParentId, //调整到哪个目录ID下，若传空则认为在原目录下调整位置
@@ -183,13 +185,17 @@ const dropCatalog = async (info: any) => {
           </div>
           <div
             v-else
-            class="model-text-content hover-set pr-1"
-            :class="{ 'background-set': openedTableId === item.id }"
+            class="model-text-content pr-1"
+            :class="{
+              'background-set': item.key.indexOf('Empty') === -1 && openedTableId === item.id,
+              'hover-set': item.key.indexOf('Empty') === -1,
+              'cursor-style': item.key.indexOf('Empty') > -1,
+            }"
             @click="onClickToTableView(item)"
           >
             <div class="table-name">
-              <GeneralTableIcon :meta="item" class="text-gray-500" />
-              <span class="mode-text"> {{ item.title }}</span>
+              <GeneralTableIcon v-if="item.key.indexOf('Empty') === -1" :meta="item" class="text-gray-500" />
+              <span class="mode-text">{{ item.title }}</span>
             </div>
             <div class="flex more-action-btn">
               <DashboardTreeViewModelListDropDown
@@ -218,6 +224,9 @@ const dropCatalog = async (info: any) => {
 .model-list {
   overflow: hidden;
   margin-top: 4px;
+  .cursor-style {
+    cursor: default !important;
+  }
   ::v-deep .ant-tree {
     background-color: transparent;
   }
