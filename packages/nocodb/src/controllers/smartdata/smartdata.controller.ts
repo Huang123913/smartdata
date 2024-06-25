@@ -31,6 +31,11 @@ export class SmartDataController {
     return await this.mcdm.getEntities();
   }
 
+  @Get('/api/v2/smartdata/translate')
+  async translate(@Query('word') word: string) {
+    return await this.llm.translate(word);
+  }
+
   @Post('/api/v2/smartdata/train')
   async train(@Body('ddl') ddl: string | undefined) {
     if (ddl) {
