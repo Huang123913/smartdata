@@ -213,4 +213,41 @@ export class SmartDataController {
   ) {
     return await this.mcdm.saveUFileInfoToTable(file, body.tableId);
   }
+  @Post(['/api/v2/smartdata/saveModelPropsToRefresh'])
+  async saveModelPropsToRefresh(
+    @Body()
+    data: {
+      entityId: string;
+      belongSQLDataType: string;
+      belongSQLDataRefreshPlan: object;
+    },
+  ) {
+    return await this.mcdm.saveModelPropsToRefresh(
+      data.entityId,
+      data.belongSQLDataType,
+      data.belongSQLDataRefreshPlan,
+    );
+  }
+
+  @Post(['/api/v2/smartdata/insertDataToTable'])
+  async insertDataToTable(
+    @Body()
+    data: {
+      insertDatas: any[];
+      tableId: string;
+    },
+  ) {
+    return await this.mcdm.insertDataToTable(data.insertDatas, data.tableId);
+  }
+
+  @Post(['/api/v2/smartdata/exeSql'])
+  async exeSql(
+    @Body()
+    data: {
+      sql: string;
+      params?: object;
+    },
+  ) {
+    return await this.mcdm.exeSql(data);
+  }
 }
