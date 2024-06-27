@@ -75,6 +75,41 @@ const handleClickChange = (visible: boolean) => {
   </a-dropdown>
 </template>
 
+<style lang="scss" scoped>
+.ant-dropdown-menu-submenu {
+  padding: 0 !important;
+  border: none !important;
+  .ant-dropdown-menu-submenu-title {
+    padding: 6px 8px !important;
+    width: 100%;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    position: relative;
+  }
+}
+.ant-dropdown-menu {
+  min-width: 200px;
+  padding: 16px 8px !important;
+}
+
+.ant-dropdown-menu-item {
+  padding: 6px 8px !important;
+}
+
+.ant-dropdown-link1 {
+  display: flex;
+  align-items: center;
+  text-decoration: none !important;
+  color: #0b6bcb !important;
+  &:hover {
+    color: #0b6bcb !important;
+  }
+  span {
+    vertical-align: 2px !important;
+  }
+}
+</style>
 <style lang="scss">
 .model-selected-list {
   max-height: 200px;
@@ -155,40 +190,6 @@ const handleClickChange = (visible: boolean) => {
   }
   .ant-popover-inner-content {
     padding: 8px 0 !important;
-  }
-}
-.ant-dropdown-menu {
-  min-width: 200px;
-  padding: 16px 8px !important;
-}
-.ant-dropdown-menu-submenu {
-  .ant-dropdown-menu-submenu-title {
-    padding: 6px 8px !important;
-    width: 100%;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    position: relative;
-  }
-}
-.ant-dropdown-menu-submenu {
-  padding: 0 !important;
-  border: none !important;
-}
-.ant-dropdown-menu-item {
-  padding: 6px 8px !important;
-}
-
-.ant-dropdown-link1 {
-  display: flex;
-  align-items: center;
-  text-decoration: none !important;
-  color: #0b6bcb !important;
-  &:hover {
-    color: #0b6bcb !important;
-  }
-  span {
-    vertical-align: 2px !important;
   }
 }
 .colse-btn {
