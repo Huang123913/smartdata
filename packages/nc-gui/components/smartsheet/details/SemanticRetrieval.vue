@@ -88,84 +88,105 @@ const getAllSemanticsSearchedFields = async () => {
 }
 
 const deleteSemanticsSearched = async (id: string) => {
-  await $api.smartData.saveModelProps({
-    entityId: route.params.viewId,
-    belongCode: 'belongSemanticFetrieval',
-    data: [],
-    option: 'del',
-    optionId: id,
-  })
-  allSemanticRetrieval.value = allSemanticRetrieval.value.filter((item) => item.id !== id)
+  try {
+    isShowLoading.value = true
+    await $api.smartData.saveModelProps({
+      entityId: route.params.viewId,
+      belongCode: 'belongSemanticFetrieval',
+      data: [],
+      option: 'del',
+      optionId: id,
+    })
+    allSemanticRetrieval.value = allSemanticRetrieval.value.filter((item) => item.id !== id)
+  } catch (error) {
+    console.error(error)
+  } finally {
+    isShowLoading.value = false
+  }
 }
 
 const addExistSemanticsSearchedColumn = async (id: string) => {
-  let addField: string[] = []
-  let addTitle: string[] = []
-  fields.value.map((item) => {
-    if (item?.isChecked) {
-      addField.push(item.column_name as string)
-      addTitle.push(item.title as string)
-    }
-  })
-  let filterItem = allSemanticRetrieval.value.filter((item) => item.id === id)
-  let isRepeat = false
-  for (let i = 0; i < addField.length; i++) {
-    if (filterItem[0].columnName.indexOf(addField[i]) > -1) {
-      isRepeat = true
-      break
-    }
-  }
-  if (isRepeat) {
-    message.warning('增加的字段存在重复')
-    return
-  }
-  let newColumn = filterItem[0].columnName + ';' + addField.join(';')
-  if (newColumn.length === allColumnName.value.length) {
-    message.warning('存在一个检索语义则默认有全局检索语义')
-    return
-  }
-  if (
-    allSemanticRetrieval.value.some((item) => {
-      if (item.columnName.length === newColumn.length) {
-        return addField.every((field) => item.columnName.indexOf(field) > -1)
+  try {
+    let addField: string[] = []
+    let addTitle: string[] = []
+    fields.value.map((item) => {
+      if (item?.isChecked) {
+        addField.push(item.column_name as string)
+        addTitle.push(item.title as string)
       }
-      return false
     })
-  ) {
-    message.warning('添加后存在重复的语义')
-    return
+    let filterItem = allSemanticRetrieval.value.filter((item) => item.id === id)
+    let isRepeat = false
+    for (let i = 0; i < addField.length; i++) {
+      if (filterItem[0].columnName.indexOf(addField[i]) > -1) {
+        isRepeat = true
+        break
+      }
+    }
+    if (isRepeat) {
+      message.warning('增加的字段存在重复')
+      return
+    }
+    let newColumn = filterItem[0].columnName + ';' + addField.join(';')
+    if (newColumn.length === allColumnName.value.length) {
+      message.warning('存在一个检索语义则默认有全局检索语义')
+      return
+    }
+    if (
+      allSemanticRetrieval.value.some((item) => {
+        if (item.columnName.length === newColumn.length) {
+          return addField.every((field) => item.columnName.indexOf(field) > -1)
+        }
+        return false
+      })
+    ) {
+      message.warning('添加后存在重复的语义')
+      return
+    }
+    isShowLoading.value = true
+    await $api.smartData.saveModelProps({
+      entityId: route.params.viewId,
+      belongCode: 'belongSemanticFetrieval',
+      data: { columnName: addField.join(';'), title: addTitle.join(';') },
+      option: 'addField',
+      optionId: id,
+    })
+    let optionItem = allSemanticRetrieval.value.find((item) => item.id === id)
+    optionItem.columnName = optionItem.columnName + ';' + addField.join(';')
+    optionItem.title = optionItem.title + ';' + addTitle.join(';')
+  } catch (error) {
+    console.error(error)
+  } finally {
+    isShowLoading.value = false
   }
-  await $api.smartData.saveModelProps({
-    entityId: route.params.viewId,
-    belongCode: 'belongSemanticFetrieval',
-    data: { columnName: addField.join(';'), title: addTitle.join(';') },
-    option: 'addField',
-    optionId: id,
-  })
-  let optionItem = allSemanticRetrieval.value.find((item) => item.id === id)
-  optionItem.columnName = optionItem.columnName + ';' + addField.join(';')
-  optionItem.title = optionItem.title + ';' + addTitle.join(';')
 }
 
 const delExistSemanticsSearchedColumn = async (optionItem: any, index: number) => {
-  let deleteColumn = optionItem.columnName.split(';')[index]
-  let deleteTitle = optionItem.title.split(';')[index]
-  await $api.smartData.saveModelProps({
-    entityId: route.params.viewId,
-    belongCode: 'belongSemanticFetrieval',
-    data: { columnName: deleteColumn, title: deleteTitle },
-    option: 'delField',
-    optionId: optionItem.id,
-  })
-  let delItem = allSemanticRetrieval.value.find((item) => item.id === optionItem.id)
-  delItem.columnName = optionItem.columnName
-    .split(';')
-    .filter((item) => item !== deleteColumn)
-    .join(';')
-  delItem.title = optionItem.title
-    .split(';')
-    .filter((item) => item !== deleteTitle)
-    .join(';')
+  try {
+    isShowLoading.value = true
+    let deleteColumn = optionItem.columnName.split(';')[index]
+    let deleteTitle = optionItem.title.split(';')[index]
+    await $api.smartData.saveModelProps({
+      entityId: route.params.viewId,
+      belongCode: 'belongSemanticFetrieval',
+      data: { columnName: deleteColumn, title: deleteTitle },
+      option: 'delField',
+      optionId: optionItem.id,
+    })
+    let delItem = allSemanticRetrieval.value.find((item) => item.id === optionItem.id)
+    delItem.columnName = optionItem.columnName
+      .split(';')
+      .filter((item) => item !== deleteColumn)
+      .join(';')
+    delItem.title = optionItem.title
+      .split(';')
+      .filter((item) => item !== deleteTitle)
+      .join(';')
+  } catch (error) {
+    console.error(error)
+  } finally {
+    isShowLoading.value = false
+  }
 }
 
 const handleCheck = (item: any) => {
