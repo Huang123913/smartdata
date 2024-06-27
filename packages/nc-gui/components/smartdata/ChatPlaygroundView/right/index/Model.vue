@@ -93,7 +93,7 @@ const handleSearchModel = () => {
   } else {
     let result: any[] = []
     checkedKeys.value = checkedKeys.value.filter((item) => item !== 'catalog')
-    chataiData.value.modelTree.forEach((node) => {
+    showTableTree.value.forEach((node) => {
       searchNodes(node, result)
     })
     if (result.length > 0) {
@@ -258,7 +258,7 @@ const handleClickCatalog = (catalog: any) => {
       <!-- 模型 -->
       <div
         ref="elementATree"
-        v-if="(isShowModelResult && searchModelResultTree.length) || (!isShowModelResult && chataiData.modelTree.length)"
+        v-if="(isShowModelResult && searchModelResultTree.length) || (!isShowModelResult && showTableTree.length)"
       >
         <a-tree
           :height="scrollYHeight"
