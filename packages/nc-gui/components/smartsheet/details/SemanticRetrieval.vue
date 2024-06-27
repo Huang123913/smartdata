@@ -271,7 +271,10 @@ const handleCheck = (item: any) => {
             <template #renderItem="{ item }">
               <a-list-item @click="handleCheck(item)">
                 <NcCheckbox v-model:checked="item.isChecked" />
-                <span class="column-title">{{ item.title }}</span>
+                <NcTooltip class="truncate" show-on-truncate-only>
+                  <template #title> {{ item.title }}</template>
+                  <span class="column-title">{{ item.title }}</span>
+                </NcTooltip>
               </a-list-item>
             </template>
           </a-list>
