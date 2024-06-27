@@ -12042,5 +12042,22 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+     * @description saveModelProps MCDM
+     *
+     * @tags SmartData
+     * @name SaveModelProps
+     * @summary saveModelProps MCDM
+     * @request POST:/api/v2/smartdata/saveModelProps
+     */
+    saveModelProps: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/saveModelProps`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
 }

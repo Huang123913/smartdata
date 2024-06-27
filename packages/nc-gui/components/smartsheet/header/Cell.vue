@@ -8,6 +8,7 @@ interface Props {
   hideMenu?: boolean
   hideIcon?: boolean
   isHiddenCol?: boolean
+  semanticsSearchedFields: string[]
 }
 
 const props = defineProps<Props>()
@@ -180,6 +181,7 @@ const onClick = (e: Event) => {
         :is-hidden-col="isHiddenCol"
         @add-column="addField"
         @edit="openHeaderMenu"
+        :semanticsSearchedFields="semanticsSearchedFields"
       />
     </template>
 

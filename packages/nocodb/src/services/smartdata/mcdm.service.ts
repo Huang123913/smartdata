@@ -458,4 +458,61 @@ export class MCDMService {
     }
     return res;
   }
+
+  async saveModelProps(params: {
+    entityId: string;
+    belongCode: string;
+    data: any;
+    option: string;
+    optionId: string;
+  }) {
+    let { entityId, belongCode, data, option, optionId } = params;
+    let entities = await this.getEntity(entityId);
+    const entity = entities[0];
+    const entityProps = entity?.props;
+    if (entityProps) {
+      let findProp = entityProps.findLast((p) => p.code == belongCode);
+      let savedValue = [];
+      if (option === 'add') {
+        savedValue = findProp
+          ? [...JSON.parse(findProp.jsonValue), ...data]
+          : data;
+      } else if (option === 'del') {
+        savedValue = JSON.parse(findProp.jsonValue).filter(
+          (item) => item.id !== optionId,
+        );
+      } else if (option === 'addField') {
+        savedValue = JSON.parse(findProp.jsonValue);
+        let optionItem = savedValue.find((item) => item.id === optionId);
+        optionItem.columnName = optionItem.columnName + ';' + data.columnName;
+        optionItem.title = optionItem.title + ';' + data.title;
+      } else {
+        // option === 'delField'
+        savedValue = JSON.parse(findProp.jsonValue);
+        let optionItem = savedValue.find((item) => item.id === optionId);
+        optionItem.columnName = optionItem.columnName
+          .split(';')
+          .filter((item) => item !== data.columnName)
+          .join(';');
+        optionItem.title = optionItem.title
+          .split(';')
+          .filter((item) => item !== data.title)
+          .join(';');
+      }
+      let saveDdlProps = [
+        {
+          id: entityId,
+          props: [
+            {
+              id: findProp ? findProp.id : null,
+              name: belongCode,
+              code: belongCode,
+              jsonValue: JSON.stringify(savedValue),
+            },
+          ],
+        },
+      ];
+      return await this.saveModel({ entities: saveDdlProps });
+    }
+  }
 }

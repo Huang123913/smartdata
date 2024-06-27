@@ -20,14 +20,57 @@ const globalSearchWrapperRef = ref<HTMLInputElement>()
 
 const { isMobileMode } = useGlobal()
 
-const columns = computed(
-  () => (meta.value as TableType)?.columns?.filter((column) => !isSystemColumn(column) && column?.uidt !== UITypes.Links) ?? [],
-)
+const allSemanticRetrieval = ref<any[]>([])
 
+const selectedOption = ref({})
+
+const columns = computed(() => {
+  let data =
+    (meta.value as TableType)?.columns?.filter((column) => !isSystemColumn(column) && column?.uidt !== UITypes.Links) ?? []
+  return [...allSemanticRetrieval.value, ...data]
+})
+
+const { $api } = useNuxtApp()
+
+const getAllSemanticsSearchedFields = async () => {
+  try {
+    let tableInfo = await $api.smartData.entity({
+      entityId: activeView.value?.id,
+    })
+    let props = tableInfo[0]?.props ? tableInfo[0]?.props : []
+    if (props.length) {
+      let findSemanticFetrievalProp = props.findLast((p) => p.code == 'belongSemanticFetrieval')
+      if (findSemanticFetrievalProp) {
+        let allField: string[] = []
+        allSemanticRetrieval.value = JSON.parse(findSemanticFetrievalProp.jsonValue).map((item) => {
+          allField.push(...item.columnName.split(';'))
+          return { ...item, value: item.columnName, isSemanticRetrieval: true }
+        })
+        allField = Array.from(new Set(allField))
+        if (allSemanticRetrieval.value.length) {
+          allSemanticRetrieval.value.unshift({
+            title: '全局检索',
+            value: allField.join(';'),
+            columnName: allField.join(';'),
+            isSemanticRetrieval: true,
+            id: '全局检索',
+          })
+          selectedOption.value = allSemanticRetrieval.value[0]
+          search.value.field = '全局检索'
+        }
+      }
+    }
+  } catch (error) {
+    console.error(error)
+  } finally {
+    console.log('test', allSemanticRetrieval.value)
+  }
+}
 watch(
   () => activeView.value?.id,
   (n, o) => {
     if (n !== o) {
+      getAllSemanticsSearchedFields()
       loadFieldQuery(activeView.value?.id)
     }
   },
@@ -35,7 +78,15 @@ watch(
 )
 
 function onPressEnter() {
-  reloadData.trigger({ shouldShowLoading: false, offset: 0 })
+  if (selectedOption.value?.isSemanticRetrieval) {
+    //TODO 语义检索
+    // let tableId = activeView.value.id
+    // console.log('activeView', activeView.value)
+    // console.log('activeView', selectedOption.value.columnName)
+    // console.log('search.value.query', search.value.query)
+  } else {
+    reloadData.trigger({ shouldShowLoading: false, offset: 0 })
+  }
 }
 
 const displayColumnLabel = computed(() => {
@@ -43,16 +94,17 @@ const displayColumnLabel = computed(() => {
     // use search field label if specified
     return columns.value?.find((column) => column.id === search.value.field)?.title
   }
+
   // use primary value label by default
   const pvColumn = columns.value?.find((column) => column.pv)
-  search.value.field = pvColumn?.id as string
-  return pvColumn?.title
+  search.value.field = allSemanticRetrieval.value.length ? allSemanticRetrieval.value[0].id : (pvColumn?.id as string)
+  return allSemanticRetrieval.value.length ? '全局检索' : pvColumn?.title
 })
 
 watchDebounced(
   () => search.value.query,
   () => {
-    onPressEnter()
+    if (!selectedOption.value?.isSemanticRetrieval) onPressEnter()
   },
   {
     debounce: 500,
@@ -63,6 +115,7 @@ watchDebounced(
 const onSelectOption = (column: ColumnType) => {
   search.value.field = column.id as string
   isDropdownOpen.value = false
+  selectedOption.value = column
 }
 
 const handleShowSearchInput = () => {
@@ -131,15 +184,13 @@ onClickOutside(globalSearchWrapperRef, (e) => {
       <form class="p-0">
         <a-input
           v-if="search.query || showSearchBox"
-          ref="globalSearchRef"
           v-model:value="search.query"
-          name="globalSearchQuery"
           size="small"
           class="text-xs w-40 h-full"
-          :placeholder="`${$t('general.searchIn')} ${displayColumnLabel}`"
+          :placeholder="`${selectedOption?.isSemanticRetrieval ? '检索范围' : $t('general.searchIn')} ${displayColumnLabel}`"
           :bordered="false"
           data-testid="search-data-input"
-          @press-enter="onPressEnter"
+          @keyup.enter="onPressEnter"
         >
         </a-input>
       </form>

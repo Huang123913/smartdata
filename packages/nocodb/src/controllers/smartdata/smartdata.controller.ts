@@ -250,4 +250,18 @@ export class SmartDataController {
   ) {
     return await this.mcdm.exeSql(data);
   }
+
+  @Post(['/api/v2/smartdata/saveModelProps'])
+  async saveModelProps(
+    @Body()
+    data: {
+      entityId: string;
+      belongCode: string;
+      data: any;
+      option: string;
+      optionId: string;
+    },
+  ) {
+    return await this.mcdm.saveModelProps(data);
+  }
 }

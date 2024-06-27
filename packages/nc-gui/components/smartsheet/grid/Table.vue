@@ -1,6 +1,6 @@
 <script lang="ts" setup>
+import { type CellRange, NavigateDir } from '#imports'
 import axios from 'axios'
-import { nextTick } from '@vue/runtime-core'
 import type { ColumnReqType, ColumnType, PaginatedType, TableType, ViewType } from 'nocodb-sdk'
 import {
   UITypes,
@@ -11,9 +11,11 @@ import {
   isSystemColumn,
   isVirtualCol,
 } from 'nocodb-sdk'
+
+import { nextTick } from '@vue/runtime-core'
+
 import { useColumnDrag } from './useColumnDrag'
 import usePaginationShortcuts from './usePaginationShortcuts'
-import { type CellRange, NavigateDir } from '#imports'
 
 const props = defineProps<{
   data: Row[]
@@ -164,6 +166,8 @@ const isViewColumnsLoading = computed(() => _isViewColumnsLoading.value || !meta
 
 const resizingColumn = ref(false)
 
+const semanticsSearchedFields = ref([])
+
 // #Permissions
 const { isUIAllowed } = useRoles()
 const hasEditPermission = computed(() => isUIAllowed('dataEdit'))
@@ -230,6 +234,28 @@ provide(JsonExpandInj, isJsonExpand)
 const isKeyDown = ref(false)
 
 // #Cell - 1
+
+onMounted(() => {
+  getAllSemanticsSearchedFields()
+})
+const getAllSemanticsSearchedFields = async () => {
+  try {
+    if (route?.params?.viewId) {
+      let tableInfo = await api.smartData.entity({
+        entityId: route.params.viewId,
+      })
+      let props = tableInfo[0]?.props ? tableInfo[0]?.props : []
+      if (props.length) {
+        let findSemanticFetrievalProp = props.findLast((p) => p.code == 'belongSemanticFetrieval')
+        JSON.parse(findSemanticFetrievalProp.jsonValue).map((item) => {
+          semanticsSearchedFields.value.push(item.columnName)
+        })
+      }
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
 
 async function clearCell(ctx: { row: number; col: number } | null, skipUpdate = false) {
   if (!ctx || !hasEditPermission.value || (!isLinksOrLTAR(fields.value[ctx.col]) && isVirtualCol(fields.value[ctx.col]))) return
@@ -1695,7 +1721,12 @@ onKeyStroke('ArrowDown', onDown)
                       :column="fields[0]"
                       :hide-menu="readOnly || isMobileMode"
                     />
-                    <LazySmartsheetHeaderCell v-else :column="fields[0]" :hide-menu="readOnly || isMobileMode" />
+                    <LazySmartsheetHeaderCell
+                      :semanticsSearchedFields="semanticsSearchedFields"
+                      v-else
+                      :column="fields[0]"
+                      :hide-menu="readOnly || isMobileMode"
+                    />
                   </div>
                 </th>
                 <th
@@ -1730,7 +1761,12 @@ onKeyStroke('ArrowDown', onDown)
                       :column="col"
                       :hide-menu="readOnly || isMobileMode"
                     />
-                    <LazySmartsheetHeaderCell v-else :column="col" :hide-menu="readOnly || isMobileMode" />
+                    <LazySmartsheetHeaderCell
+                      :semanticsSearchedFields="semanticsSearchedFields"
+                      v-else
+                      :column="col"
+                      :hide-menu="readOnly || isMobileMode"
+                    />
                   </div>
                 </th>
                 <th
