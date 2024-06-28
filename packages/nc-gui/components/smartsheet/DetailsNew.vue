@@ -29,14 +29,10 @@ const init = async () => {
       } else {
         isUpdateFrequency.value = !!intelligentImportProp
       }
-      if (sqlValue.value) openedSubTab.value = 'sql'
-      else if (isUpdateFrequency.value) openedSubTab.value = 'updateFrequency'
-      else {
-        openedSubTab.value = 'semanticRetrieval'
-      }
     }
   } catch (error) {
   } finally {
+    openedSubTab.value = 'sql'
     isShowLoading.value = false
   }
 }

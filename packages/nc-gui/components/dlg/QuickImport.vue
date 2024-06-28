@@ -271,8 +271,10 @@ const saveFileInfoToTable = async () => {
     let form = new FormData()
     form.append('file', info.file.originFileObj)
     form.append('tableId', route.params.viewId)
-    const hostname = window.location.hostname
-    await axios.post(`http://${hostname}:8080/api/v2/smartdata/saveUFileInfoToTable`, form)
+    let port = window.location.port
+    const hostname = port ? window.location.hostname + ':8080' : window.location.hostname
+    console.log('http', `http://${hostname}/api/v2/smartdata/saveUFileInfoToTable`)
+    await axios.post(`http://${hostname}/api/v2/smartdata/saveUFileInfoToTable`, form)
   }
 }
 

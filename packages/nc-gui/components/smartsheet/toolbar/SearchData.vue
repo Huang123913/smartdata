@@ -31,6 +31,13 @@ const columns = computed(() => {
 })
 
 const { $api } = useNuxtApp()
+const fields = inject(FieldsInj, ref([]))
+const { eventBus } = useSmartsheetStoreOrThrow()
+eventBus.on((event) => {
+  if (event === SmartsheetStoreEvents.TABLE_Props_RELOAD) {
+    getAllSemanticsSearchedFields()
+  }
+})
 
 const getAllSemanticsSearchedFields = async () => {
   try {
@@ -41,29 +48,36 @@ const getAllSemanticsSearchedFields = async () => {
     if (props.length) {
       let findSemanticFetrievalProp = props.findLast((p) => p.code == 'belongSemanticFetrieval')
       if (findSemanticFetrievalProp) {
-        let allField: string[] = []
-        allSemanticRetrieval.value = JSON.parse(findSemanticFetrievalProp.jsonValue).map((item) => {
-          allField.push(...item.columnName.split(';'))
-          return { ...item, value: item.columnName, isSemanticRetrieval: true }
+        let allColumnId: string[] = []
+        JSON.parse(findSemanticFetrievalProp.jsonValue).map((item) => {
+          let title: string[] = []
+          item.columnId.map((id) => {
+            allColumnId.push(...item.columnId)
+            let findColumn = fields.value.find((item) => item.id === id)
+            title.push(findColumn?.title)
+          })
+          allSemanticRetrieval.value.push({
+            ...item,
+            value: item.columnId.join(';'),
+            title: title.join(';'),
+            isSemanticRetrieval: true,
+          })
         })
-        allField = Array.from(new Set(allField))
+        allColumnId = Array.from(new Set(allColumnId))
         if (allSemanticRetrieval.value.length) {
           allSemanticRetrieval.value.unshift({
             title: '全局检索',
-            value: allField.join(';'),
-            columnName: allField.join(';'),
+            value: allColumnId.join(';'),
             isSemanticRetrieval: true,
             id: '全局检索',
           })
           selectedOption.value = allSemanticRetrieval.value[0]
-          search.value.field = '全局检索'
         }
       }
     }
   } catch (error) {
     console.error(error)
   } finally {
-    console.log('test', allSemanticRetrieval.value)
   }
 }
 watch(
@@ -92,12 +106,14 @@ function onPressEnter() {
 const displayColumnLabel = computed(() => {
   if (search.value.field) {
     // use search field label if specified
+    if (allSemanticRetrieval.value.length && selectedOption.value.id === '全局检索' && selectedOption.value?.isSemanticRetrieval)
+      return '全局检索'
     return columns.value?.find((column) => column.id === search.value.field)?.title
   }
 
   // use primary value label by default
   const pvColumn = columns.value?.find((column) => column.pv)
-  search.value.field = allSemanticRetrieval.value.length ? allSemanticRetrieval.value[0].id : (pvColumn?.id as string)
+  search.value.field = pvColumn?.id as string
   return allSemanticRetrieval.value.length ? '全局检索' : pvColumn?.title
 })
 
@@ -172,7 +188,9 @@ onClickOutside(globalSearchWrapperRef, (e) => {
         <template #overlay>
           <SmartsheetToolbarFieldListWithSearch
             :is-parent-open="isDropdownOpen"
-            :selected-option-id="search.field"
+            :selected-option-id="
+              allSemanticRetrieval.length && selectedOption?.isSemanticRetrieval ? selectedOption.id : search.field
+            "
             show-selected-option
             :options="columns"
             toolbar-menu="globalSearch"
@@ -187,7 +205,9 @@ onClickOutside(globalSearchWrapperRef, (e) => {
           v-model:value="search.query"
           size="small"
           class="text-xs w-40 h-full"
-          :placeholder="`${selectedOption?.isSemanticRetrieval ? '检索范围' : $t('general.searchIn')} ${displayColumnLabel}`"
+          :placeholder="`${
+            allSemanticRetrieval.length && selectedOption?.isSemanticRetrieval ? '检索范围' : $t('general.searchIn')
+          } ${displayColumnLabel}`"
           :bordered="false"
           data-testid="search-data-input"
           @keyup.enter="onPressEnter"

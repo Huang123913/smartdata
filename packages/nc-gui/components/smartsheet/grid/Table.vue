@@ -248,7 +248,7 @@ const getAllSemanticsSearchedFields = async () => {
       if (props.length) {
         let findSemanticFetrievalProp = props.findLast((p) => p.code == 'belongSemanticFetrieval')
         JSON.parse(findSemanticFetrievalProp.jsonValue).map((item) => {
-          semanticsSearchedFields.value.push(item.columnName)
+          semanticsSearchedFields.value.push(item.columnId.join(';'))
         })
       }
     }

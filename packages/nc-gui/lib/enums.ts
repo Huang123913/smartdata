@@ -91,6 +91,7 @@ export enum SmartsheetStoreEvents {
   GROUP_BY_ADD = 'group-by-add',
   GROUP_BY_REMOVE = 'group-by-remove',
   FILTER_ADD = 'filter-add',
+  TABLE_Props_RELOAD = 'table-props-reload',
 }
 
 export enum ChatPlaygroundViewStoreEvents {

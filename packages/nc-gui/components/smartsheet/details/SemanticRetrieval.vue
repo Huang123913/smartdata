@@ -20,51 +20,11 @@ const isCanAdd = computed(() => {
   return fields.value.some((item) => item?.isChecked)
 })
 
-const allColumnName = computed(() => {
-  return fields.value.map((item) => item.column_name).join(';')
+const allColumnId = computed(() => {
+  return fields.value.map((item) => item.id)
 })
 
-const addSemanticRetrieval = async () => {
-  try {
-    if (fields.value.every((item) => item?.isChecked) && allSemanticRetrieval.value.length > 1) {
-      message.warning('存在一个检索语义则默认有全局检索语义')
-      return
-    }
-    isLoading.value = true
-    let addField = ''
-    let addTitle = ''
-    fields.value.map((item) => {
-      if (item?.isChecked) {
-        addField += item.column_name + ';'
-        addTitle += item.title + ';'
-      }
-    })
-    addField = addField.replace(/;$/, '')
-    addTitle = addTitle.replace(/;$/, '')
-    if (allSemanticRetrieval.value.some((item) => item.columnName === addField)) {
-      message.warning('此检索语义已存在')
-      return
-    }
-    let params = {
-      id: uuidv4(),
-      columnName: addField,
-      title: addTitle,
-    }
-    await $api.smartData.saveModelProps({
-      entityId: route.params.viewId,
-      belongCode: 'belongSemanticFetrieval',
-      data: [params],
-      option: 'add',
-      optionId: '',
-    })
-    allSemanticRetrieval.value.push(params)
-  } catch (error) {
-    console.error(error)
-  } finally {
-    isLoading.value = false
-  }
-}
-
+//获取检索语义
 const getAllSemanticsSearchedFields = async () => {
   try {
     if (route?.params?.viewId) {
@@ -76,7 +36,14 @@ const getAllSemanticsSearchedFields = async () => {
       if (props.length) {
         let findSemanticFetrievalProp = props.findLast((p) => p.code == 'belongSemanticFetrieval')
         if (findSemanticFetrievalProp) {
-          allSemanticRetrieval.value = JSON.parse(findSemanticFetrievalProp.jsonValue)
+          JSON.parse(findSemanticFetrievalProp.jsonValue).map((item) => {
+            let title: string[] = []
+            item.columnId.map((id) => {
+              let findColumn = fields.value.find((item) => item.id === id)
+              title.push(findColumn?.title)
+            })
+            allSemanticRetrieval.value.push({ ...item, title })
+          })
         }
       }
     }
@@ -87,6 +54,53 @@ const getAllSemanticsSearchedFields = async () => {
   }
 }
 
+//添加检索语义
+const addSemanticRetrieval = async () => {
+  try {
+    if (fields.value.every((item) => item?.isChecked) && allSemanticRetrieval.value.length > 1) {
+      message.warning('存在一个检索语义则默认有全局检索语义')
+      return
+    }
+    isLoading.value = true
+    let addColumnId: string[] = []
+    let addTitle: string[] = []
+    fields.value.map((item) => {
+      if (item?.isChecked) {
+        addColumnId.push(item.id)
+        addTitle.push(item.title)
+      }
+    })
+    if (
+      allSemanticRetrieval.value.some((item) => {
+        if (item.columnId.length === addColumnId.length) {
+          return addColumnId.every((field) => item.columnId.includes(field))
+        }
+        return false
+      })
+    ) {
+      message.warning('此检索语义已存在')
+      return
+    }
+    let params = {
+      id: uuidv4(),
+      columnId: addColumnId,
+    }
+    await $api.smartData.saveModelProps({
+      entityId: route.params.viewId,
+      belongCode: 'belongSemanticFetrieval',
+      data: [params],
+      option: 'add',
+      optionId: '',
+    })
+    allSemanticRetrieval.value.push({ ...params, title: addTitle })
+  } catch (error) {
+    console.error(error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+//删除检索语义
 const deleteSemanticsSearched = async (id: string) => {
   try {
     isShowLoading.value = true
@@ -105,37 +119,33 @@ const deleteSemanticsSearched = async (id: string) => {
   }
 }
 
+//给检索语义组合增加字段
 const addExistSemanticsSearchedColumn = async (id: string) => {
   try {
-    let addField: string[] = []
+    let addColumnId: string[] = []
     let addTitle: string[] = []
     fields.value.map((item) => {
       if (item?.isChecked) {
-        addField.push(item.column_name as string)
+        addColumnId.push(item.id as string)
         addTitle.push(item.title as string)
       }
     })
     let filterItem = allSemanticRetrieval.value.filter((item) => item.id === id)
-    let isRepeat = false
-    for (let i = 0; i < addField.length; i++) {
-      if (filterItem[0].columnName.indexOf(addField[i]) > -1) {
-        isRepeat = true
-        break
+    for (let i = 0; i < addColumnId.length; i++) {
+      if (filterItem[0].columnId.includes(addColumnId[i])) {
+        message.warning('增加的字段存在重复')
+        return
       }
     }
-    if (isRepeat) {
-      message.warning('增加的字段存在重复')
-      return
-    }
-    let newColumn = filterItem[0].columnName + ';' + addField.join(';')
-    if (newColumn.length === allColumnName.value.length) {
-      message.warning('存在一个检索语义则默认有全局检索语义')
+    let newColumn = [...filterItem[0].columnId, ...addColumnId]
+    if (newColumn.length === allColumnId.value.length) {
+      message.warning('添加后是一个全局检索语义，存在一个检索语义则默认有全局检索语义')
       return
     }
     if (
       allSemanticRetrieval.value.some((item) => {
-        if (item.columnName.length === newColumn.length) {
-          return addField.every((field) => item.columnName.indexOf(field) > -1)
+        if (item.columnId.length === newColumn.length) {
+          return addColumnId.every((id) => item.columnId.includes(id))
         }
         return false
       })
@@ -147,13 +157,13 @@ const addExistSemanticsSearchedColumn = async (id: string) => {
     await $api.smartData.saveModelProps({
       entityId: route.params.viewId,
       belongCode: 'belongSemanticFetrieval',
-      data: { columnName: addField.join(';'), title: addTitle.join(';') },
+      data: { columnId: addColumnId },
       option: 'addField',
       optionId: id,
     })
     let optionItem = allSemanticRetrieval.value.find((item) => item.id === id)
-    optionItem.columnName = optionItem.columnName + ';' + addField.join(';')
-    optionItem.title = optionItem.title + ';' + addTitle.join(';')
+    optionItem.columnId.push(...addColumnId)
+    optionItem.title.push(...addTitle)
   } catch (error) {
     console.error(error)
   } finally {
@@ -161,27 +171,22 @@ const addExistSemanticsSearchedColumn = async (id: string) => {
   }
 }
 
+//删除检索语义组合的字段
 const delExistSemanticsSearchedColumn = async (optionItem: any, index: number) => {
   try {
     isShowLoading.value = true
-    let deleteColumn = optionItem.columnName.split(';')[index]
-    let deleteTitle = optionItem.title.split(';')[index]
+    let deleteColumnId = optionItem.columnId[index]
+    let deleteTitle = optionItem.title[index]
     await $api.smartData.saveModelProps({
       entityId: route.params.viewId,
       belongCode: 'belongSemanticFetrieval',
-      data: { columnName: deleteColumn, title: deleteTitle },
+      data: { columnId: deleteColumnId },
       option: 'delField',
       optionId: optionItem.id,
     })
     let delItem = allSemanticRetrieval.value.find((item) => item.id === optionItem.id)
-    delItem.columnName = optionItem.columnName
-      .split(';')
-      .filter((item) => item !== deleteColumn)
-      .join(';')
-    delItem.title = optionItem.title
-      .split(';')
-      .filter((item) => item !== deleteTitle)
-      .join(';')
+    delItem.columnId = delItem.columnId.filter((item) => item !== deleteColumnId)
+    delItem.title = delItem.title.filter((item) => item !== deleteTitle)
   } catch (error) {
     console.error(error)
   } finally {
@@ -206,10 +211,7 @@ const handleCheck = (item: any) => {
           <div class="left-header border-b border-gray-200">可检索语义</div>
           <div class="left-list" v-if="allSemanticRetrieval.length">
             <template v-for="item in allSemanticRetrieval">
-              <div
-                class="group mb-4 rounded-lg p-2 min-w-full w-min border-1 nc-filter-nested-level-0"
-                v-if="item.title.indexOf(';') > -1"
-              >
+              <div class="group mb-4 rounded-lg p-2 min-w-full w-min border-1 nc-filter-nested-level-0">
                 <div class="group-icon">
                   <GeneralIcon
                     @click="addExistSemanticsSearchedColumn(item.id)"
@@ -237,45 +239,22 @@ const handleCheck = (item: any) => {
                       </svg>
                     </template>
                   </icon>
-                  <GeneralIcon icon="delete" @click="deleteSemanticsSearched(item.id)" class="text-gray-700 group-del-icon" />
+                  <GeneralIcon
+                    v-if="item.title.length > 1"
+                    icon="delete"
+                    @click="deleteSemanticsSearched(item.id)"
+                    class="text-gray-700 group-del-icon"
+                  />
                 </div>
-                <div class="flex mb-2 items-center justify-between" v-for="(item1, index) in item.title.split(';')">
+                <div class="flex mb-2 items-center justify-between" v-for="(item1, index) in item.title">
                   <span> {{ item1 }}</span>
-                  <GeneralIcon icon="delete" class="text-gray-700" @click="delExistSemanticsSearchedColumn(item, index)" />
-                </div>
-              </div>
-              <div class="mb-4 group rounded-lg p-2 min-w-full w-min border-1 nc-filter-nested-level-0" v-else>
-                <div class="group-icon">
                   <GeneralIcon
-                    @click="addExistSemanticsSearchedColumn(item.id)"
-                    v-if="isCanAdd"
-                    icon="plus"
+                    v-if="item.title.length > 1"
+                    icon="delete"
                     class="text-gray-700"
+                    @click="delExistSemanticsSearchedColumn(item, index)"
                   />
-                  <icon v-else>
-                    <template #component>
-                      <svg
-                        t="1719394041956"
-                        class="icon"
-                        viewBox="0 0 1025 1024"
-                        version="1.1"
-                        xmlns="http://www.w3.org/2000/svg"
-                        p-id="2296"
-                        width="16"
-                        height="16"
-                      >
-                        <path
-                          d="M895.531061 485.788536 535.640488 485.788536 535.640488 125.897963c0-13.5716-11.001648-24.573248-24.573248-24.573248s-24.573248 11.001648-24.573248 24.573248l0 359.890572L126.604444 485.788536c-13.5716 0-24.573248 11.001648-24.573248 24.573248s11.001648 24.573248 24.573248 24.573248l359.889548 0 0 359.890572c0 13.5716 11.001648 24.573248 24.573248 24.573248s24.573248-11.001648 24.573248-24.573248L535.640488 534.934007l359.890572 0c13.5716 0 24.573248-11.001648 24.573248-24.573248S909.102661 485.788536 895.531061 485.788536z"
-                          fill="#D5D5D9"
-                          p-id="2297"
-                        ></path>
-                      </svg>
-                    </template>
-                  </icon>
-                </div>
-                <div class="flex justify-between items-center">
-                  <span>{{ item.title }}</span>
-                  <GeneralIcon @click="deleteSemanticsSearched(item.id)" icon="delete" class="text-gray-700" />
+                  <GeneralIcon v-else @click="deleteSemanticsSearched(item.id)" icon="delete" class="text-gray-700" />
                 </div>
               </div>
             </template>

@@ -354,7 +354,7 @@ const filterOrGroupByThisField = (event: SmartsheetStoreEvents) => {
 }
 const isMarking = ref(false)
 const markSemanticsSearch = async () => {
-  if ([...props.semanticsSearchedFields, ...addsemanticsSearchedFields.value].includes(column?.value?.column_name)) return
+  if ([...props.semanticsSearchedFields, ...addsemanticsSearchedFields.value].includes(column?.value?.id)) return
   try {
     isMarking.value = true
     await $api.smartData.saveModelProps({
@@ -363,14 +363,14 @@ const markSemanticsSearch = async () => {
       data: [
         {
           id: uuidv4(),
-          columnName: column?.value?.column_name,
-          title: column?.value?.title,
+          columnId: [column?.value?.id],
         },
       ],
       option: 'add',
       optionId: '',
     })
-    addsemanticsSearchedFields.value.push(column?.value?.column_name)
+    eventBus.emit(SmartsheetStoreEvents.TABLE_Props_RELOAD)
+    addsemanticsSearchedFields.value.push(column?.value?.id)
   } catch (error) {
   } finally {
     isMarking.value = false
@@ -436,7 +436,7 @@ const markSemanticsSearch = async () => {
           <div class="nc-column-set-primary nc-header-menu-item item items-center flex">
             <GeneralLoader v-if="isMarking" class="menu-icon mt-0.5 !text-red-500" />
             <icon
-              v-else-if="!isMarking && [...semanticsSearchedFields, ...addsemanticsSearchedFields].includes(column?.column_name)"
+              v-else-if="!isMarking && [...semanticsSearchedFields, ...addsemanticsSearchedFields].includes(column?.id)"
               :style="{ marginTop: '-4px' }"
             >
               <template #component>
@@ -460,7 +460,7 @@ const markSemanticsSearch = async () => {
             </icon>
             <GeneralIcon v-else icon="star" class="text-gray-700 !w-4.25 !h-4.25" />
             {{
-              [...semanticsSearchedFields, ...addsemanticsSearchedFields].includes(column?.column_name)
+              [...semanticsSearchedFields, ...addsemanticsSearchedFields].includes(column?.id)
                 ? '已标记为检索语义'
                 : '标记为检索语义'
             }}

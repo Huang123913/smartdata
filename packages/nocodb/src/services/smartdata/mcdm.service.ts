@@ -484,20 +484,14 @@ export class MCDMService {
       } else if (option === 'addField') {
         savedValue = JSON.parse(findProp.jsonValue);
         let optionItem = savedValue.find((item) => item.id === optionId);
-        optionItem.columnName = optionItem.columnName + ';' + data.columnName;
-        optionItem.title = optionItem.title + ';' + data.title;
+        optionItem.columnId.push(...data.columnId);
       } else {
         // option === 'delField'
         savedValue = JSON.parse(findProp.jsonValue);
         let optionItem = savedValue.find((item) => item.id === optionId);
-        optionItem.columnName = optionItem.columnName
-          .split(';')
-          .filter((item) => item !== data.columnName)
-          .join(';');
-        optionItem.title = optionItem.title
-          .split(';')
-          .filter((item) => item !== data.title)
-          .join(';');
+        optionItem.columnId = optionItem.columnId.filter(
+          (item) => item !== data.columnId,
+        );
       }
       let saveDdlProps = [
         {
