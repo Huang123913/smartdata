@@ -18,6 +18,15 @@ const isTab = computed(() => {
 })
 
 const { allowCSVDownload } = useSharedView()
+const { $api } = useNuxtApp()
+const embeddingparquet = async () => {
+  try {
+    let res = await $api.smartData.embeddingparquet({ columns: '' })
+    console.log('数据向量化', res)
+  } catch (error) {
+    console.error('res', error)
+  }
+}
 </script>
 
 <template>
@@ -68,6 +77,8 @@ const { allowCSVDownload } = useSharedView()
         <LazySmartsheetToolbarExport v-if="isPublic && allowCSVDownload" />
 
         <LazySmartsheetToolbarAIButton />
+
+        <NcButton :style="{ border: 'none' }" @click="embeddingparquet" type="secondary">数据向量化 </NcButton>
 
         <div class="flex-1" />
       </template>

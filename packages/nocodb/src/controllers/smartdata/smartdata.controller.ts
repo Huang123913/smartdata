@@ -264,4 +264,28 @@ export class SmartDataController {
   ) {
     return await this.mcdm.saveModelProps(data);
   }
+  @Post(['/api/v2/smartdata/exeRetrieve'])
+  async exeRetrieve(
+    @Body()
+    data: {
+      entityId: string;
+      belongCode: string;
+      data: any;
+      option: string;
+      optionId: string;
+      callbackUrl: string;
+    },
+  ) {
+    return await this.mcdm.exeRetrieve(data);
+  }
+
+  @Post(['/api/v2/smartdata/embeddingparquet'])
+  async embeddingparquet(
+    @Body()
+    data: {
+      columns: string;
+    },
+  ) {
+    return await this.llm.embeddingparquet(data);
+  }
 }

@@ -1,4 +1,7 @@
 import axios, { type AxiosInstance } from 'axios';
+import FormData from 'form-data';
+import * as fs from 'fs';
+import path from 'path';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 import { v4 as uuidv4 } from 'uuid';
 import { MCDMService } from '~/services/smartdata/mcdm.service';
@@ -31,7 +34,9 @@ export class LLMService {
     this.llm.interceptors.request.use((config) => {
       let projectid = process.env.LLM_PROJECTID ?? '2';
       let orgid = process.env.LLM_ORGID ?? '2';
-      if (config?.data) {
+      if (config.params?.columns) {
+        config.params.orgid = orgid;
+      } else if (config?.data) {
         config.data.projectid = projectid;
         config.data.orgid = orgid;
       } else {
@@ -527,5 +532,47 @@ export class LLMService {
       return exeSqlRes;
     }
     return exeRes;
+  }
+
+  async embeddingparquet(params: { columns: string }) {
+    const filePath = path.resolve(
+      __dirname,
+      'sample_MaterialCategories_records.parquet',
+    );
+    if (fs.existsSync(filePath)) {
+      const formData = new FormData();
+      const fileStream = fs.createReadStream(filePath);
+      formData.append(
+        'file',
+        fileStream,
+        'sample_MaterialCategories_records.parquet',
+      );
+      return await this.llm({
+        method: 'POST',
+        url: `/embeddingparquet`,
+        params: {
+          id: uuidv4(),
+          columns: JSON.stringify(['CategoryName']),
+        },
+        data: formData,
+      }).then((r) => {
+        return r.data;
+      });
+    } else {
+      return `File does not exist:${filePath}`;
+    }
+  }
+
+  async embeddingtext(params: { text: string }) {
+    return await this.llm({
+      method: 'POST',
+      url: `/embeddingtext`,
+      params: {
+        id: uuidv4(),
+        text: params.text,
+      },
+    }).then((r) => {
+      return r.data;
+    });
   }
 }

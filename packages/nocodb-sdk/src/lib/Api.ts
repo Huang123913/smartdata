@@ -12059,5 +12059,39 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+     * @description exeRetrieve MCDM
+     *
+     * @tags SmartData
+     * @name ExeRetrieve
+     * @summary exeRetrieve MCDM
+     * @request POST:/api/v2/smartdata/exeRetrieve
+     */
+    exeRetrieve: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/exeRetrieve`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description embeddingparquet LLM
+     *
+     * @tags SmartData
+     * @name Embeddingparquet
+     * @summary embeddingparquet LLM
+     * @request POST:/api/v2/smartdata/embeddingparquet
+     */
+    embeddingparquet: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/embeddingparquet`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
 }

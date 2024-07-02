@@ -509,4 +509,41 @@ export class MCDMService {
       return await this.saveModel({ entities: saveDdlProps });
     }
   }
+
+  async saveTableStatus(entityId: string) {
+    let entities = await this.getEntity(entityId);
+    const entity = entities[0];
+    const entityProps = entity?.props;
+    if (entityProps) {
+      let findProp = entityProps.findLast((p) => p.code == 'belongTableStatus');
+      let saveDdlProps = [
+        {
+          id: entityId,
+          props: [
+            {
+              id: findProp ? findProp.id : null,
+              name: 'belongTableStatus',
+              code: 'belongTableStatus',
+              value: findProp ? '向量化完成' : '正在向量化',
+            },
+          ],
+        },
+      ];
+      await this.saveModel({ entities: saveDdlProps });
+    }
+  }
+
+  async exeRetrieve(params: {
+    entityId: string;
+    belongCode: string;
+    data: any;
+    option: string;
+    optionId: string;
+    callbackUrl: string;
+  }) {
+    let { entityId, belongCode, data, option, optionId } = params;
+    await this.saveModelProps({ entityId, belongCode, data, option, optionId });
+    await this.saveTableStatus(entityId);
+    //TODO 调用MCDM接口完成向量化
+  }
 }
