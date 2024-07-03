@@ -470,6 +470,7 @@ export class MCDMService {
     let entities = await this.getEntity(entityId);
     const entity = entities[0];
     const entityProps = entity?.props;
+    let res = null;
     if (entityProps) {
       let findProp = entityProps.findLast((p) => p.code == belongCode);
       let savedValue = [];
@@ -506,44 +507,95 @@ export class MCDMService {
           ],
         },
       ];
-      return await this.saveModel({ entities: saveDdlProps });
+      res = await this.saveModel({ entities: saveDdlProps });
     }
+    return res;
   }
 
-  async saveTableStatus(entityId: string) {
-    let entities = await this.getEntity(entityId);
-    const entity = entities[0];
-    const entityProps = entity?.props;
-    if (entityProps) {
-      let findProp = entityProps.findLast((p) => p.code == 'belongTableStatus');
-      let saveDdlProps = [
-        {
-          id: entityId,
-          props: [
-            {
-              id: findProp ? findProp.id : null,
-              name: 'belongTableStatus',
-              code: 'belongTableStatus',
-              value: findProp ? '向量化完成' : '正在向量化',
-            },
-          ],
-        },
-      ];
-      await this.saveModel({ entities: saveDdlProps });
-    }
-  }
-
-  async exeRetrieve(params: {
+  //标记语义
+  async markSemantics(params: {
     entityId: string;
     belongCode: string;
     data: any;
     option: string;
     optionId: string;
-    callbackUrl: string;
   }) {
     let { entityId, belongCode, data, option, optionId } = params;
     await this.saveModelProps({ entityId, belongCode, data, option, optionId });
-    await this.saveTableStatus(entityId);
-    //TODO 调用MCDM接口完成向量化
+    let res = await this.execBizEntityDataSemanticAanalysis(entityId);
+    return res;
+  }
+
+  //对模型发起语义分析
+
+  async execBizEntityDataSemanticAanalysis(entityId: string) {
+    return await this.mcdm({
+      method: 'POST',
+      url: `/webapi/innersysapi/VMcdmDuckdbServiceWebApi/execBizEntityDataSemanticAanalysis`,
+      data: {
+        entityId: `${entityId}`,
+      },
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  //发送处理完成的语义分析文件
+  async receiveProcessedSemanticAnalysisFileIds(
+    received: {
+      entityId: string;
+      toBeProcessedFileId: string;
+      processedFileId: string;
+    }[],
+  ) {
+    return await this.mcdm({
+      method: 'POST',
+      url: `/webapi/innersysapi/VMcdmDuckdbServiceWebApi/receiveProcessedSemanticAnalysisFileIds`,
+      data: {
+        received,
+      },
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  //查询待处理语义分析文件列表
+  async getToBeProcessedSemanticAnalysisFileIds() {
+    return await this.mcdm({
+      method: 'GET',
+      url: `/webapi/innersysapi/VMcdmDuckdbServiceWebApi/getToBeProcessedSemanticAnalysisFileIds`,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async uploadFileNew(formData) {
+    return await this.mcdm({
+      method: 'POST',
+      url: `/module-operation!executeOperation?operation=FileUpload`,
+      data: formData,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async downLoadFile(fileId: string) {
+    return await this.mcdm({
+      method: 'GET',
+      url: `/module-operation!executeOperation`,
+      params: {
+        operation: 'FileDown',
+        token: JSON.stringify({
+          data: {
+            isMulti: false,
+            dataId: `${fileId}`,
+            isShow: 0,
+          },
+        }),
+      },
+      responseType: 'stream', // 确保返回数据是一个流
+    }).then((r) => {
+      return r.data;
+    });
   }
 }

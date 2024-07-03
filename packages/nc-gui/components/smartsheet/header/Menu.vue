@@ -357,7 +357,7 @@ const markSemanticsSearch = async () => {
   if ([...props.semanticsSearchedFields, ...addsemanticsSearchedFields.value].includes(column?.value?.id)) return
   try {
     isMarking.value = true
-    await $api.smartData.saveModelProps({
+    await $api.smartData.markSemantics({
       entityId: view.value.id,
       belongCode: 'belongSemanticFetrieval',
       data: [

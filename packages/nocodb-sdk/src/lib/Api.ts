@@ -12061,16 +12061,16 @@ export class Api<
       }),
 
     /**
-     * @description exeRetrieve MCDM
+     * @description markSemantics MCDM
      *
      * @tags SmartData
-     * @name ExeRetrieve
-     * @summary exeRetrieve MCDM
-     * @request POST:/api/v2/smartdata/exeRetrieve
+     * @name MarkSemantics
+     * @summary markSemantics MCDM
+     * @request POST:/api/v2/smartdata/markSemantics
      */
-    exeRetrieve: (data: object, params: RequestParams = {}) =>
+    markSemantics: (data: object, params: RequestParams = {}) =>
       this.request<any, any>({
-        path: `/api/v2/smartdata/exeRetrieve`,
+        path: `/api/v2/smartdata/markSemantics`,
         method: 'POST',
         body: data,
         type: ContentType.Json,
@@ -12078,19 +12078,34 @@ export class Api<
       }),
 
     /**
-     * @description embeddingparquet LLM
+     * @description toBeProcessed LLM
      *
      * @tags SmartData
-     * @name Embeddingparquet
-     * @summary embeddingparquet LLM
-     * @request POST:/api/v2/smartdata/embeddingparquet
+     * @name ToBeProcessed
+     * @summary toBeProcessed LLM
+     * @request POST:/api/v2/smartdata/semanticAnalysis/toBeProcessed
      */
-    embeddingparquet: (data: object, params: RequestParams = {}) =>
+    toBeProcessed: (data: object, params: RequestParams = {}) =>
       this.request<any, any>({
-        path: `/api/v2/smartdata/embeddingparquet`,
+        path: `/api/v2/smartdata/semanticAnalysis/toBeProcessed`,
         method: 'POST',
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description getToBeProcessedSemanticAnalysisFileIds MCDM
+     *
+     * @tags SmartData
+     * @name GetToBeProcessedSemanticAnalysisFileIds
+     * @summary getToBeProcessedSemanticAnalysisFileIds MCDM
+     * @request GET:/api/v2/smartdata/getToBeProcessedSemanticAnalysisFileIds
+     */
+    getToBeProcessedSemanticAnalysisFileIds: (params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/getToBeProcessedSemanticAnalysisFileIds`,
+        method: 'GET',
         ...params,
       }),
   };

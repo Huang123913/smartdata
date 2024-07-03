@@ -1,7 +1,5 @@
 import axios, { type AxiosInstance } from 'axios';
 import FormData from 'form-data';
-import * as fs from 'fs';
-import path from 'path';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 import { v4 as uuidv4 } from 'uuid';
 import { MCDMService } from '~/services/smartdata/mcdm.service';
@@ -534,35 +532,46 @@ export class LLMService {
     return exeRes;
   }
 
-  async embeddingparquet(params: { columns: string }) {
-    const filePath = path.resolve(
-      __dirname,
-      'sample_MaterialCategories_records.parquet',
-    );
-    if (fs.existsSync(filePath)) {
-      const formData = new FormData();
-      const fileStream = fs.createReadStream(filePath);
-      formData.append(
-        'file',
-        fileStream,
-        'sample_MaterialCategories_records.parquet',
-      );
-      return await this.llm({
-        method: 'POST',
-        url: `/embeddingparquet`,
-        params: {
-          id: uuidv4(),
-          columns: JSON.stringify(['CategoryName']),
-        },
-        data: formData,
-      }).then((r) => {
-        return r.data;
-      });
-    } else {
-      return `File does not exist:${filePath}`;
-    }
+  async toBeProcessed(params: {
+    entityId: string;
+    columnsJson: string;
+    fileId: string;
+  }) {
+    let { entityId, columnsJson, fileId } = params;
+    let llmFile = await this.embeddingparquet(columnsJson, fileId);
+    const formData = new FormData();
+    formData.append('file', llmFile, `${uuidv4()}.parquet`);
+    let uploadFileInfo = await this.mcdm.uploadFileNew(formData);
+    let res = await this.mcdm.receiveProcessedSemanticAnalysisFileIds([
+      {
+        entityId,
+        toBeProcessedFileId: fileId,
+        processedFileId: uploadFileInfo.id,
+      },
+    ]);
+    return res;
   }
 
+  //数据向量化
+  async embeddingparquet(columnsJson: string, fileId: string) {
+    let mcdmFile = await this.mcdm.downLoadFile(fileId);
+    const formData = new FormData();
+    formData.append('file', mcdmFile, `${fileId}.parquet`);
+    return await this.llm({
+      method: 'POST',
+      url: `/embeddingparquet`,
+      params: {
+        id: uuidv4(),
+        columns: columnsJson,
+      },
+      data: formData,
+      responseType: 'stream', // 确保返回数据是一个流
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  //文本向量化
   async embeddingtext(params: { text: string }) {
     return await this.llm({
       method: 'POST',

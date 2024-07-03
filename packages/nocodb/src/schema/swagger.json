@@ -18015,11 +18015,11 @@
         }
       ]
     },
-    "/api/v2/smartdata/exeRetrieve":{
+    "/api/v2/smartdata/markSemantics":{
       "post": {
-        "summary": "exeRetrieve MCDM",
-        "operationId": "exeRetrieve",
-        "description": "exeRetrieve MCDM",
+        "summary": "markSemantics MCDM",
+        "operationId": "markSemantics",
+        "description": "markSemantics MCDM",
         "tags": ["SmartData"],
         "requestBody": {
           "content": {
@@ -18037,11 +18037,11 @@
         }
       ]
     },
-    "/api/v2/smartdata/embeddingparquet":{
+    "/api/v2/smartdata/semanticAnalysis/toBeProcessed":{
       "post": {
-        "summary": "embeddingparquet LLM",
-        "operationId": "embeddingparquet",
-        "description": "embeddingparquet LLM",
+        "summary": "toBeProcessed LLM",
+        "operationId": "toBeProcessed",
+        "description": "toBeProcessed LLM",
         "tags": ["SmartData"],
         "requestBody": {
           "content": {
@@ -18058,6 +18058,14 @@
           "$ref": "#/components/parameters/xc-auth"
         }
       ]
+    },
+    "/api/v2/smartdata/getToBeProcessedSemanticAnalysisFileIds": {
+      "get": {
+        "summary": "getToBeProcessedSemanticAnalysisFileIds MCDM ",
+        "operationId": "getToBeProcessedSemanticAnalysisFileIds",
+        "description": "getToBeProcessedSemanticAnalysisFileIds MCDM",
+        "tags": ["SmartData"]
+      }
     }
   },
   "components": {

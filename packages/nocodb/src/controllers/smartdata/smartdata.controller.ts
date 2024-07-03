@@ -213,6 +213,7 @@ export class SmartDataController {
   ) {
     return await this.mcdm.saveUFileInfoToTable(file, body.tableId);
   }
+
   @Post(['/api/v2/smartdata/saveModelPropsToRefresh'])
   async saveModelPropsToRefresh(
     @Body()
@@ -264,8 +265,9 @@ export class SmartDataController {
   ) {
     return await this.mcdm.saveModelProps(data);
   }
-  @Post(['/api/v2/smartdata/exeRetrieve'])
-  async exeRetrieve(
+
+  @Post(['/api/v2/smartdata/markSemantics'])
+  async markSemantics(
     @Body()
     data: {
       entityId: string;
@@ -273,19 +275,25 @@ export class SmartDataController {
       data: any;
       option: string;
       optionId: string;
-      callbackUrl: string;
     },
   ) {
-    return await this.mcdm.exeRetrieve(data);
+    return await this.mcdm.markSemantics(data);
   }
 
-  @Post(['/api/v2/smartdata/embeddingparquet'])
-  async embeddingparquet(
+  @Post(['/api/v2/smartdata/semanticAnalysis/toBeProcessed'])
+  async toBeProcessed(
     @Body()
     data: {
-      columns: string;
+      entityId: string;
+      columnsJson: string;
+      fileId: string;
     },
   ) {
-    return await this.llm.embeddingparquet(data);
+    return await this.llm.toBeProcessed(data);
+  }
+
+  @Get(['/api/v2/smartdata/getToBeProcessedSemanticAnalysisFileIds'])
+  async getToBeProcessedSemanticAnalysisFileIds() {
+    return await this.mcdm.getToBeProcessedSemanticAnalysisFileIds();
   }
 }

@@ -78,7 +78,7 @@ const embeddingparquet = async () => {
 
         <LazySmartsheetToolbarAIButton />
 
-        <NcButton :style="{ border: 'none' }" @click="embeddingparquet" type="secondary">数据向量化 </NcButton>
+        <!-- <NcButton :style="{ border: 'none' }" @click="embeddingparquet" type="secondary">数据向量化 </NcButton> -->
 
         <div class="flex-1" />
       </template>
