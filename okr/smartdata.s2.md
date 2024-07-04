@@ -44,7 +44,7 @@
  - ⚪️ 数据向量化 (增量)
  - ⚪️ 语义化查询
 
-## 7.2
+## 7.4
    > 正式环境: http://smartdata.yindangu.com
    > 测试环境: http://smartdata-server.yindangu.com
 
@@ -63,7 +63,9 @@
          5. 🟡 发送 parquet 文件 (SD -> MCDM) **联调中**
 
 ### 前端
+   - 【进行中】语义搜索: /embeddingtext
    - 【进行中】语义搜索: 自动补偿
+      > 已完成定时任务部分, 还差防抖机制
    - 【联调中】语义搜索: 数据同步
    - 【测试中】合并 nocodb v0.251.0
 
