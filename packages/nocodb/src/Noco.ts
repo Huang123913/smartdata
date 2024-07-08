@@ -16,7 +16,7 @@ import type http from 'http';
 import { MetaTable, RootScopes } from '~/utils/globals';
 import { AppModule } from '~/app.module';
 import { isEE } from '~/utils';
-
+import { startCronJobs } from './cronJobs';
 dotenv.config();
 
 export default class Noco {
@@ -130,6 +130,9 @@ export default class Noco {
     if (dashboardPath !== '/' && dashboardPath !== '') {
       server.get('/', (_req, res) => res.redirect(dashboardPath));
     }
+
+    // 启动定时任务
+    startCronJobs();
 
     return nestApp.getHttpAdapter().getInstance();
   }

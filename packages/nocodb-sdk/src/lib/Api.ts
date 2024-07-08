@@ -12434,5 +12434,22 @@ export class Api<
         method: 'GET',
         ...params,
       }),
+
+    /**
+     * @description setEntityIdData
+     *
+     * @tags SmartData
+     * @name SetEntityIdData
+     * @summary setEntityIdData
+     * @request POST:/api/v2/smartdata/setEntityIdData
+     */
+    setEntityIdData: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/setEntityIdData`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
 }

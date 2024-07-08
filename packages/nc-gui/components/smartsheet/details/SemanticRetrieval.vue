@@ -85,6 +85,7 @@ const addSemanticRetrieval = async () => {
       id: uuidv4(),
       columnId: addColumnId,
     }
+    await $api.smartData.setEntityIdData({ isAdd: true, id: route.params.viewId })
     await $api.smartData.markSemantics({
       entityId: route.params.viewId,
       belongCode: 'belongSemanticFetrieval',
@@ -104,6 +105,7 @@ const addSemanticRetrieval = async () => {
 const deleteSemanticsSearched = async (id: string) => {
   try {
     isShowLoading.value = true
+    await $api.smartData.setEntityIdData({ isAdd: true, id: route.params.viewId })
     await $api.smartData.markSemantics({
       entityId: route.params.viewId,
       belongCode: 'belongSemanticFetrieval',
@@ -154,6 +156,7 @@ const addExistSemanticsSearchedColumn = async (id: string) => {
       return
     }
     isShowLoading.value = true
+    await $api.smartData.setEntityIdData({ isAdd: true, id: route.params.viewId })
     await $api.smartData.markSemantics({
       entityId: route.params.viewId,
       belongCode: 'belongSemanticFetrieval',
@@ -177,6 +180,7 @@ const delExistSemanticsSearchedColumn = async (optionItem: any, index: number) =
     isShowLoading.value = true
     let deleteColumnId = optionItem.columnId[index]
     let deleteTitle = optionItem.title[index]
+    await $api.smartData.setEntityIdData({ isAdd: true, id: route.params.viewId })
     await $api.smartData.markSemantics({
       entityId: route.params.viewId,
       belongCode: 'belongSemanticFetrieval',

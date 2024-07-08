@@ -14,6 +14,8 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
+import { setEntityIdData } from '../../cronJobs';
+
 @Controller()
 export class SmartDataController {
   constructor(
@@ -295,5 +297,10 @@ export class SmartDataController {
   @Get(['/api/v2/smartdata/getToBeProcessedSemanticAnalysisFileIds'])
   async getToBeProcessedSemanticAnalysisFileIds() {
     return await this.mcdm.getToBeProcessedSemanticAnalysisFileIds();
+  }
+
+  @Post(['/api/v2/smartdata/setEntityIdData'])
+  async setSharedData(@Body() data: { isAdd: boolean; id: string }) {
+    return setEntityIdData(data.isAdd, data.id);
   }
 }

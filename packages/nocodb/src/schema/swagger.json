@@ -18513,6 +18513,28 @@
         "description": "getToBeProcessedSemanticAnalysisFileIds MCDM",
         "tags": ["SmartData"]
       }
+    },
+    "/api/v2/smartdata/setEntityIdData":{
+      "post": {
+        "summary": "setEntityIdData",
+        "operationId": "setEntityIdData",
+        "description": "setEntityIdData",
+        "tags": ["SmartData"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/xc-auth"
+        }
+      ]
     }
   },
   "components": {

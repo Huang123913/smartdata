@@ -6,6 +6,8 @@ import { MCDMService } from '~/services/smartdata/mcdm.service';
 
 import { Injectable, Logger } from '@nestjs/common';
 
+import { setEntityIdData } from '../../cronJobs';
+
 @Injectable()
 export class LLMService {
   protected logger = new Logger(LLMService.name);
@@ -549,6 +551,7 @@ export class LLMService {
         processedFileId: uploadFileInfo.id,
       },
     ]);
+    setEntityIdData(false, entityId);
     return res;
   }
 
@@ -572,13 +575,13 @@ export class LLMService {
   }
 
   //文本向量化
-  async embeddingtext(params: { text: string }) {
+  async embeddingtext(text: string) {
     return await this.llm({
       method: 'POST',
       url: `/embeddingtext`,
       params: {
         id: uuidv4(),
-        text: params.text,
+        text: text,
       },
     }).then((r) => {
       return r.data;
