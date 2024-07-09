@@ -12,7 +12,11 @@ const { getCustomCatalogEntityTree } = store
 const onDelete = async () => {
   isLoading.value = true
   try {
-    if (props.catalog?.children && props.catalog.children.length) {
+    if (
+      props.catalog?.children &&
+      (props.catalog.children.length > 1 ||
+        (props.catalog.children.length === 1 && props.catalog.children[0].key.indexOf('Empty') === -1))
+    ) {
       message.warning('文件夹内存在实体！无法删除！')
       return
     }

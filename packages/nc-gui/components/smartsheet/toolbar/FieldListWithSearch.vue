@@ -83,11 +83,10 @@ const handleKeydownEnter = () => {
     onClick(filteredOptions.value[activeFieldIndex.value])
   }
 }
-const lastIndex = ref(0)
+
 onMounted(() => {
   searchQuery.value = ''
   activeFieldIndex.value = -1
-  lastIndex.value = props.options.findLastIndex((item) => item?.isSemanticRetrieval)
 })
 
 watch(
@@ -141,13 +140,12 @@ watch(
         v-for="(option, index) in filteredOptions"
         :key="index"
         v-e="configByToolbarMenu.selectOptionEvent"
-        class="flex w-full py-[5px] items-center justify-between px-2 hover:bg-gray-100 cursor-pointer"
+        class="flex w-full py-[5px] items-center justify-between px-2 hover:bg-gray-100 cursor-pointer rounded-md"
         :class="[
           `${configByToolbarMenu.optionClassName}`,
           `nc-field-list-option-${index}`,
           {
             'bg-gray-100 nc-field-list-option-active': activeFieldIndex === index,
-            'border-b': lastIndex === index,
           },
         ]"
         @click="onClick(option)"
@@ -159,8 +157,7 @@ watch(
             'max-w-full': !showSelectedOption,
           }"
         >
-          <component v-if="option.isSemanticRetrieval" :is="iconMap.filter" class="filter-icon" />
-          <SmartsheetHeaderIcon v-else :column="option" class="!w-3.5 !h-3.5 !text-gray-500" />
+          <SmartsheetHeaderIcon :column="option" class="!w-3.5 !h-3.5 !text-gray-500" />
           <NcTooltip class="truncate" show-on-truncate-only>
             <template #title> {{ option.title }}</template>
             <span>
@@ -183,11 +180,5 @@ watch(
 <style lang="scss" scoped>
 .nc-field-list-wrapper {
   max-height: min(400px, calc(100vh - 120px));
-}
-.filter-icon {
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-  margin-left: 4px;
 }
 </style>

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Pane, Splitpanes } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
+
 import type { ColumnType, LinkToAnotherRecordType, TableType } from 'nocodb-sdk'
 import { UITypes, isLinksOrLTAR } from 'nocodb-sdk'
+import { Pane, Splitpanes } from 'splitpanes'
 
 const props = defineProps<{
   activeTab: TabItem
@@ -10,11 +11,13 @@ const props = defineProps<{
 
 const { isUIAllowed } = useRoles()
 
+const activeTab = toRef(props, 'activeTab')
+
 const { metas, getMeta } = useMetas()
 
 useSidebar('nc-right-sidebar')
 
-const activeTab = toRef(props, 'activeTab')
+const { isMobileMode } = useGlobal()
 
 const route = useRoute()
 
@@ -37,6 +40,12 @@ const reloadViewMetaEventHook = createEventHook<void | boolean>()
 
 const openNewRecordFormHook = createEventHook<void>()
 
+const { base } = storeToRefs(useBase())
+
+const activeSource = computed(() => {
+  return meta.value?.source_id && base.value && base.value.sources?.find((source) => source.id === meta.value?.source_id)
+})
+
 useProvideKanbanViewStore(meta, activeView)
 useProvideMapViewStore(meta, activeView)
 useProvideCalendarViewStore(meta, activeView)
@@ -50,9 +59,17 @@ provide(ReloadViewMetaHookInj, reloadViewMetaEventHook)
 provide(OpenNewRecordFormHookInj, openNewRecordFormHook)
 provide(IsFormInj, isForm)
 provide(TabMetaInj, activeTab)
+provide(ActiveSourceInj, activeSource)
+provide(ReloadAggregateHookInj, createEventHook())
+
 provide(
   ReadonlyInj,
-  computed(() => !isUIAllowed('dataEdit')),
+  computed(
+    () =>
+      !isUIAllowed('dataEdit', {
+        skipSourceCheck: true,
+      }),
+  ),
 )
 useExpandedFormDetachedProvider()
 
@@ -160,7 +177,10 @@ const onResize = (sizes: { min: number; max: number; size: number }[]) => {
       <Splitpanes v-if="openedViewsTab === 'view'" class="nc-extensions-content-resizable-wrapper" @resized="onResize">
         <Pane class="flex flex-col h-full flex-1 min-w-0" size="60">
           <LazySmartsheetToolbar v-if="!isForm" />
-          <div :style="{ height: isForm ? '100%' : 'calc(100% - var(--toolbar-height))' }" class="flex flex-row w-full">
+          <div
+            :style="{ height: isForm || isMobileMode ? '100%' : 'calc(100% - var(--toolbar-height))' }"
+            class="flex flex-row w-full"
+          >
             <Transition name="layout" mode="out-in">
               <div v-if="openedViewsTab === 'view'" class="flex flex-1 min-h-0 w-3/4">
                 <div class="h-full flex-1 min-w-0 min-h-0 bg-white">

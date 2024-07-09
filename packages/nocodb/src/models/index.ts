@@ -19,7 +19,9 @@ export { default as HookFilter } from './HookFilter';
 export { default as HookLog } from './HookLog';
 export { default as KanbanView } from './KanbanView';
 export { default as KanbanViewColumn } from './KanbanViewColumn';
-export { default as LinkToAnotherRecordColumn } from './LinkToAnotherRecordColumn';
+export {
+  default as LinkToAnotherRecordColumn,
+} from './LinkToAnotherRecordColumn';
 export { default as LookupColumn } from './LookupColumn';
 export { default as MapView } from './MapView';
 export { default as MapViewColumn } from './MapViewColumn';
@@ -42,3 +44,4 @@ export { default as Notification } from './Notification';
 export { default as PresignedUrl } from './PresignedUrl';
 export { default as UserRefreshToken } from './UserRefreshToken';
 export { default as Extension } from './Extension';
+export { default as Comment } from './Comment';

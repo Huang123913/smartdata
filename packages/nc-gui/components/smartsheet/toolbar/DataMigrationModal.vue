@@ -12,7 +12,7 @@ const props = defineProps<{
 }>()
 onMounted(() => {})
 const { $api, $poller } = useNuxtApp()
-const { openTable: _openTable } = useTableNew({ baseId: props.base.id! })
+const { openTable: _openTable } = useTableNew({ baseId: props.base?.id! })
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
 const viewsStore = useViewsStore()

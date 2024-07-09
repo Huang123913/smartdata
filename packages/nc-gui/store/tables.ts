@@ -1,6 +1,5 @@
 import type { TableType } from 'nocodb-sdk'
 import { acceptHMRUpdate, defineStore } from 'pinia'
-import type { TableType } from 'nocodb-sdk'
 import type { SidebarTableNode } from '~/lib/types'
 
 export const useTablesStore = defineStore('tablesStore', () => {

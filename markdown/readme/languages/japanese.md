@@ -40,29 +40,14 @@ MySQL、PostgreSQL、SQL Server、SQLite＆Mariadbをスマートスプレッド
 docker run -d --name nocodb -p 8080:8080 nocodb/nocodb:latest
 ```
 
-- NocoDBは入力としてデータベースが必要です:[本番環境設定](https://github.com/nocodb/nocodb/blob/master/README.md#production-setup)を参照してください。
-- この入力がない場合、SQLiteにフォールバックします。SQLiteでデータを保持するために、`/usr/app/data/`をマウントします。
+- NocoDB は入力としてデータベースが必要です:[本番環境設定](https://github.com/nocodb/nocodb/blob/master/README.md#production-setup)を参照してください。
+- この入力がない場合、SQLite にフォールバックします。SQLite でデータを保持するために、`/usr/app/data/`をマウントします。
 
   例:
 
   ```
   docker run -d -p 8080:8080 --name nocodb -v "$(pwd)"/nocodb:/usr/app/data/ nocodb/nocodb:latest
   ```
-
-### NPM を使用して初期化を行う
-
-```
-npx create-nocodb-app
-```
-
-### git を使う
-
-```
-git clone https://github.com/nocodb/nocodb-seed
-cd nocodb-seed
-npm install
-npm start
-```
 
 ### GUI
 
@@ -145,29 +130,11 @@ NoCodb には、スプレッドシートビューと外部データベースの�
 
 ## Docker
 
-#### MySQLの例
-
-```
-docker run -d -p 8080:8080 \
-    -e NC_DB="mysql2://host.docker.internal:3306?u=root&p=password&d=d1" \
-    -e NC_AUTH_JWT_SECRET="569a1821-0a93-45e8-87ab-eb857f20a010" \
-    nocodb/nocodb:latest
-```
-
-#### Postgresの例
+#### Postgres の例
 
 ```
 docker run -d -p 8080:8080 \
     -e NC_DB="pg://host:port?u=user&p=password&d=database" \
-    -e NC_AUTH_JWT_SECRET="569a1821-0a93-45e8-87ab-eb857f20a010" \
-    nocodb/nocodb:latest
-```
-
-#### SQL Serverの例
-
-```
-docker run -d -p 8080:8080 \
-    -e NC_DB="mssql://host:port?u=user&p=password&d=database" \
     -e NC_AUTH_JWT_SECRET="569a1821-0a93-45e8-87ab-eb857f20a010" \
     nocodb/nocodb:latest
 ```
@@ -178,7 +145,7 @@ docker run -d -p 8080:8080 \
 git clone https://github.com/nocodb/nocodb
 cd nocodb
 cd docker-compose
-cd mysql or pg or mssql
+cd pg
 docker-compose up -d
 ```
 
@@ -196,8 +163,8 @@ docker-compose up -d
 
 # 開発の目的
 
-ほとんどのインターネットビジネスは、ビジネスニーズを解決するためにスプレッドシートかデータベースのどちらかを用いています。表計算ソフトは、毎日10億人以上の人が共同作業で使っています。しかし、コンピューティングに関しては、より強力なツールであるデータベースで同様のスピードで作業するのは、かなり遅れています。SaaSでこれを解決しようとすると、ひどいアクセスコントロール、ベンダーの囲い込み、データの囲い込み、突然の価格変更、そして最も重要なこととしては、将来における可能性に対する隠れた制限が存在することです
+ほとんどのインターネットビジネスは、ビジネスニーズを解決するためにスプレッドシートかデータベースのどちらかを用いています。表計算ソフトは、毎日 10 億人以上の人が共同作業で使っています。しかし、コンピューティングに関しては、より強力なツールであるデータベースで同様のスピードで作業するのは、かなり遅れています。SaaS でこれを解決しようとすると、ひどいアクセスコントロール、ベンダーの囲い込み、データの囲い込み、突然の価格変更、そして最も重要なこととしては、将来における可能性に対する隠れた制限が存在することです
 
 # 私たちの使命
 
-私たちの使命は、データベース用の最も強力なノーコードインターフェイスを、世界中のすべてのインターネットビジネスにオープンソースで提供することです。これは、強力なコンピューティングツールへのアクセスを民主化するだけでなく、インターネット上で根本的な改修と構築の能力を持つ10億人以上の人々を生み出すでしょう。
+私たちの使命は、データベース用の最も強力なノーコードインターフェイスを、世界中のすべてのインターネットビジネスにオープンソースで提供することです。これは、強力なコンピューティングツールへのアクセスを民主化するだけでなく、インターネット上で根本的な改修と構築の能力を持つ 10 億人以上の人々を生み出すでしょう。

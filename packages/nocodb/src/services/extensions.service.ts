@@ -1,32 +1,42 @@
-import { Injectable } from '@nestjs/common';
-import { AppEvents, type ExtensionReqType } from 'nocodb-sdk';
-import type { NcRequest } from '~/interface/config';
-import { AppHooksService } from '~/services/app-hooks/app-hooks.service';
+import {
+  AppEvents,
+  type ExtensionReqType,
+} from 'nocodb-sdk';
 import { validatePayload } from '~/helpers';
+import type {
+  NcContext,
+  NcRequest,
+} from '~/interface/config';
 import { Extension } from '~/models';
+import { AppHooksService } from '~/services/app-hooks/app-hooks.service';
+
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ExtensionsService {
   constructor(private readonly appHooksService: AppHooksService) {}
 
-  async extensionList(param: { baseId: string }) {
-    return await Extension.list(param.baseId);
+  async extensionList(context: NcContext, param: { baseId: string }) {
+    return await Extension.list(context, param.baseId);
   }
 
-  async extensionRead(param: { extensionId: string }) {
-    return await Extension.get(param.extensionId);
+  async extensionRead(context: NcContext, param: { extensionId: string }) {
+    return await Extension.get(context, param.extensionId);
   }
 
-  async extensionCreate(param: {
-    extension: ExtensionReqType;
-    req: NcRequest;
-  }) {
+  async extensionCreate(
+    context: NcContext,
+    param: {
+      extension: ExtensionReqType;
+      req: NcRequest;
+    },
+  ) {
     validatePayload(
       'swagger.json#/components/schemas/ExtensionReq',
       param.extension,
     );
 
-    const res = await Extension.insert({
+    const res = await Extension.insert(context, {
       ...param.extension,
       fk_user_id: param.req.user.id,
     });
@@ -40,17 +50,24 @@ export class ExtensionsService {
     return res;
   }
 
-  async extensionUpdate(param: {
-    extensionId: string;
-    extension: ExtensionReqType;
-    req: NcRequest;
-  }) {
+  async extensionUpdate(
+    context: NcContext,
+    param: {
+      extensionId: string;
+      extension: ExtensionReqType;
+      req: NcRequest;
+    },
+  ) {
     validatePayload(
       'swagger.json#/components/schemas/ExtensionReq',
       param.extension,
     );
 
-    const res = await Extension.update(param.extensionId, param.extension);
+    const res = await Extension.update(
+      context,
+      param.extensionId,
+      param.extension,
+    );
 
     this.appHooksService.emit(AppEvents.EXTENSION_UPDATE, {
       extensionId: param.extensionId,
@@ -61,8 +78,11 @@ export class ExtensionsService {
     return res;
   }
 
-  async extensionDelete(param: { extensionId: string; req: NcRequest }) {
-    const res = await Extension.delete(param.extensionId);
+  async extensionDelete(
+    context: NcContext,
+    param: { extensionId: string; req: NcRequest },
+  ) {
+    const res = await Extension.delete(context, param.extensionId);
 
     this.appHooksService.emit(AppEvents.EXTENSION_DELETE, {
       extensionId: param.extensionId,

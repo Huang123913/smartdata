@@ -55,9 +55,7 @@ const searchVal = ref<string | null>()
 
 const { $api } = useNuxtApp()
 
-const { getMeta } = useMetas()
-
-const { isUIAllowed } = useRoles()
+const { isUIAllowed, isMetaReadOnly } = useRoles()
 
 const { isPg, isMysql } = useBase()
 
@@ -284,8 +282,8 @@ async function addIfMissingAndSave() {
 
       activeOptCreateInProgress.value--
       if (!activeOptCreateInProgress.value) {
-        await getMeta(column.value.fk_model_id!, true)
         vModel.value = [...vModel.value]
+        // await getMeta(column.value.fk_model_id!, true)
         tempSelectedOptsState.splice(0, tempSelectedOptsState.length)
       }
     } else {
@@ -469,7 +467,6 @@ const onFocus = () => {
         v-model:value="vModel"
         mode="multiple"
         class="w-full overflow-hidden"
-        :placeholder="isEditColumn ? $t('labels.optional') : ''"
         :bordered="false"
         clear-icon
         :show-search="!isMobileMode"
@@ -523,7 +520,9 @@ const onFocus = () => {
         </a-select-option>
 
         <a-select-option
-          v-if="searchVal && isOptionMissing && !isPublic && !disableOptionCreation && isUIAllowed('fieldEdit')"
+          v-if="
+            !isMetaReadOnly && searchVal && isOptionMissing && !isPublic && !disableOptionCreation && isUIAllowed('fieldEdit')
+          "
           :key="searchVal"
           :value="searchVal"
         >

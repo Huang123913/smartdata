@@ -2,22 +2,25 @@ const Api = require('nocodb-sdk').Api;
 const { UITypes } = require('nocodb-sdk');
 const jsonfile = require('jsonfile');
 
-const GRID = 3, GALLERY = 2, FORM = 1;
+const GRID = 3,
+  GALLERY = 2,
+  FORM = 1;
 
-let ncMap = { /* id: name <string> */ };
+let ncMap = {
+  /* id: name <string> */
+};
 let tblSchema = [];
 let api = {};
 let viewStore = { columns: {}, sort: {}, filter: {} };
 
-let inputConfig = jsonfile.readFileSync(`config.json`)
+let inputConfig = jsonfile.readFileSync(`config.json`);
 let ncConfig = {
   baseName: inputConfig.srcProject,
   baseURL: inputConfig.baseURL,
   headers: {
-    'xc-auth': `${inputConfig["xc-auth"]}`
-  }
+    'xc-auth': `${inputConfig['xc-auth']}`,
+  },
 };
-
 
 // helper routines
 // remove objects containing 0/ false/ null
@@ -26,25 +29,55 @@ function removeEmpty(obj) {
   return Object.fromEntries(
     Object.entries(obj)
       .filter(([_, v]) => v != null && v != 0 && v != false)
-      .map(([k, v]) => [k, v === Object(v) ? removeEmpty(v) : v])
+      .map(([k, v]) => [k, v === Object(v) ? removeEmpty(v) : v]),
   );
 }
-
 
 function addColumnSpecificData(c) {
   // pick required fields to proceed further
   let col;
-  if(inputConfig.excludeDt) {
+  if (inputConfig.excludeDt) {
     col = removeEmpty(
       (({ id, title, column_name, uidt, pk, pv, rqd, dtxp, system, ai }) => ({
-        id, title, column_name, uidt, pk, pv, rqd, dtxp, system, ai
-      }))(c)
+        id,
+        title,
+        column_name,
+        uidt,
+        pk,
+        pv,
+        rqd,
+        dtxp,
+        system,
+        ai,
+      }))(c),
     );
   } else {
     col = removeEmpty(
-      (({ id, title, column_name, uidt, dt, pk, pv, rqd, dtxp, system, ai }) => ({
-        id, title, column_name, uidt, dt, pk, pv, rqd, dtxp, system, ai
-      }))(c)
+      (({
+        id,
+        title,
+        column_name,
+        uidt,
+        dt,
+        pk,
+        pv,
+        rqd,
+        dtxp,
+        system,
+        ai,
+      }) => ({
+        id,
+        title,
+        column_name,
+        uidt,
+        dt,
+        pk,
+        pv,
+        rqd,
+        dtxp,
+        system,
+        ai,
+      }))(c),
     );
   }
 
@@ -59,14 +92,14 @@ function addColumnSpecificData(c) {
         fk_related_model_id: c.colOptions.fk_related_model_id,
         fk_child_column_id: c.colOptions.fk_child_column_id,
         fk_parent_column_id: c.colOptions.fk_parent_column_id,
-        type: c.colOptions.type
+        type: c.colOptions.type,
       };
       break;
     case UITypes.Lookup:
       col[`colOptions`] = {
         fk_model_id: c.fk_model_id,
         fk_relation_column_id: c.colOptions.fk_relation_column_id,
-        fk_lookup_column_id: c.colOptions.fk_lookup_column_id
+        fk_lookup_column_id: c.colOptions.fk_lookup_column_id,
       };
       break;
     case UITypes.Rollup:
@@ -74,7 +107,7 @@ function addColumnSpecificData(c) {
         fk_model_id: c.fk_model_id,
         fk_relation_column_id: c.colOptions.fk_relation_column_id,
         fk_rollup_column_id: c.colOptions.fk_rollup_column_id,
-        rollup_function: c.colOptions.rollup_function
+        rollup_function: c.colOptions.rollup_function,
       };
       break;
   }
@@ -90,7 +123,7 @@ function addViewDetails(v) {
     type,
     show_system_fields,
     lock_type,
-    order
+    order,
   }))(v);
 
   // form view
@@ -102,7 +135,7 @@ function addViewDetails(v) {
       redirect_after_secs,
       email,
       submit_another_form,
-      show_blank_form
+      show_blank_form,
     }) => ({
       heading,
       subheading,
@@ -110,25 +143,25 @@ function addViewDetails(v) {
       redirect_after_secs,
       email,
       submit_another_form,
-      show_blank_form
+      show_blank_form,
     }))(v.view);
   }
 
   // gallery view
   else if (v.type === GALLERY) {
     view.property = {
-      fk_cover_image_col_id: ncMap[v.view.fk_cover_image_col_id]
+      fk_cover_image_col_id: ncMap[v.view.fk_cover_image_col_id],
     };
   }
 
   // gallery view doesn't share column information in api yet
   if (v.type !== GALLERY) {
     if (v.type === GRID)
-      view.columns = viewStore.columns[v.id].map(a =>
-        (({ id, width, order, show }) => ({ id, width, order, show }))(a)
+      view.columns = viewStore.columns[v.id].map((a) =>
+        (({ id, width, order, show }) => ({ id, width, order, show }))(a),
       );
     if (v.type === FORM)
-      view.columns = viewStore.columns[v.id].map(a =>
+      view.columns = viewStore.columns[v.id].map((a) =>
         (({ id, order, show, label, help, description, required }) => ({
           id,
           order,
@@ -136,8 +169,8 @@ function addViewDetails(v) {
           label,
           help,
           description,
-          required
-        }))(a)
+          required,
+        }))(a),
       );
 
     for (let i = 0; i < view.columns?.length; i++)
@@ -145,27 +178,27 @@ function addViewDetails(v) {
 
     // skip hm & mm columns
     view.columns = view.columns
-      ?.filter(a => a.title?.includes('_nc_m2m_') === false)
-      .filter(a => a.title?.includes('nc_') === false);
+      ?.filter((a) => a.title?.includes('_nc_m2m_') === false)
+      .filter((a) => a.title?.includes('nc_') === false);
   }
 
   // filter & sort configurations
   if (v.type !== FORM) {
-    view.sort = viewStore.sort[v.id].map(a =>
+    view.sort = viewStore.sort[v.id].map((a) =>
       (({ fk_column_id, direction, order }) => ({
         fk_column_id,
         direction,
-        order
-      }))(a)
+        order,
+      }))(a),
     );
-    view.filter = viewStore.filter[v.id].map(a =>
+    view.filter = viewStore.filter[v.id].map((a) =>
       (({ fk_column_id, logical_op, comparison_op, value, order }) => ({
         fk_column_id,
         logical_op,
         comparison_op,
         value,
-        order
-      }))(a)
+        order,
+      }))(a),
     );
   }
   return view;
@@ -180,16 +213,19 @@ async function storeViewDetails(tableId) {
     let viewDetails = [];
 
     // invoke view specific read to populate columns information
-    if (v.type === FORM) viewDetails = (await api.dbView.formRead(v.id)).columns;
-    else if (v.type === GALLERY) viewDetails = await api.dbView.galleryRead(v.id);
-    else if (v.type === GRID) viewDetails = await api.dbView.gridColumnsList(v.id);
+    if (v.type === FORM)
+      viewDetails = (await api.dbView.formRead(v.id)).columns;
+    else if (v.type === GALLERY)
+      viewDetails = await api.dbView.galleryRead(v.id);
+    else if (v.type === GRID)
+      viewDetails = await api.dbView.gridColumnsList(v.id);
     viewStore.columns[v.id] = viewDetails;
 
     // populate sort information
-    let vSort = await api.dbTableSort.list(v.id);
+    let vSort = await api.dbTableSort.list({ viewId: v.id });
     viewStore.sort[v.id] = vSort.sorts.list;
 
-    let vFilter = await api.dbTableFilter.read(v.id);
+    let vFilter = await api.dbTableFilter.read({ viewId: v.id });
     viewStore.filter[v.id] = vFilter;
   }
 }
@@ -201,27 +237,29 @@ async function generateMapTbl(pId) {
 
   for (let i = 0; i < tblList.list.length; i++) {
     let tblId = tblList.list[i].id;
-    let tbl = await api.dbTable.read(tblId);
+    let tbl = await api.dbTable.readTable({ tableId: tblId });
 
     // table ID <> name
     ncMap[tblId] = tbl.title;
 
     // column ID <> name
-    tbl.columns.map(x => (ncMap[x.id] = x.title));
+    tbl.columns.map((x) => (ncMap[x.id] = x.title));
 
     // view ID <> name
-    tbl.views.map(x => (ncMap[x.id] = x.tn));
+    tbl.views.map((x) => (ncMap[x.id] = x.tn));
 
     for (let i = 0; i < tbl.views.length; i++) {
       let x = tbl.views[i];
       let viewColumns = [];
-      if (x.type === FORM) viewColumns = (await api.dbView.formRead(x.id)).columns;
+      if (x.type === FORM)
+        viewColumns = (await api.dbView.formRead(x.id)).columns;
       else if (x.type === GALLERY)
         viewColumns = (await api.dbView.galleryRead(x.id)).columns;
-      else if (x.type === GRID) viewColumns = await api.dbView.gridColumnsList(x.id);
+      else if (x.type === GRID)
+        viewColumns = await api.dbView.gridColumnsList(x.id);
 
       // view column ID <> name
-      viewColumns?.map(a => (ncMap[a.id] = ncMap[a.fk_column_id]));
+      viewColumns?.map((a) => (ncMap[a.id] = ncMap[a.fk_column_id]));
     }
   }
 }
@@ -233,7 +271,7 @@ async function exportSchema() {
 
   // fetch base details (id et.al)
   const x = await api.base.list();
-  const p = x.list.find(a => a.title === ncConfig.baseName);
+  const p = x.list.find((a) => a.title === ncConfig.baseName);
 
   await generateMapTbl(p.id);
 
@@ -245,20 +283,20 @@ async function exportSchema() {
     let tblId = tblList.list[i].id;
     await storeViewDetails(tblId);
 
-    let tbl = await api.dbTable.read(tblId);
+    let tbl = await api.dbTable.readTable({ tableId: tblId });
 
     // prepare schema
     let tSchema = {
       id: tbl.id,
       title: tbl.title,
       table_name: tbl?.table_name,
-      columns: [...tbl.columns.map(c => addColumnSpecificData(c))]
-        .filter(a => a.title.includes('_nc_m2m_') === false)        // mm
-        .filter(a => a.title.includes(p.prefix) === false)          // hm
+      columns: [...tbl.columns.map((c) => addColumnSpecificData(c))]
+        .filter((a) => a.title.includes('_nc_m2m_') === false) // mm
+        .filter((a) => a.title.includes(p.prefix) === false) // hm
         .filter(
-          a => !(a?.system === 1 && a.uidt === UITypes.LinkToAnotherRecord)
+          (a) => !(a?.system === 1 && a.uidt === UITypes.LinkToAnotherRecord),
         ),
-      views: [...tbl.views.map(v => addViewDetails(v))]
+      views: [...tbl.views.map((v) => addViewDetails(v))],
     };
     tblSchema.push(tSchema);
   }
@@ -269,8 +307,8 @@ async function exportSchema() {
   jsonfile.writeFileSync(
     `${ncConfig.baseName.replace(/ /g, '_')}.json`,
     tblSchema,
-    { spaces: 2 }
+    { spaces: 2 },
   );
-})().catch(e => {
+})().catch((e) => {
   console.log(e);
 });

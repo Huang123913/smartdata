@@ -222,7 +222,6 @@ const [useProvideViewGroupBy, useViewGroupBy] = useInjectionState(
     async function loadGroups(params: any = {}, group?: Group) {
       try {
         group = group || rootGroup.value
-
         if (!base?.value?.id || !view.value?.id || !view.value?.fk_model_id || !group) return
 
         if (groupBy.value.length === 0) {
@@ -333,7 +332,6 @@ const [useProvideViewGroupBy, useViewGroupBy] = useInjectionState(
           group.children.push(temp)
         }
 
-        // clear rest of the children
         group.children = group.children.filter((c) => tempList.find((t) => t.key === c.key))
 
         if (group.count <= (group.paginationData.pageSize ?? groupByGroupLimit.value)) {
@@ -382,7 +380,7 @@ const [useProvideViewGroupBy, useViewGroupBy] = useInjectionState(
               ...(isUIAllowed('sortSync') ? {} : { sortArrJson: JSON.stringify(sorts.value) }),
               ...(isUIAllowed('filterSync') ? {} : { filterArrJson: JSON.stringify(nestedFilters.value) }),
             } as any)
-          : await fetchSharedViewData({ sortsArr: sorts.value, filtersArr: nestedFilters.value, ...query })
+          : await fetchSharedViewData({ sortsArr: sorts.value, filtersArr: nestedFilters.value, ...query }, { isGroupBy: true })
 
         group.count = response.pageInfo.totalRows ?? 0
         group.rows = formatData(response.list)
@@ -531,6 +529,8 @@ const [useProvideViewGroupBy, useViewGroupBy] = useInjectionState(
             const lookupRelation = (await getMeta(nextCol.fk_model_id as string))?.columns?.find(
               (c) => c.id === (nextCol?.colOptions as LookupType).fk_relation_column_id,
             )
+
+            if (!lookupRelation?.colOptions) break
 
             const relatedTableMeta = await getMeta(
               (lookupRelation?.colOptions as LinkToAnotherRecordType).fk_related_model_id as string,

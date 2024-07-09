@@ -58,7 +58,7 @@ export const useColumnDrag = ({
     const lastViewCol = gridViewCols.value[lastCol.id!]
 
     // if nextToViewCol/toViewCol is null, return
-    if (nextToViewCol === null || lastViewCol === null) return
+    if (nextToViewCol === null && lastViewCol === null) return
 
     const newOrder = nextToViewCol ? toViewCol.order! + (nextToViewCol.order! - toViewCol.order!) / 2 : lastViewCol.order! + 1
     const oldOrder = toBeReorderedViewCol.order
@@ -115,10 +115,15 @@ export const useColumnDrag = ({
 
   const handleReorderColumn = async () => {
     isProcessing.value = true
-    dragColPlaceholderDomRef.value!.style.left = '0px'
-    dragColPlaceholderDomRef.value!.style.height = '0px'
-    await reorderColumn(draggedCol.value!.id!, toBeDroppedColId.value!)
-    isProcessing.value = false
+    try {
+      dragColPlaceholderDomRef.value!.style.left = '0px'
+      dragColPlaceholderDomRef.value!.style.height = '0px'
+      await reorderColumn(draggedCol.value!.id!, toBeDroppedColId.value!)
+    } catch (error) {
+      console.error('Failed to reorder column: ', error)
+    } finally {
+      isProcessing.value = false
+    }
     draggedCol.value = null
     toBeDroppedColId.value = null
   }
@@ -193,7 +198,7 @@ export const useColumnDrag = ({
   const onDragEnd = async (e: DragEvent) => {
     e.preventDefault()
 
-    await until(() => isProcessing.value == false).toBeTruthy()
+    await until(() => !isProcessing.value).toBeTruthy()
 
     if (!e.dataTransfer || !draggedCol.value || !toBeDroppedColId.value) return
 

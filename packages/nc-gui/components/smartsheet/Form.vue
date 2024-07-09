@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import Draggable from 'vuedraggable'
-import tinycolor from 'tinycolor2'
-import { Pane, Splitpanes } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 
 import {
@@ -14,6 +11,9 @@ import {
   isLinksOrLTAR,
   isVirtualCol,
 } from 'nocodb-sdk'
+import { Pane, Splitpanes } from 'splitpanes'
+import tinycolor from 'tinycolor2'
+import Draggable from 'vuedraggable'
 import type { ImageCropperConfig } from '~/lib/types'
 
 provide(IsFormInj, ref(true))
@@ -85,6 +85,7 @@ const {
   validateInfos,
   validate,
   clearValidate,
+  fieldMappings,
 } = useProvideFormViewStore(meta, view, formViewData, updateFormView, isEditable)
 
 const { preFillFormSearchParams } = storeToRefs(useViewsStore())
@@ -198,9 +199,9 @@ async function submitForm() {
   }
 
   try {
-    await validate([...Object.keys(formState.value)])
+    await validate(Object.keys(formState.value).map((title) => fieldMappings.value[title]))
   } catch (e: any) {
-    if (e.errorFields.length) {
+    if (e?.errorFields?.length) {
       message.error(t('msg.error.someOfTheRequiredFieldsAreEmpty'))
       return
     }
@@ -360,7 +361,7 @@ async function handleAddOrRemoveAllColumns<T>(value: T) {
 }
 
 async function checkSMTPStatus() {
-  if (emailMe.value) {
+  if (emailMe.value && !isEeUI) {
     const emailPluginActive = await $api.plugin.status('SMTP')
     if (!emailPluginActive) {
       emailMe.value = false
@@ -586,7 +587,7 @@ watch(
     updatePreFillFormSearchParams()
 
     try {
-      await validate([...Object.keys(formState.value)])
+      await validate(Object.keys(formState.value).map((title) => fieldMappings.value[title]))
     } catch {}
   },
   {
@@ -968,7 +969,7 @@ useEventListener(
                               :bordered="false"
                               :data-testid="NcForm.heading"
                               :data-title="NcForm.heading"
-                              @update:value="updateView"
+                              @input="updateView"
                               @focus="activeRow = NcForm.heading"
                               @blur="activeRow = ''"
                             />
@@ -1103,9 +1104,10 @@ useEventListener(
                             <div class="nc-form-field-body">
                               <div class="mt-2">
                                 <a-form-item
-                                  :name="element.title"
+                                  v-if="fieldMappings[element.title]"
+                                  :name="fieldMappings[element.title]"
                                   class="!my-0 nc-input-required-error nc-form-input-item"
-                                  v-bind="validateInfos[element.title]"
+                                  v-bind="validateInfos[fieldMappings[element.title]]"
                                 >
                                   <LazySmartsheetDivDataCell class="relative" @click.stop>
                                     <LazySmartsheetVirtualCell
@@ -1196,7 +1198,7 @@ useEventListener(
                 }"
               >
                 <!-- Form Field settings -->
-                <div v-if="activeField && activeColumn" :key="activeField?.id">
+                <div v-if="activeField && activeColumn" :key="activeField?.id" class="nc-form-field-right-panel">
                   <!-- Field header -->
                   <div class="px-3 pt-4 pb-2 flex items-center justify-between border-b border-gray-200 font-medium">
                     <div class="flex items-center">
@@ -1278,7 +1280,7 @@ useEventListener(
                       :placeholder="$t('msg.info.formInput')"
                       @focus="onFocusActiveFieldLabel"
                       @keydown.enter.prevent
-                      @update:value="updateFieldTitle"
+                      @input="updateFieldTitle($event.target.value)"
                       @change="updateColMeta(activeField)"
                     />
 
@@ -1297,7 +1299,7 @@ useEventListener(
 
                 <!-- Form Settings -->
                 <template v-else>
-                  <Splitpanes v-if="formViewData" horizontal class="w-full nc-form-right-splitpane">
+                  <Splitpanes v-if="formViewData" horizontal class="nc-form-settings w-full nc-form-right-splitpane">
                     <Pane min-size="30" size="50" class="nc-form-right-splitpane-item p-4 flex flex-col space-y-4 !min-h-200px">
                       <div class="flex flex-wrap justify-between items-center gap-2">
                         <div class="flex gap-3">
@@ -1529,14 +1531,12 @@ useEventListener(
                               class="nc-form-hide-branding"
                               data-testid="nc-form-hide-branding"
                               :disabled="isLocked || !isEditable"
-                              @change="
-                      (value) => {
-                        if (isLocked || !isEditable) return
+                              @change="(value) => {
+                                  if (isLocked || !isEditable) return
 
-                        (formViewData!.meta as Record<string,any>).hide_branding = value
-                        updateView()
-                      }
-                    "
+                                  (formViewData!.meta as Record<string,any>).hide_branding = value
+                                  updateView()
+                                }"
                             />
 
                             <NcTooltip v-else placement="top">
@@ -1558,14 +1558,12 @@ useEventListener(
                               class="nc-form-hide-banner"
                               data-testid="nc-form-hide-banner"
                               :disabled="isLocked || !isEditable"
-                              @change="
-                      (value) => {
-                        if (isLocked || !isEditable) return
+                              @change="(value) => {
+                                  if (isLocked || !isEditable) return
 
-                        (formViewData!.meta as Record<string,any>).hide_banner = value
-                        updateView()
-                      }
-                    "
+                                  (formViewData!.meta as Record<string,any>).hide_banner = value
+                                  updateView()
+                                }"
                             />
                           </div>
                         </div>

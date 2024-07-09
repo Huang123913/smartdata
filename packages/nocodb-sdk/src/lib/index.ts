@@ -9,16 +9,19 @@ export * from '~/lib/enums';
 export * from '~/lib/formulaHelpers';
 export {
   default as UITypes,
-  UITypesName,
-  numericUITypes,
-  isNumericCol,
-  isVirtualCol,
-  isLinksOrLTAR,
-  isCreatedOrLastModifiedTimeCol,
-  isCreatedOrLastModifiedByCol,
-  isHiddenCol,
+  FieldNameFromUITypes,
   getEquivalentUIType,
+  isCreatedOrLastModifiedByCol,
+  isCreatedOrLastModifiedTimeCol,
+  isHiddenCol,
+  isLinksOrLTAR,
+  isNumericCol,
   isSelectTypeCol,
+  isVirtualCol,
+  numericUITypes,
+  partialUpdateAllowedTypes,
+  readonlyMetaAllowedTypes,
+  UITypesName,
 } from '~/lib/UITypes';
 export { default as CustomAPI, FileType } from '~/lib/CustomAPI';
 export { default as TemplateGenerator } from '~/lib/TemplateGenerator';
@@ -26,3 +29,4 @@ export * from '~/lib/passwordHelpers';
 export * from '~/lib/mergeSwaggerSchema';
 export * from '~/lib/dateTimeHelper';
 export * from '~/lib/form';
+export * from '~/lib/aggregationHelper';

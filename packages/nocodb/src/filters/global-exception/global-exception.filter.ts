@@ -1,21 +1,37 @@
-import { Catch, Logger, NotFoundException, Optional } from '@nestjs/common';
-import { InjectSentry, SentryService } from '@ntegral/nestjs-sentry';
-import { ThrottlerException } from '@nestjs/throttler';
+import type {
+  Request,
+  Response,
+} from 'express';
 import { NcErrorType } from 'nocodb-sdk';
-import type { ArgumentsHost, ExceptionFilter } from '@nestjs/common';
-import type { Request, Response } from 'express';
 import {
   AjvError,
   BadRequest,
   ExternalError,
   extractDBError,
   Forbidden,
+  NcBaseError,
   NcBaseErrorv2,
   NotFound,
   SsoError,
   Unauthorized,
   UnprocessableEntity,
 } from '~/helpers/catchError';
+
+import type {
+  ArgumentsHost,
+  ExceptionFilter,
+} from '@nestjs/common';
+import {
+  Catch,
+  Logger,
+  NotFoundException,
+  Optional,
+} from '@nestjs/common';
+import { ThrottlerException } from '@nestjs/throttler';
+import {
+  InjectSentry,
+  SentryService,
+} from '@ntegral/nestjs-sentry';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -39,7 +55,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       exception = new NcBaseErrorv2(NcErrorType.BAD_JSON);
     }
 
-    const dbError = extractDBError(exception);
+    // try to extract db error for unknown errors
+    const dbError =
+      exception instanceof NcBaseError ? null : extractDBError(exception);
 
     // skip unnecessary error logging
     if (

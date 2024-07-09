@@ -1,7 +1,7 @@
 <script lang="ts" setup>
+import { NavigateDir } from '#imports'
 import type { ColumnType } from 'nocodb-sdk'
 import { isSystemColumn } from 'nocodb-sdk'
-import { NavigateDir } from '#imports'
 
 interface Props {
   column: ColumnType
@@ -192,7 +192,7 @@ const onContextmenu = (e: MouseEvent) => {
       <LazyCellJson v-else-if="isJSON(column)" v-model="vModel" />
       <LazyCellText v-else v-model="vModel" />
       <div
-        v-if="((isPublic && readOnly && !isForm) || (isSystemColumn(column) && !isAttachment(column))) && !isTextArea(column)"
+        v-if="((isPublic && readOnly && !isForm) || isSystemColumn(column)) && !isAttachment(column) && !isTextArea(column)"
         class="nc-locked-overlay"
       />
     </template>

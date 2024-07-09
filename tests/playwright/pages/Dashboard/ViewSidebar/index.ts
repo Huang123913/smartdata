@@ -1,7 +1,9 @@
-import { expect, Locator } from '@playwright/test';
-import { DashboardPage } from '..';
-import BasePage from '../../Base';
 import { ViewTypes } from 'nocodb-sdk';
+
+import { expect, Locator } from '@playwright/test';
+
+import { DashboardPage } from '../';
+import BasePage from '../../Base';
 
 export class ViewSidebarPage extends BasePage {
   readonly base: any;
@@ -161,7 +163,7 @@ export class ViewSidebarPage extends BasePage {
         force: true,
       });
     const submitAction = () =>
-      this.rootPage.locator('.ant-modal-content').locator('button:has-text("Create view"):visible').click();
+      this.rootPage.locator('.ant-modal-content').locator('button:has-text("Create View"):visible').click();
     await this.waitForResponse({
       httpMethodsToMatch: ['POST'],
       requestUrlPathToMatch: '/api/v1/db/meta/tables/',

@@ -1,7 +1,8 @@
 import type { RuleObject } from 'ant-design-vue/es/form'
-import isMobilePhone from 'validator/lib/isMobilePhone'
-import { StringValidationType, UITypes } from 'nocodb-sdk'
 import type { ColumnType, Validation } from 'nocodb-sdk'
+import { StringValidationType, UITypes } from 'nocodb-sdk'
+import isMobilePhone from 'validator/lib/isMobilePhone'
+
 import { getI18n } from '../plugins/a.i18n'
 
 export const formEmailValidator = (val: Validation) => {
@@ -77,7 +78,9 @@ export const requiredFieldValidatorFn = (value: unknown) => {
   }
 
   if (typeof value === 'object') {
-    for (let _ in value) return true
+    if (Object.keys(value).length > 0) {
+      return true
+    }
 
     return false
   }
@@ -137,4 +140,17 @@ export const extractFieldValidator = (_validators: Validation[], element: Column
   }
 
   return rules
+}
+
+export const getValidFieldName = (title: string, uniqueFieldNames: Set<string>) => {
+  title = title.replace(/\./g, '_')
+  let counter = 1
+
+  let newTitle = title
+  while (uniqueFieldNames.has(newTitle)) {
+    newTitle = `${title}_${counter}`
+    counter++
+  }
+  uniqueFieldNames.add(newTitle)
+  return newTitle
 }

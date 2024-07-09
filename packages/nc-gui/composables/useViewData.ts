@@ -1,8 +1,9 @@
-import { ViewTypes } from 'nocodb-sdk'
+import type { ComputedRef, Ref } from 'vue'
+
+import { NavigateDir } from '#imports'
 import axios from 'axios'
 import type { Api, ColumnType, FormColumnType, FormType, GalleryType, PaginatedType, TableType, ViewType } from 'nocodb-sdk'
-import type { ComputedRef, Ref } from 'vue'
-import { NavigateDir } from '#imports'
+import { ViewTypes } from 'nocodb-sdk'
 
 const formatData = (list: Record<string, any>[]) =>
   list.map((row) => ({
@@ -31,9 +32,9 @@ export function useViewData(
 
   const route = router.currentRoute
 
-  const { appInfo } = useGlobal()
+  const { appInfo, gridViewPageSize } = useGlobal()
 
-  const appInfoDefaultLimit = appInfo.value.defaultLimit || 25
+  const appInfoDefaultLimit = gridViewPageSize.value || appInfo.value.defaultLimit || 25
 
   const _paginationData = ref<PaginatedType>({ page: 1, pageSize: appInfoDefaultLimit })
 
@@ -349,9 +350,8 @@ export function useViewData(
 
     // extract the row id of the sibling row
     const rowId = extractPkFromRow(formattedData.value[siblingRowIndex].row, meta.value?.columns as ColumnType[])
-
     if (rowId) {
-      router.push({
+      await router.push({
         query: {
           ...routeQuery.value,
           rowId,

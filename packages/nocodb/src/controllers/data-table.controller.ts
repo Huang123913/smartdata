@@ -12,12 +12,14 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { DataTableService } from '~/services/data-table.service';
 import { parseHrtimeToMilliSeconds } from '~/helpers';
 import { DataApiLimiterGuard } from '~/guards/data-api-limiter.guard';
 import { GlobalGuard } from '~/guards/global/global.guard';
+import { TenantContext } from '~/decorators/tenant-context.decorator';
+import { NcContext, NcRequest } from '~/interface/config';
 
 import { UseInterceptors } from '@nestjs/common';
 import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
@@ -32,13 +34,14 @@ export class DataTableController {
   @Get('/api/v2/tables/:modelId/records')
   @Acl('dataList')
   async dataList(
-    @Req() req: Request,
+    @TenantContext() context: NcContext,
+    @Req() req: NcRequest,
     @Res() res: Response,
     @Param('modelId') modelId: string,
     @Query('viewId') viewId: string,
   ) {
     const startTime = process.hrtime();
-    const responseData = await this.dataTableService.dataList({
+    const responseData = await this.dataTableService.dataList(context, {
       query: req.query,
       modelId: modelId,
       viewId: viewId,
@@ -51,12 +54,13 @@ export class DataTableController {
   @Get(['/api/v2/tables/:modelId/records/count'])
   @Acl('dataCount')
   async dataCount(
-    @Req() req: Request,
+    @TenantContext() context: NcContext,
+    @Req() req: NcRequest,
     @Res() res: Response,
     @Param('modelId') modelId: string,
     @Query('viewId') viewId: string,
   ) {
-    const countResult = await this.dataTableService.dataCount({
+    const countResult = await this.dataTableService.dataCount(context, {
       query: req.query,
       modelId,
       viewId,
@@ -70,12 +74,13 @@ export class DataTableController {
   @Acl('dataInsert')
   @UseInterceptors(MCDMRewrite('NocodbTableRecordsCreateTableRecords'))
   async dataInsert(
-    @Req() req: Request,
+    @TenantContext() context: NcContext,
+    @Req() req: NcRequest,
     @Param('modelId') modelId: string,
     @Query('viewId') viewId: string,
     @Body() body: any,
   ) {
-    return await this.dataTableService.dataInsert({
+    return await this.dataTableService.dataInsert(context, {
       modelId: modelId,
       body: body,
       viewId,
@@ -87,12 +92,13 @@ export class DataTableController {
   @Acl('dataUpdate')
   @UseInterceptors(MCDMRewrite('NocodbTableRecordsUpdateTableRecords'))
   async dataUpdate(
-    @Req() req: Request,
+    @TenantContext() context: NcContext,
+    @Req() req: NcRequest,
     @Param('modelId') modelId: string,
     @Query('viewId') viewId: string,
     @Param('rowId') _rowId: string,
   ) {
-    return await this.dataTableService.dataUpdate({
+    return await this.dataTableService.dataUpdate(context, {
       modelId: modelId,
       body: req.body,
       cookie: req,
@@ -107,12 +113,13 @@ export class DataTableController {
     MCDMRewrite('NocodbTableRecordsDeleteTableRecords'),
   )
   async dataDelete(
-    @Req() req: Request,
+    @TenantContext() context: NcContext,
+    @Req() req: NcRequest,
     @Param('modelId') modelId: string,
     @Query('viewId') viewId: string,
     @Param('rowId') _rowId: string,
   ) {
-    return await this.dataTableService.dataDelete({
+    return await this.dataTableService.dataDelete(context, {
       modelId: modelId,
       cookie: req,
       viewId,
@@ -120,15 +127,31 @@ export class DataTableController {
     });
   }
 
+  @Get(['/api/v2/tables/:modelId/aggregate'])
+  @Acl('dataAggregate')
+  async dataAggregate(
+    @TenantContext() context: NcContext,
+    @Req() req: NcRequest,
+    @Param('modelId') modelId: string,
+    @Query('viewId') viewId: string,
+  ) {
+    return await this.dataTableService.dataAggregate(context, {
+      query: req.query,
+      modelId,
+      viewId,
+    });
+  }
+
   @Get(['/api/v2/tables/:modelId/records/:rowId'])
   @Acl('dataRead')
   async dataRead(
-    @Req() req: Request,
+    @TenantContext() context: NcContext,
+    @Req() req: NcRequest,
     @Param('modelId') modelId: string,
     @Query('viewId') viewId: string,
     @Param('rowId') rowId: string,
   ) {
-    return await this.dataTableService.dataRead({
+    return await this.dataTableService.dataRead(context, {
       modelId,
       rowId: rowId,
       query: req.query,
@@ -139,13 +162,14 @@ export class DataTableController {
   @Get(['/api/v2/tables/:modelId/links/:columnId/records/:rowId'])
   @Acl('nestedDataList')
   async nestedDataList(
-    @Req() req: Request,
+    @TenantContext() context: NcContext,
+    @Req() req: NcRequest,
     @Param('modelId') modelId: string,
     @Query('viewId') viewId: string,
     @Param('columnId') columnId: string,
     @Param('rowId') rowId: string,
   ) {
-    return await this.dataTableService.nestedDataList({
+    return await this.dataTableService.nestedDataList(context, {
       modelId,
       rowId: rowId,
       query: req.query,
@@ -157,7 +181,8 @@ export class DataTableController {
   @Post(['/api/v2/tables/:modelId/links/:columnId/records/:rowId'])
   @Acl('nestedDataLink')
   async nestedLink(
-    @Req() req: Request,
+    @TenantContext() context: NcContext,
+    @Req() req: NcRequest,
     @Param('modelId') modelId: string,
     @Query('viewId') viewId: string,
     @Param('columnId') columnId: string,
@@ -171,7 +196,7 @@ export class DataTableController {
       | Record<string, any>
       | Record<string, any>[],
   ) {
-    return await this.dataTableService.nestedLink({
+    return await this.dataTableService.nestedLink(context, {
       modelId,
       rowId: rowId,
       query: req.query,
@@ -185,7 +210,8 @@ export class DataTableController {
   @Delete(['/api/v2/tables/:modelId/links/:columnId/records/:rowId'])
   @Acl('nestedDataUnlink')
   async nestedUnlink(
-    @Req() req: Request,
+    @TenantContext() context: NcContext,
+    @Req() req: NcRequest,
     @Param('modelId') modelId: string,
     @Query('viewId') viewId: string,
     @Param('columnId') columnId: string,
@@ -193,7 +219,7 @@ export class DataTableController {
     @Body()
     refRowIds: string | string[] | number | number[] | Record<string, any>,
   ) {
-    return await this.dataTableService.nestedUnlink({
+    return await this.dataTableService.nestedUnlink(context, {
       modelId,
       rowId: rowId,
       query: req.query,
@@ -208,7 +234,8 @@ export class DataTableController {
   @Post(['/api/v2/tables/:modelId/links/:columnId/records'])
   @Acl('nestedDataListCopyPasteOrDeleteAll')
   async nestedListCopyPasteOrDeleteAll(
-    @Req() req: Request,
+    @TenantContext() context: NcContext,
+    @Req() req: NcRequest,
     @Param('modelId') modelId: string,
     @Query('viewId') viewId: string,
     @Param('columnId') columnId: string,
@@ -220,7 +247,7 @@ export class DataTableController {
       fk_related_model_id: string;
     }[],
   ) {
-    return await this.dataTableService.nestedListCopyPasteOrDeleteAll({
+    return await this.dataTableService.nestedListCopyPasteOrDeleteAll(context, {
       modelId,
       query: req.query,
       viewId,

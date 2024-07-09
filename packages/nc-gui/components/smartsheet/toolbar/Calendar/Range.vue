@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { type CalendarRangeType, UITypes, ViewTypes, isSystemColumn } from 'nocodb-sdk'
+import { type CalendarRangeType, UITypes, isSystemColumn } from 'nocodb-sdk'
 import type { SelectProps } from 'ant-design-vue'
 
 const meta = inject(MetaInj, ref())
@@ -14,9 +14,21 @@ const IsPublic = inject(IsPublicInj, ref(false))
 
 const { loadViewColumns } = useViewColumnsOrThrow()
 
-const { loadCalendarMeta, loadCalendarData, loadSidebarData, fetchActiveDates } = useCalendarViewStoreOrThrow()
+const { loadCalendarMeta, loadCalendarData, loadSidebarData, fetchActiveDates, updateCalendarMeta, viewMetaProperties } =
+  useCalendarViewStoreOrThrow()
 
 const calendarRangeDropdown = ref(false)
+
+const hideWeekends = computed({
+  get: () => viewMetaProperties.value?.hide_weekend ?? false,
+  set: (newValue) => {
+    updateCalendarMeta({
+      meta: {
+        hide_weekend: newValue,
+      },
+    })
+  },
+})
 
 watch(
   () => activeView.value?.id,
@@ -44,6 +56,26 @@ const calendarRange = computed<CalendarRangeType[]>(() => {
 // We keep the calendar range here and update it when the user selects a new range
 const _calendar_ranges = ref<CalendarRangeType[]>(calendarRange.value)
 
+const isSetup = computed(() => {
+  return _calendar_ranges.value.length > 0 && _calendar_ranges.value[0].fk_from_column_id
+})
+
+watch(
+  calendarRangeDropdown,
+  (newVal) => {
+    if (!newVal && !isSetup.value) {
+      calendarRangeDropdown.value = true
+      if (_calendar_ranges.value.length === 0) {
+        _calendar_ranges.value.push({
+          fk_from_column_id: undefined,
+          fk_to_column_id: null,
+        })
+      }
+    }
+  },
+  { immediate: true },
+)
+
 const saveCalendarRanges = async () => {
   if (activeView.value) {
     try {
@@ -56,8 +88,12 @@ const saveCalendarRanges = async () => {
       await $api.dbView.calendarUpdate(activeView.value?.id as string, {
         calendar_range: calRanges as CalendarRangeType[],
       })
+
+      if (activeView.value.view) activeView.value.view.calendar_range = calRanges
+
       await loadCalendarMeta()
       await Promise.all([loadCalendarData(), loadSidebarData(), fetchActiveDates()])
+      calendarRangeDropdown.value = false
     } catch (e) {
       console.log(e)
       message.error('There was an error while updating view!')
@@ -78,13 +114,6 @@ const dateFieldOptions = computed<SelectProps['options']>(() => {
       })) ?? []
   )
 })
-const addCalendarRange = async () => {
-  _calendar_ranges.value.push({
-    fk_from_column_id: dateFieldOptions.value![0].value as string,
-    fk_to_column_id: null,
-  })
-  await saveCalendarRanges()
-}
 /*
 const removeRange = async (id: number) => {
   _calendar_ranges.value = _calendar_ranges.value.filter((_, i) => i !== id)
@@ -118,29 +147,6 @@ const saveCalendarRange = async (range: CalendarRangeType, value?) => {
     </div>
     <template #overlay>
       <div v-if="calendarRangeDropdown" class="w-98 space-y-6 rounded-2xl p-6" data-testid="nc-calendar-range-menu" @click.stop>
-        <div>
-          <div class="flex mb-3 justify-between">
-            <div class="flex items-center gap-3">
-              <GeneralViewIcon
-                :meta="{
-                  type: ViewTypes.CALENDAR,
-                }"
-                class="w-6 h-6"
-              />
-              <span class="font-bold text-base"> {{ `${$t('activity.calendar')} ${$t('activity.viewSettings')}` }}</span>
-            </div>
-
-            <a
-              class="text-sm !text-gray-600 !font-default !hover:text-gray-600"
-              href="`https://docs.nocodb.com/views/view-types/calendar`"
-              target="_blank"
-            >
-              Go to Docs
-            </a>
-          </div>
-          <NcDivider divider-class="!border-gray-200" />
-        </div>
-
         <div
           v-for="(range, id) in _calendar_ranges"
           :key="id"
@@ -236,21 +242,22 @@ const saveCalendarRange = async (range: CalendarRangeType, value?) => {
             -->
         </div>
 
+        <div v-if="!isSetup" class="flex items-center gap-2 !mt-2">
+          <GeneralIcon icon="warning" class="text-sm mt-0.5 text-orange-500" />
+          <span class="text-sm text-gray-500"> Date field is required! </span>
+        </div>
+
+        <div>
+          <NcSwitch v-model:checked="hideWeekends">
+            <span class="text-gray-800">
+              {{ $t('activity.hideWeekends') }}
+            </span>
+          </NcSwitch>
+        </div>
+
         <!--
         <div class="text-[13px] text-gray-500 py-2">Records in this view will be based on the specified date field.</div>
 -->
-
-        <NcButton
-          v-if="_calendar_ranges.length === 0"
-          class="mt-2"
-          data-testid="nc-calendar-range-add-btn"
-          size="small"
-          type="secondary"
-          @click="addCalendarRange"
-        >
-          <component :is="iconMap.plus" />
-          Add date field
-        </NcButton>
       </div>
     </template>
   </NcDropdown>

@@ -1,4 +1,4 @@
-import type { AuditType, ColumnType, TableType } from 'nocodb-sdk'
+import type { AuditType, ColumnType, CommentType, TableType } from 'nocodb-sdk'
 import { UITypes, ViewTypes, isVirtualCol } from 'nocodb-sdk'
 import type { Ref } from 'vue'
 import dayjs from 'dayjs'
@@ -6,17 +6,24 @@ import dayjs from 'dayjs'
 const [useProvideExpandedFormStore, useExpandedFormStore] = useInjectionState((meta: Ref<TableType>, _row: Ref<Row>) => {
   const { $e, $state, $api } = useNuxtApp()
 
-  const { api, isLoading: isCommentsLoading, error: commentsError } = useApi()
-
   const { t } = useI18n()
 
   const isPublic = inject(IsPublicInj, ref(false))
 
-  const commentsOnly = ref(false)
+  const comments = ref<
+    Array<
+      CommentType & {
+        created_display_name: string
+        resolved_display_name?: string
+      }
+    >
+  >([])
 
-  const commentsAndLogs = ref<any[]>([])
+  const audits = ref<Array<AuditType>>([])
 
-  const comment = ref('')
+  const isCommentsLoading = ref(false)
+
+  const isAuditLoading = ref(false)
 
   const commentsDrawer = ref(true)
 
@@ -24,7 +31,13 @@ const [useProvideExpandedFormStore, useExpandedFormStore] = useInjectionState((m
 
   const changedColumns = ref(new Set<string>())
 
+  const basesStore = useBases()
+
+  const { basesUser } = storeToRefs(basesStore)
+
   const { base } = storeToRefs(useBase())
+
+  const baseUsers = computed(() => (meta.value.base_id ? basesUser.value.get(meta.value.base_id) || [] : []))
 
   const { sharedView } = useSharedView()
 
@@ -32,13 +45,14 @@ const [useProvideExpandedFormStore, useExpandedFormStore] = useInjectionState((m
     !sharedView.value ||
       sharedView.value?.type === ViewTypes.GALLERY ||
       sharedView.value?.type === ViewTypes.KANBAN ||
-      _row.value.rowMeta.new
+      _row.value?.rowMeta?.new
       ? _row.value
       : ({ row: {}, oldRow: {}, rowMeta: {} } as Row),
   )
 
-  row.value.rowMeta.fromExpandedForm = true
-
+  if (row.value?.rowMeta?.fromExpandedForm) {
+    row.value.rowMeta.fromExpandedForm = true
+  }
   const rowStore = useProvideSmartsheetRowStore(row)
 
   const activeView = inject(ActiveViewInj, ref())
@@ -87,24 +101,105 @@ const [useProvideExpandedFormStore, useExpandedFormStore] = useInjectionState((m
     return extractPkFromRow(row.value.row, meta.value.columns as ColumnType[])
   })
 
-  // actions
-  const loadCommentsAndLogs = async () => {
-    if (!isUIAllowed('commentList')) return
+  const loadComments = async (_rowId?: string) => {
+    if (!isUIAllowed('commentList') || (!row.value && !_rowId)) return
 
-    if (!row.value) return
-
-    const rowId = extractPkFromRow(row.value.row, meta.value.columns as ColumnType[])
+    const rowId = _rowId ?? extractPkFromRow(row.value.row, meta.value.columns as ColumnType[])
 
     if (!rowId) return
 
-    commentsAndLogs.value =
-      (
-        await api.utils.commentList({
+    try {
+      isCommentsLoading.value = true
+
+      const res = ((
+        await $api.utils.commentList({
           row_id: rowId,
           fk_model_id: meta.value.id as string,
-          comments_only: commentsOnly.value,
         })
-      ).list?.reverse?.() || []
+      ).list || []) as Array<
+        CommentType & {
+          created_display_name: string
+        }
+      >
+
+      comments.value = res.map((comment) => {
+        const user = baseUsers.value.find((u) => u.id === comment.created_by)
+        const resolvedUser = comment.resolved_by ? baseUsers.value.find((u) => u.id === comment.resolved_by) : null
+        return {
+          ...comment,
+          created_display_name: user?.display_name ?? (user?.email ?? '').split('@')[0],
+          resolved_display_name: resolvedUser ? resolvedUser.display_name ?? resolvedUser.email.split('@')[0] : null,
+        }
+      })
+    } catch (e: unknown) {
+      message.error(
+        await extractSdkResponseErrorMsg(
+          e as Error & {
+            response: any
+          },
+        ),
+      )
+    } finally {
+      isCommentsLoading.value = false
+    }
+  }
+
+  const deleteComment = async (commentId: string) => {
+    if (!isUIAllowed('commentDelete')) return
+    const tempC = comments.value.find((c) => c.id === commentId)
+
+    try {
+      comments.value = comments.value.filter((c) => c.id !== commentId)
+
+      await $api.utils.commentDelete(commentId)
+
+      // update comment count in rowMeta
+      Object.assign(row.value, {
+        ...row.value,
+        rowMeta: {
+          ...row.value.rowMeta,
+          commentCount: (row.value.rowMeta.commentCount ?? 1) - 1,
+        },
+      })
+    } catch (e: unknown) {
+      message.error(
+        await extractSdkResponseErrorMsg(
+          e as Error & {
+            response: any
+          },
+        ),
+      )
+      comments.value = [...comments.value, tempC]
+    }
+  }
+
+  const loadAudits = async (_rowId?: string) => {
+    if (!isUIAllowed('auditList') || (!row.value && !_rowId)) return
+
+    const rowId = _rowId ?? extractPkFromRow(row.value.row, meta.value.columns as ColumnType[])
+
+    if (!rowId) return
+
+    try {
+      isAuditLoading.value = true
+      audits.value =
+        (
+          await $api.utils.auditList({
+            row_id: rowId,
+            fk_model_id: meta.value.id as string,
+          })
+        ).list?.reverse?.() || []
+    } catch (e: any) {
+      message.error(
+        await extractSdkResponseErrorMsg(
+          e as Error & {
+            response: any
+          },
+        ),
+      )
+    } finally {
+      isAuditLoading.value = false
+    }
   }
 
   const isYou = (email: string) => {
@@ -118,27 +213,79 @@ const [useProvideExpandedFormStore, useExpandedFormStore] = useInjectionState((m
     }
   }
 
-  const saveComment = async () => {
+  const resolveComment = async (commentId: string) => {
+    if (!isUIAllowed('commentResolve')) return
+    const tempC = comments.value.find((c) => c.id === commentId)
+
     try {
-      if (!row.value || !comment.value) return
+      comments.value = comments.value.map((c) => {
+        if (c.id === commentId) {
+          return {
+            ...c,
+            resolved_by: tempC.resolved_by ? null : $state.user?.value?.id,
+            resolved_by_email: tempC.resolved_by ? null : $state.user?.value?.email,
+            resolved_display_name: tempC.resolved_by
+              ? null
+              : $state.user?.value?.display_name ?? $state.user?.value?.email.split('@')[0],
+          }
+        }
+        return c
+      })
+      await $api.utils.commentResolve(commentId)
+    } catch (e: unknown) {
+      comments.value = comments.value.map((c) => {
+        if (c.id === commentId) {
+          return tempC
+        }
+        return c
+      })
+      message.error(
+        await extractSdkResponseErrorMsg(
+          e as Error & {
+            response: any
+          },
+        ),
+      )
+    }
+  }
+
+  const saveComment = async (comment: string) => {
+    try {
+      if (!row.value || !comment) {
+        comments.value = comments.value.filter((c) => !c.id?.startsWith('temp-'))
+        return
+      }
 
       const rowId = extractPkFromRow(row.value.row, meta.value.columns as ColumnType[])
 
       if (!rowId) return
 
-      await api.utils.commentRow({
+      await $api.utils.commentRow({
         fk_model_id: meta.value?.id as string,
         row_id: rowId,
-        description: `The following comment has been created: ${comment.value}`,
+        comment: `${comment}`.replace(/(<br \/>)+$/g, ''),
       })
 
-      reloadTrigger?.trigger()
+      // Increase Comment Count in rowMeta
+      Object.assign(row.value, {
+        rowMeta: {
+          ...row.value.rowMeta,
+          commentCount: (row.value.rowMeta.commentCount ?? 0) + 1,
+        },
+      })
 
-      await loadCommentsAndLogs()
+      // reloadTrigger?.trigger()
 
-      comment.value = ''
+      await Promise.all([loadComments(), loadAudits()])
     } catch (e: any) {
-      message.error(e.message)
+      comments.value = comments.value.filter((c) => !(c.id ?? '').startsWith('temp-'))
+      message.error(
+        await extractSdkResponseErrorMsg(
+          e as Error & {
+            response: any
+          },
+        ),
+      )
     }
 
     $e('a:row-expand:comment')
@@ -154,6 +301,8 @@ const [useProvideExpandedFormStore, useExpandedFormStore] = useInjectionState((m
       kanbanClbk?: (row: Row, isNewRow: boolean) => void
     } = {},
   ) => {
+    if (!meta.value.id) return
+
     let data
 
     const isNewRow = row.value.rowMeta?.new ?? false
@@ -178,7 +327,10 @@ const [useProvideExpandedFormStore, useExpandedFormStore] = useInjectionState((m
 
       Object.assign(row.value, {
         row: data,
-        rowMeta: {},
+        rowMeta: {
+          ...row.value.rowMeta,
+          new: false,
+        },
         oldRow: { ...data },
       })
 
@@ -222,6 +374,7 @@ const [useProvideExpandedFormStore, useExpandedFormStore] = useInjectionState((m
         obj[col] = row.value.row[col]
         return obj
       }, {} as Record<string, any>)
+
       if (Object.keys(updateOrInsertObj).length) {
         const id = extractPkFromRow(row.value.row, meta.value.columns as ColumnType[])
 
@@ -240,7 +393,7 @@ const [useProvideExpandedFormStore, useExpandedFormStore] = useInjectionState((m
           addUndo({
             redo: {
               fn: async (id: string, data: Record<string, any>) => {
-                await $api.dbTableRow.update(NOCO, base.value.id as string, meta.value.id, encodeURIComponent(id), data)
+                await $api.dbTableRow.update(NOCO, base.value.id as string, meta.value.id!, encodeURIComponent(id), data)
                 await loadKanbanData()
 
                 reloadTrigger?.trigger()
@@ -249,7 +402,7 @@ const [useProvideExpandedFormStore, useExpandedFormStore] = useInjectionState((m
             },
             undo: {
               fn: async (id: string, data: Record<string, any>) => {
-                await $api.dbTableRow.update(NOCO, base.value.id as string, meta.value.id, encodeURIComponent(id), data)
+                await $api.dbTableRow.update(NOCO, base.value.id as string, meta.value.id!, encodeURIComponent(id), data)
                 await loadKanbanData()
                 reloadTrigger?.trigger()
               },
@@ -260,7 +413,7 @@ const [useProvideExpandedFormStore, useExpandedFormStore] = useInjectionState((m
         }
 
         if (commentsDrawer.value) {
-          await loadCommentsAndLogs()
+          await Promise.all([loadComments(), loadAudits()])
         }
       } else {
         // No columns to update
@@ -283,59 +436,80 @@ const [useProvideExpandedFormStore, useExpandedFormStore] = useInjectionState((m
   }
 
   const loadRow = async (rowId?: string, onlyVirtual = false, onlyNewColumns = false) => {
-    if (row.value.rowMeta.new) return
+    if (row?.value?.rowMeta?.new || isPublic.value || !meta.value?.id) return
 
-    if (isPublic.value || !meta.value?.id) return
-    let record = await $api.dbTableRow.read(
-      NOCO,
-      // todo: base_id missing on view type
-      (base?.value?.id || (sharedView.value?.view as any)?.base_id) as string,
-      meta.value.id as string,
-      encodeURIComponent(rowId ?? extractPkFromRow(row.value.row, meta.value.columns as ColumnType[])),
-      {
-        getHiddenColumn: true,
-      },
-    )
+    const recordId = rowId ?? extractPkFromRow(row.value.row, meta.value.columns as ColumnType[])
 
-    // update only virtual columns value if `onlyVirtual` is true
-    if (onlyVirtual) {
-      record = {
-        ...row.value.row,
-        ...meta.value.columns.reduce((partialRecord, col) => {
-          if (isVirtualCol(col) && col.title in record) {
-            partialRecord[col.title] = record[col.title]
-          }
-          return partialRecord
-        }, {} as Record<string, any>),
+    if (!recordId) return
+    let record: Record<string, any> = {}
+    try {
+      record = await $api.dbTableRow.read(
+        NOCO,
+        // todo: base_id missing on view type
+        ((base?.value?.id ?? meta.value?.base_id) || (sharedView.value?.view as any)?.base_id) as string,
+        meta.value.id as string,
+        encodeURIComponent(recordId),
+        {
+          getHiddenColumn: true,
+        },
+      )
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        const router = useRouter()
+        message.error(t('msg.noRecordFound'))
+        router.replace({ query: {} })
+      } else {
+        message.error(`${await extractSdkResponseErrorMsg(err)}`)
       }
     }
 
-    // update only new/duplicated/renamed columns value if `onlyNewColumns` is true
-    if (onlyNewColumns) {
-      record = Object.keys(record).reduce((acc, curr) => {
-        if (!Object.prototype.hasOwnProperty.call(row.value.row, curr)) {
-          acc[curr] = record[curr]
-        } else {
-          acc[curr] = row.value.row[curr]
+    try {
+      // update only virtual columns value if `onlyVirtual` is true
+      if (onlyVirtual) {
+        record = {
+          ...row.value.row,
+          ...(meta.value.columns ?? []).reduce((partialRecord, col) => {
+            if (isVirtualCol(col) && col.title && col.title in record) {
+              partialRecord[col.title] = (record as Record<string, any>)[col.title as string]
+            }
+            return partialRecord
+          }, {} as Record<string, any>),
         }
-        return acc
-      }, {} as Record<string, any>)
-    }
+      }
 
-    Object.assign(row.value, {
-      row: record,
-      oldRow: { ...record },
-      rowMeta: {},
-    })
+      // update only new/duplicated/renamed columns value if `onlyNewColumns` is true
+      if (onlyNewColumns) {
+        record = Object.keys(record).reduce((acc, curr) => {
+          if (!Object.prototype.hasOwnProperty.call(row.value.row, curr)) {
+            acc[curr] = record[curr]
+          } else {
+            acc[curr] = row.value.row[curr]
+          }
+          return acc
+        }, {} as Record<string, any>)
+      }
+
+      Object.assign(row.value, {
+        row: record,
+        oldRow: { ...record },
+        rowMeta: {
+          ...row.value.rowMeta,
+        },
+      })
+    } catch (e: any) {
+      message.error(`${t('msg.error.errorLoadingRecord')}`)
+    }
   }
 
   const deleteRowById = async (rowId?: string) => {
     try {
+      const recordId = rowId ?? extractPkFromRow(row.value.row, meta.value.columns as ColumnType[])
+
       const res: { message?: string[] } | number = await $api.dbTableRow.delete(
         NOCO,
         base.value.id as string,
         meta.value.id as string,
-        encodeURIComponent(rowId ?? extractPkFromRow(row.value.row, meta.value.columns as ColumnType[])),
+        encodeURIComponent(recordId),
       )
 
       if (res.message) {
@@ -351,19 +525,48 @@ const [useProvideExpandedFormStore, useExpandedFormStore] = useInjectionState((m
     }
   }
 
-  const updateComment = async (auditId: string, audit: Partial<AuditType>) => {
-    return await $api.utils.commentUpdate(auditId, audit)
+  const updateComment = async (commentId: string, comment: Partial<CommentType>) => {
+    const tempEdit = comments.value.find((c) => c.id === commentId)
+    try {
+      comments.value = comments.value.map((c) => {
+        if (c.id === commentId) {
+          return {
+            ...c,
+            ...comment,
+            updated_at: new Date().toISOString(),
+          }
+        }
+        return c
+      })
+      await $api.utils.commentUpdate(commentId, comment)
+    } catch (e: any) {
+      comments.value = comments.value.map((c) => {
+        if (c.id === commentId) {
+          return tempEdit
+        }
+        return c
+      })
+      message.error(
+        await extractSdkResponseErrorMsg(
+          e as Error & {
+            response: any
+          },
+        ),
+      )
+    }
   }
 
   return {
     ...rowStore,
-    commentsOnly,
-    loadCommentsAndLogs,
-    commentsAndLogs,
+    loadComments,
+    deleteComment,
+    loadAudits,
+    comments,
+    audits,
+    isAuditLoading,
+    resolveComment,
     isCommentsLoading,
-    commentsError,
     saveComment,
-    comment,
     isYou,
     commentsDrawer,
     row,

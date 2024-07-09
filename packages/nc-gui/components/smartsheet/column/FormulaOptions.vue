@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
+
 import type { ListItem as AntListItem } from 'ant-design-vue'
 import jsep from 'jsep'
+import type { ColumnType, FormulaType } from 'nocodb-sdk'
 import {
   FormulaError,
   UITypes,
@@ -10,7 +12,6 @@ import {
   substituteColumnIdWithAliasInFormula,
   validateFormulaAndExtractTreeWithType,
 } from 'nocodb-sdk'
-import type { ColumnType, FormulaType } from 'nocodb-sdk'
 
 const props = defineProps<{
   value: any
@@ -22,7 +23,7 @@ const uiTypesNotSupportedInFormulas = [UITypes.QrCode, UITypes.Barcode]
 
 const vModel = useVModel(props, 'value', emit)
 
-const { setAdditionalValidations, validateInfos, sqlUi, column } = useColumnCreateStoreOrThrow()
+const { setAdditionalValidations, validateInfos, sqlUi, column, fromTableExplorer } = useColumnCreateStoreOrThrow()
 
 const { t } = useI18n()
 
@@ -47,6 +48,8 @@ const supportedColumns = computed(
 const { getMeta } = useMetas()
 
 const suggestionPreviewed = ref<Record<any, string> | undefined>()
+
+const showFunctionList = ref<boolean>(true)
 
 const validators = {
   formula_raw: [
@@ -83,8 +86,6 @@ const availableBinOps = ['+', '-', '*', '/', '>', '<', '==', '<=', '>=', '!=', '
 const autocomplete = ref(false)
 
 const formulaRef = ref()
-
-const sugListRef = ref()
 
 const variableListRef = ref<(typeof AntListItem)[]>([])
 
@@ -124,7 +125,7 @@ const suggestionsList = computed(() => {
         .map((c: any) => ({
           text: c.title,
           type: 'column',
-          icon: getUIDTIcon(c.uidt),
+          icon: getUIDTIcon(c.uidt) ? markRaw(getUIDTIcon(c.uidt)!) : undefined,
           uidt: c.uidt,
         })),
       ...availableBinOps.map((op: string) => ({
@@ -218,7 +219,11 @@ function handleInput() {
 
   if (!isCurlyBracketBalanced()) {
     suggestion.value = suggestion.value.filter((v) => v.type === 'column')
+    showFunctionList.value = false
+  } else if (!showFunctionList.value) {
+    showFunctionList.value = true
   }
+
   autocomplete.value = !!suggestion.value.length
 }
 
@@ -283,27 +288,77 @@ setAdditionalValidations({
 onMounted(() => {
   jsep.plugins.register(jsepCurlyHook)
 })
+
+const suggestionPreviewPostion = ref({
+  top: '0px',
+  left: '-344px',
+})
+
+onMounted(() => {
+  // wait until MFE field modal transition complete
+  setTimeout(() => {
+    const textAreaPosition = formulaRef.value?.$el?.getBoundingClientRect()
+    if (!textAreaPosition) return
+
+    if (fromTableExplorer?.value) {
+      suggestionPreviewPostion.value.left = `${textAreaPosition.left - 344}px`
+      suggestionPreviewPostion.value.top = `${textAreaPosition.top}px`
+    } else {
+      suggestionPreviewPostion.value.left = textAreaPosition.left < 352 ? '350px' : '-344px'
+      suggestionPreviewPostion.value.top = `0px`
+    }
+  }, 250)
+})
+
+const handleKeydown = (e: KeyboardEvent) => {
+  e.stopPropagation()
+  switch (e.key) {
+    case 'ArrowUp': {
+      e.preventDefault()
+      suggestionListUp()
+      break
+    }
+    case 'ArrowDown': {
+      e.preventDefault()
+      suggestionListDown()
+      break
+    }
+    case 'Enter': {
+      e.preventDefault()
+      selectText()
+      break
+    }
+  }
+}
 </script>
 
 <template>
   <div class="formula-wrapper relative">
     <div
       v-if="suggestionPreviewed && !suggestionPreviewed.unsupported && suggestionPreviewed.type === 'function'"
-      class="absolute -left-91 w-84 top-0 bg-white z-10 pl-3 pt-3 border-1 shadow-md rounded-xl"
+      class="w-84 bg-white z-10 pl-3 pt-3 border-1 shadow-md rounded-xl"
+      :class="{
+        'fixed': fromTableExplorer,
+        'absolute top-0': !fromTableExplorer,
+      }"
+      :style="{
+        left: suggestionPreviewPostion.left,
+        top: suggestionPreviewPostion.top,
+      }"
     >
       <div class="pr-3">
-        <div class="flex flex-row w-full justify-between pb-1 border-b-1">
-          <div class="flex items-center gap-x-1 font-semibold text-base">
+        <div class="flex flex-row w-full justify-between pb-2 border-b-1">
+          <div class="flex items-center gap-x-1 font-semibold text-base text-gray-600">
             <component :is="iconMap.function" class="text-lg" />
             {{ suggestionPreviewed.text }}
           </div>
-          <NcButton type="text" size="small" @click="suggestionPreviewed = undefined">
+          <NcButton type="text" size="small" class="!h-7 !w-7 !min-w-0" @click="suggestionPreviewed = undefined">
             <GeneralIcon icon="close" />
           </NcButton>
         </div>
       </div>
-      <div class="flex flex-col max-h-120 nc-scrollbar-md pr-2">
-        <div class="flex mt-3">{{ suggestionPreviewed.description }}</div>
+      <div class="flex flex-col max-h-120 nc-scrollbar-thin pr-2">
+        <div class="flex mt-3 text-sm">{{ suggestionPreviewed.description }}</div>
 
         <div class="text-gray-500 uppercase text-xs mt-3 mb-2">Syntax</div>
         <div class="bg-white rounded-md py-1 px-2 border-1">{{ suggestionPreviewed.syntax }}</div>
@@ -322,16 +377,16 @@ onMounted(() => {
           {{ example }}
         </div>
       </div>
-      <div class="flex flex-row mt-1 mb-3 justify-end pr-3">
+      <div class="flex flex-row mt-3 mb-3 justify-end pr-3">
         <a v-if="suggestionPreviewed.docsUrl" target="_blank" rel="noopener noreferrer" :href="suggestionPreviewed.docsUrl">
-          <NcButton type="text" class="!text-gray-400 !hover:text-gray-800 !text-xs"
+          <NcButton type="text" size="small" class="!text-gray-400 !hover:text-gray-700 !text-xs"
             >View in Docs
             <GeneralIcon icon="openInNew" class="ml-1" />
           </NcButton>
         </a>
       </div>
     </div>
-    <a-form-item v-bind="validateInfos.formula_raw" class="!pb-1" :label="$t('datatype.Formula')">
+    <a-form-item v-bind="validateInfos.formula_raw" :label="$t('datatype.Formula')">
       <!-- <GeneralIcon
         v-if="isEeUI"
         icon="magic"
@@ -342,23 +397,19 @@ onMounted(() => {
       <a-textarea
         ref="formulaRef"
         v-model:value="vModel.formula_raw"
-        class="nc-formula-input !rounded-md !my-1"
-        @keydown.down.prevent="suggestionListDown"
-        @keydown.up.prevent="suggestionListUp"
-        @keydown.enter.prevent="selectText"
+        class="nc-formula-input !rounded-md"
+        @keydown="handleKeydown"
         @change="handleInputDeb"
       />
     </a-form-item>
 
-    <div ref="sugListRef" class="h-[250px] overflow-auto nc-scrollbar-md">
-      <template v-if="suggestedFormulas.length > 0">
-        <div class="rounded-t-lg border-1 bg-gray-50 px-3 py-1 uppercase text-gray-600 text-xs">Formulas</div>
+    <div class="h-[250px] overflow-auto nc-scrollbar-thin border-1 border-gray-200 rounded-lg mt-4">
+      <template v-if="suggestedFormulas && showFunctionList">
+        <div class="border-b-1 bg-gray-50 px-3 py-1 uppercase text-gray-600 text-xs font-semibold sticky top-0 z-10">
+          Formulas
+        </div>
 
-        <a-list
-          :data-source="suggestedFormulas"
-          :locale="{ emptyText: $t('msg.formula.noSuggestedFormulaFound') }"
-          class="border-1 border-t-0 rounded-b-lg !mb-4"
-        >
+        <a-list :data-source="suggestedFormulas" :locale="{ emptyText: $t('msg.formula.noSuggestedFormulaFound') }">
           <template #renderItem="{ item, index }">
             <a-list-item
               :ref="
@@ -377,12 +428,12 @@ onMounted(() => {
               <a-list-item-meta>
                 <template #title>
                   <div class="flex items-center gap-x-1" :class="{ 'text-gray-400': item.unsupported }">
-                    <component :is="iconMap.function" v-if="item.type === 'function'" class="text-lg" />
+                    <component :is="iconMap.function" v-if="item.type === 'function'" class="w-4 h-4 !text-gray-600" />
 
-                    <component :is="iconMap.calculator" v-if="item.type === 'op'" class="text-lg" />
+                    <component :is="iconMap.calculator" v-if="item.type === 'op'" class="w-4 h-4 !text-gray-600" />
 
-                    <component :is="item.icon" v-if="item.type === 'column'" class="text-lg" />
-                    <span class="prose-sm" :class="{ 'text-gray-600': !item.unsupported }">{{ item.text }}</span>
+                    <component :is="item.icon" v-if="item.type === 'column'" class="w-4 h-4 !text-gray-600" />
+                    <span class="text-small leading-[18px]" :class="{ 'text-gray-800': !item.unsupported }">{{ item.text }}</span>
                   </div>
                   <div v-if="item.unsupported" class="ml-5 text-gray-400 text-xs">{{ $t('msg.formulaNotSupported') }}</div>
                 </template>
@@ -392,14 +443,14 @@ onMounted(() => {
         </a-list>
       </template>
 
-      <template v-if="variableList.length > 0">
-        <div class="rounded-t-lg border-1 bg-gray-50 px-3 py-1 uppercase text-gray-600 text-xs">Fields</div>
+      <template v-if="variableList">
+        <div class="border-b-1 bg-gray-50 px-3 py-1 uppercase text-gray-600 text-xs font-semibold sticky top-0 z-10">Fields</div>
 
         <a-list
           ref="variableListRef"
           :data-source="variableList"
-          :locale="{ emptyText: $t('msg.formula.noSuggestedFormulaFound') }"
-          class="border-1 border-t-0 rounded-b-lg !overflow-hidden"
+          :locale="{ emptyText: $t('msg.formula.noSuggestedFieldFound') }"
+          class="!overflow-hidden"
         >
           <template #renderItem="{ item, index }">
             <a-list-item
@@ -414,12 +465,22 @@ onMounted(() => {
               class="cursor-pointer hover:bg-gray-50"
               @click.prevent.stop="appendText(item)"
             >
-              <a-list-item-meta>
+              <a-list-item-meta class="nc-variable-list-item">
                 <template #title>
-                  <div class="flex items-center gap-x-1">
-                    <component :is="item.icon" class="text-lg" />
+                  <div class="flex items-center gap-x-1 justify-between">
+                    <div class="flex items-center gap-x-1 rounded-md bg-gray-200 px-1 h-5">
+                      <component :is="item.icon" class="w-4 h-4 !text-gray-600" />
 
-                    <span class="prose-sm text-gray-600">{{ item.text }}</span>
+                      <span class="text-small leading-[18px] text-gray-800 font-weight-500">{{ item.text }}</span>
+                    </div>
+
+                    <NcButton
+                      size="small"
+                      type="text"
+                      class="nc-variable-list-item-use-field-btn !h-7 px-3 !text-small invisible"
+                    >
+                      {{ $t('general.use') }} {{ $t('objects.field').toLowerCase() }}
+                    </NcButton>
                   </div>
                 </template>
               </a-list-item-meta>
@@ -427,15 +488,29 @@ onMounted(() => {
           </template>
         </a-list>
       </template>
-      <div v-if="suggestion.length === 0">
-        <span class="text-gray-500">Empty</span>
-      </div>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
 :deep(.ant-list-item) {
-  @apply !pt-1.75 pb-0.75 !px-2;
+  @apply !py-0 !px-2;
+
+  &:not(:has(.nc-variable-list-item)) {
+    @apply !py-[7px] !px-2;
+  }
+  .nc-variable-list-item {
+    @apply min-h-8 flex items-center;
+  }
+  .ant-list-item-meta-title {
+    @apply m-0;
+  }
+  &.ant-list-item,
+  &.ant-list-item:last-child {
+    @apply !border-b-1 border-gray-200 border-solid;
+  }
+  &:hover .nc-variable-list-item-use-field-btn {
+    @apply visible;
+  }
 }
 </style>

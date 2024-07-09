@@ -7,6 +7,7 @@ import {
   type LookupType,
   type RollupType,
   isLinksOrLTAR,
+  readonlyMetaAllowedTypes,
 } from 'nocodb-sdk'
 import { RelationTypes, UITypes, UITypesName, substituteColumnIdWithAliasInFormula } from 'nocodb-sdk'
 
@@ -36,7 +37,7 @@ provide(ColumnInj, column)
 
 const { metas } = useMetas()
 
-const { isUIAllowed } = useRoles()
+const { isUIAllowed, isMetaReadOnly } = useRoles()
 
 const meta = inject(MetaInj, ref())
 
@@ -46,7 +47,7 @@ const isForm = inject(IsFormInj, ref(false))
 
 const isExpandedForm = inject(IsExpandedFormOpenInj, ref(false))
 
-const colOptions = computed(() => column.value?.colOptions)
+const isExpandedBulkUpdateForm = inject(IsExpandedBulkUpdateFormOpenInj, ref(false))
 
 const tableTile = computed(() => meta?.value?.title)
 
@@ -68,22 +69,6 @@ const relatedTableMeta = computed(
 
 const relatedTableTitle = computed(() => relatedTableMeta.value?.title)
 
-const childColumn = computed(() => {
-  if (relatedTableMeta.value?.columns) {
-    if (isRollup(column.value)) {
-      return relatedTableMeta.value?.columns.find(
-        (c: ColumnType) => c.id === (colOptions.value as RollupType).fk_rollup_column_id,
-      )
-    }
-    if (isLookup(column.value)) {
-      return relatedTableMeta.value?.columns.find(
-        (c: ColumnType) => c.id === (colOptions.value as LookupType).fk_lookup_column_id,
-      )
-    }
-  }
-  return ''
-})
-
 const tooltipMsg = computed(() => {
   if (!column.value) {
     return ''
@@ -97,8 +82,6 @@ const tooltipMsg = computed(() => {
     return `'${column?.value?.title}' ${t('labels.belongsTo')} '${relatedTableTitle.value}'`
   } else if (isOo(column.value)) {
     return `'${tableTile.value}' & '${relatedTableTitle.value}' ${t('labels.oneToOne')}`
-  } else if (isLookup(column.value)) {
-    return `'${childColumn.value.title}' from '${relatedTableTitle.value}' (${childColumn.value.uidt})`
   } else if (isFormula(column.value)) {
     const formula = substituteColumnIdWithAliasInFormula(
       (column.value?.colOptions as FormulaType)?.formula,
@@ -106,14 +89,12 @@ const tooltipMsg = computed(() => {
       (column.value?.colOptions as any)?.formula_raw,
     )
     return `Formula - ${formula}`
-  } else if (isRollup(column.value)) {
-    return `'${childColumn.value.title}' of '${relatedTableTitle.value}' (${childColumn.value.uidt})`
   }
   return column?.value?.title || ''
 })
 
 const showTooltipAlways = computed(() => {
-  return isLinksOrLTAR(column.value) || isFormula(column.value) || isRollup(column.value) || isLookup(column.value)
+  return isLinksOrLTAR(column.value) || isFormula(column.value)
 })
 
 const columnOrder = ref<Pick<ColumnReqType, 'column_order'> | null>(null)
@@ -140,9 +121,14 @@ const closeAddColumnDropdown = () => {
 }
 
 const openHeaderMenu = (e?: MouseEvent) => {
-  if (isLocked.value || (isExpandedForm.value && e?.type === 'dblclick')) return
+  if (isLocked.value || (isExpandedForm.value && e?.type === 'dblclick') || isExpandedBulkUpdateForm.value) return
 
-  if (!isForm.value && isUIAllowed('fieldEdit') && !isMobileMode.value) {
+  if (
+    !isForm.value &&
+    isUIAllowed('fieldEdit') &&
+    !isMobileMode.value &&
+    (!isMetaReadOnly.value || readonlyMetaAllowedTypes.includes(column.value.uidt))
+  ) {
     editColumnDropdown.value = true
   }
 }
@@ -165,7 +151,7 @@ const onClick = (e: Event) => {
     e.preventDefault()
     e.stopPropagation()
   } else {
-    if (isExpandedForm.value && !editColumnDropdown.value) {
+    if (isExpandedForm.value && !editColumnDropdown.value && !isExpandedBulkUpdateForm.value) {
       isDropDownOpen.value = true
       return
     }
@@ -179,9 +165,10 @@ const onClick = (e: Event) => {
   <div
     class="flex items-center w-full h-full text-small text-gray-500 font-weight-medium group"
     :class="{
-      'flex-col !items-start justify-center': isExpandedForm,
-      'bg-gray-100': isExpandedForm ? editColumnDropdown || isDropDownOpen : false,
-      'cursor-pointer hover:bg-gray-100': isExpandedForm && !isMobileMode && isUIAllowed('fieldEdit'),
+      'flex-col !items-start justify-center pt-0.5': isExpandedForm && !isMobileMode && !isExpandedBulkUpdateForm,
+      'bg-gray-100': isExpandedForm && !isExpandedBulkUpdateForm ? editColumnDropdown || isDropDownOpen : false,
+      'nc-cell-expanded-form-header cursor-pointer hover:bg-gray-100':
+        isExpandedForm && !isMobileMode && isUIAllowed('fieldEdit') && !isExpandedBulkUpdateForm,
     }"
     @dblclick="openHeaderMenu"
     @click.right="openDropDown"
@@ -191,7 +178,7 @@ const onClick = (e: Event) => {
       class="nc-virtual-cell-name-wrapper flex-1 flex items-center"
       :class="{
         'max-w-[calc(100%_-_23px)]': !isExpandedForm,
-        'max-w-full': isExpandedForm,
+        'max-w-full': isExpandedForm && !isExpandedBulkUpdateForm,
       }"
     >
       <template v-if="column && !props.hideIcon">
@@ -208,7 +195,7 @@ const onClick = (e: Event) => {
         <span
           :data-test-id="column.title"
           :class="{
-            'select-none': isExpandedForm,
+            'select-none': isExpandedForm && !isExpandedBulkUpdateForm,
           }"
         >
           {{ column.title }}
@@ -218,9 +205,9 @@ const onClick = (e: Event) => {
       <span v-if="isVirtualColRequired(column, meta?.columns || []) || required" class="text-red-500">&nbsp;*</span>
 
       <GeneralIcon
-        v-if="isExpandedForm && !isMobileMode && isUIAllowed('fieldEdit')"
+        v-if="isExpandedForm && !isMobileMode && isUIAllowed('fieldEdit') && !isExpandedBulkUpdateForm"
         icon="arrowDown"
-        class="flex-none h-full cursor-pointer ml-1 group-hover:visible"
+        class="flex-none cursor-pointer ml-1 group-hover:visible w-4 h-4"
         :class="{
           visible: editColumnDropdown || isDropDownOpen,
           invisible: !(editColumnDropdown || isDropDownOpen),
@@ -244,10 +231,10 @@ const onClick = (e: Event) => {
       v-model:visible="editColumnDropdown"
       class="h-full"
       :trigger="['click']"
-      :placement="isExpandedForm ? 'bottomLeft' : 'bottomRight'"
-      overlay-class-name="nc-dropdown-edit-column"
+      :placement="isExpandedForm && !isExpandedBulkUpdateForm ? 'bottomLeft' : 'bottomRight'"
+      :overlay-class-name="`nc-dropdown-edit-column ${editColumnDropdown ? 'active' : ''}`"
     >
-      <div v-if="isExpandedForm" class="h-[1px]" @dblclick.stop>&nbsp;</div>
+      <div v-if="isExpandedForm && !isExpandedBulkUpdateForm" class="h-[1px]" @dblclick.stop>&nbsp;</div>
       <div v-else />
       <template #overlay>
         <SmartsheetColumnEditOrAddProvider

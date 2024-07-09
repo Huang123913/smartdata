@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
 import { type UserType, ViewTypes } from 'nocodb-sdk';
 import { BaseUser } from '~/models';
 import { TablesService } from '~/services/tables.service';
 import { deserializeJSON } from '~/utils/serialize';
+
+import { Injectable } from '@nestjs/common';
 
 const viewTypeAlias: Record<number, string> = {
   [ViewTypes.GRID]: 'grid',
@@ -32,6 +33,7 @@ export class CommandPaletteService {
         viewList.push(
           ...(
             (await this.tablesService.xcVisibilityMetaGet(
+              { workspace_id: base.fk_workspace_id, base_id: base.id },
               base.id,
               null,
               false,

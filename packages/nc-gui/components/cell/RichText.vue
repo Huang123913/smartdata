@@ -1,15 +1,16 @@
 <script lang="ts" setup>
-import StarterKit from '@tiptap/starter-kit'
-import TaskList from '@tiptap/extension-task-list'
-import { EditorContent, useEditor } from '@tiptap/vue-3'
-import TurndownService from 'turndown'
-import { marked } from 'marked'
-import { generateJSON } from '@tiptap/html'
-import Underline from '@tiptap/extension-underline'
-import Placeholder from '@tiptap/extension-placeholder'
-import { TaskItem } from '~/helpers/dbTiptapExtensions/task-item'
-import { Link } from '~/helpers/dbTiptapExtensions/links'
 import type { RichTextBubbleMenuOptions } from '#imports'
+import { marked } from 'marked'
+import TurndownService from 'turndown'
+import { Link } from '~/helpers/dbTiptapExtensions/links'
+import { TaskItem } from '~/helpers/dbTiptapExtensions/task-item'
+
+import Placeholder from '@tiptap/extension-placeholder'
+import TaskList from '@tiptap/extension-task-list'
+import Underline from '@tiptap/extension-underline'
+import { generateJSON } from '@tiptap/html'
+import StarterKit from '@tiptap/starter-kit'
+import { EditorContent, useEditor } from '@tiptap/vue-3'
 
 const props = withDefaults(
   defineProps<{
@@ -40,15 +41,27 @@ const rowHeight = inject(RowHeightInj, ref(1 as const))
 
 const readOnlyCell = inject(ReadonlyInj, ref(false))
 
+const isEditColumn = inject(EditColumnInj, ref(false))
+
 const isForm = inject(IsFormInj, ref(false))
 
 const isGrid = inject(IsGridInj, ref(false))
 
 const isSurveyForm = inject(IsSurveyFormInj, ref(false))
 
+const isGallery = inject(IsGalleryInj, ref(false))
+
+const isKanban = inject(IsKanbanInj, ref(false))
+
 const isFocused = ref(false)
 
 const keys = useMagicKeys()
+
+const localRowHeight = computed(() => {
+  if (readOnlyCell.value && !isExpandedFormOpen.value && (isGallery.value || isKanban.value)) return 6
+
+  return rowHeight.value
+})
 
 const shouldShowLinkOption = computed(() => {
   return isFormField.value ? isFocused.value : true
@@ -155,7 +168,7 @@ const editor = useEditor({
       .turndown(editor.getHTML().replaceAll(/<p><\/p>/g, '<br />'))
       .replaceAll(/\n\n<br \/>\n\n/g, '<br>\n\n')
 
-    vModel.value = isFormField.value && markdown === '<br />' ? '' : markdown
+    vModel.value = markdown === '<br />' ? '' : markdown
   },
   editable: !props.readOnly,
   autofocus: props.autofocus,
@@ -205,7 +218,7 @@ const onFocusWrapper = () => {
 
 if (props.syncValueChange) {
   watch([vModel, editor], () => {
-    setEditorContent(vModel.value)
+    setEditorContent(isFormField.value ? (vModel.value || '')?.replace(/(<br \/>)+$/g, '') : vModel.value)
   })
 }
 
@@ -220,7 +233,7 @@ if (isFormField.value) {
 }
 
 onMounted(() => {
-  if (fullMode.value || isFormField.value || isForm.value) {
+  if (fullMode.value || isFormField.value || isForm.value || isEditColumn.value) {
     setEditorContent(vModel.value, true)
 
     if (fullMode.value || isSurveyForm.value) {
@@ -320,8 +333,8 @@ onClickOutside(editorDom, (e) => {
           'mt-2.5 flex-grow': fullMode,
           'scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent': !fullMode || (!fullMode && isExpandedFormOpen),
           'flex-grow': isExpandedFormOpen,
-          [`!overflow-hidden nc-truncate nc-line-clamp-${rowHeightTruncateLines(rowHeight)}`]:
-            !fullMode && readOnly && rowHeight && !isExpandedFormOpen && !isForm,
+          [`!overflow-hidden nc-truncate nc-line-clamp-${rowHeightTruncateLines(localRowHeight)}`]:
+            !fullMode && readOnly && localRowHeight && !isExpandedFormOpen && !isForm,
         }"
         @keydown.alt.enter.stop
         @keydown.shift.enter.stop
@@ -391,6 +404,17 @@ onClickOutside(editorDom, (e) => {
         resize: none;
         white-space: pre-line;
       }
+    }
+  }
+  &.allow-vertical-resize:not(.readonly) {
+    .ProseMirror {
+      @apply nc-scrollbar-thin;
+
+      overflow-y: auto;
+      overflow-x: hidden;
+      resize: vertical;
+      min-width: 100%;
+      max-height: min(800px, calc(100vh - 200px)) !important;
     }
   }
 }

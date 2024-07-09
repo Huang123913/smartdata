@@ -1,6 +1,7 @@
 <script lang="ts" setup>
-import type { VNodeRef } from '@vue/runtime-core'
 import { extractEmail } from '~/helpers/parsers/parserHelpers'
+
+import type { VNodeRef } from '@vue/runtime-core'
 
 interface Props {
   modelValue: string | null | undefined
@@ -81,7 +82,6 @@ watch(
     :ref="focus"
     v-model="vModel"
     class="nc-cell-field w-full outline-none py-1"
-    :placeholder="isEditColumn ? $t('labels.optional') : ''"
     @blur="editEnabled = false"
     @keydown.down.stop
     @keydown.left.stop
@@ -98,7 +98,7 @@ watch(
   <nuxt-link
     v-else-if="validEmail"
     no-ref
-    class="py-1 underline hover:opacity-75 inline-block nc-cell-field-link max-w-full"
+    class="py-1 underline inline-block nc-cell-field-link max-w-full"
     :href="`mailto:${vModel}`"
     target="_blank"
     :tabindex="readOnly ? -1 : 0"

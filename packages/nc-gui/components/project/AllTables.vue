@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { SourceType, TableType } from 'nocodb-sdk'
 import dayjs from 'dayjs'
-import NcTooltip from '~/components/nc/Tooltip.vue'
 
 const { activeTables } = storeToRefs(useTablesStore())
 const { openTable } = useTablesStore()
@@ -91,7 +90,7 @@ const onCreateBaseClick = () => {
       }"
     >
       <div
-        v-if="isUIAllowed('tableCreate')"
+        v-if="isUIAllowed('tableCreate', { source: base?.sources?.[0] })"
         role="button"
         class="nc-base-view-all-table-btn"
         data-testid="proj-view-btn__add-new-table"
@@ -101,7 +100,7 @@ const onCreateBaseClick = () => {
         <div class="label">{{ $t('general.new') }} {{ $t('objects.table') }}</div>
       </div>
       <div
-        v-if="isUIAllowed('tableCreate')"
+        v-if="isUIAllowed('tableCreate', { source: base?.sources?.[0] })"
         role="button"
         class="nc-base-view-all-table-btn"
         data-testid="proj-view-btn__add-new-table"
@@ -111,7 +110,7 @@ const onCreateBaseClick = () => {
         <div class="label">提问 建表</div>
       </div>
       <div
-        v-if="isUIAllowed('tableCreate')"
+        v-if="isUIAllowed('tableCreate', { source: base?.sources?.[0] })"
         v-e="['c:table:import']"
         role="button"
         class="nc-base-view-all-table-btn"
@@ -209,7 +208,7 @@ const onCreateBaseClick = () => {
     </div>
 
     <ProjectImportModal v-if="defaultBase" v-model:visible="isImportModalOpen" :source="defaultBase" />
-<!--    <LazyDashboardSettingsDataSourcesCreateBase v-model:open="isNewBaseModalOpen" />-->
+    <!--    <LazyDashboardSettingsDataSourcesCreateBase v-model:open="isNewBaseModalOpen" />-->
   </div>
 </template>
 

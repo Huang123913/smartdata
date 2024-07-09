@@ -1,16 +1,18 @@
 import type { Source } from '~/models';
+import type { NcContext } from '~/interface/config';
 
 export async function generateBaseIdMap(
+  context: NcContext,
   source: Source,
   idMap: Map<string, string>,
 ) {
   idMap.set(source.base_id, source.base_id);
   idMap.set(source.id, `${source.base_id}::${source.id}`);
-  const models = await source.getModels();
+  const models = await source.getModels(context);
 
   for (const md of models) {
     idMap.set(md.id, `${source.base_id}::${source.id}::${md.id}`);
-    await md.getColumns();
+    await md.getColumns(context);
     for (const column of md.columns) {
       idMap.set(column.id, `${idMap.get(md.id)}::${column.id}`);
     }
@@ -72,6 +74,9 @@ export function findWithIdentifier(map: Map<string, any>, id: string) {
 }
 
 export function generateUniqueName(name: string, names: string[]) {
+  // if name is unique, return it
+  if (!names.includes(name)) return name;
+  // if name is not unique, add a number suffix
   let newName = name;
   let i = 1;
   while (names.includes(newName)) {

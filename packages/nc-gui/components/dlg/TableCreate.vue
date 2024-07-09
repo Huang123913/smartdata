@@ -137,7 +137,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <NcModal v-model:visible="dialogShow" :header="$t('activity.createTable')" size="small" @keydown.esc="dialogShow = false">
+  <NcModal
+    v-model:visible="dialogShow"
+    :show-separator="false"
+    :header="$t('activity.createTable')"
+    size="small"
+    @keydown.esc="dialogShow = false"
+  >
     <template #header>
       <div class="flex flex-row items-center gap-x-2">
         <GeneralIcon icon="table" class="!text-gray-600/75" />
@@ -212,12 +218,13 @@ onMounted(() => {
             </a-row>
           </div>
         </div>
-        <div class="flex flex-row justify-end gap-x-2 mt-2">
-          <NcButton type="secondary" @click="dialogShow = false">{{ $t('general.cancel') }}</NcButton>
+        <div class="flex flex-row justify-end gap-x-2">
+          <NcButton type="secondary" size="small" @click="dialogShow = false">{{ $t('general.cancel') }}</NcButton>
 
           <NcButton
             v-e="['a:table:create']"
             type="primary"
+            size="small"
             :disabled="validateInfos.title.validateStatus === 'error'"
             :loading="creating"
             @click="_createTable"

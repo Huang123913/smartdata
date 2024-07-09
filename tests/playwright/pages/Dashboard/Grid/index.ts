@@ -1,18 +1,20 @@
 import { expect, Locator } from '@playwright/test';
-import { DashboardPage } from '..';
+
+import { DashboardPage } from '../';
 import BasePage from '../../Base';
+import { BarcodeOverlay } from '../BarcodeOverlay';
 import { CellPageObject, CellProps } from '../common/Cell';
-import { ColumnPageObject } from './Column';
-import { TopbarPage } from '../common/Topbar';
-import { ToolbarPage } from '../common/Toolbar';
 import { FootbarPage } from '../common/Footbar';
 import { ProjectMenuObject } from '../common/ProjectMenu';
-import { QrCodeOverlay } from '../QrCodeOverlay';
-import { BarcodeOverlay } from '../BarcodeOverlay';
-import { RowPageObject } from './Row';
+import { ToolbarPage } from '../common/Toolbar';
+import { TopbarPage } from '../common/Topbar';
 import { WorkspaceMenuObject } from '../common/WorkspaceMenu';
-import { GroupPageObject } from './Group';
+import { QrCodeOverlay } from '../QrCodeOverlay';
+import { AggregaionBarPage } from './AggregationBar';
+import { ColumnPageObject } from './Column';
 import { ColumnHeaderPageObject } from './columnHeader';
+import { GroupPageObject } from './Group';
+import { RowPageObject } from './Row';
 
 export class GridPage extends BasePage {
   readonly dashboard: DashboardPage;
@@ -30,6 +32,7 @@ export class GridPage extends BasePage {
   readonly workspaceMenu: WorkspaceMenuObject;
   readonly rowPage: RowPageObject;
   readonly groupPage: GroupPageObject;
+  readonly aggregationBar: AggregaionBarPage;
 
   readonly btn_addNewRow: Locator;
 
@@ -49,6 +52,7 @@ export class GridPage extends BasePage {
     this.workspaceMenu = new WorkspaceMenuObject(this);
     this.rowPage = new RowPageObject(this);
     this.groupPage = new GroupPageObject(this);
+    this.aggregationBar = new AggregaionBarPage(this);
 
     this.btn_addNewRow = this.get().locator('.nc-grid-add-new-cell');
   }
@@ -354,7 +358,7 @@ export class GridPage extends BasePage {
     while (parseInt(recordCnt) !== count && i < 5) {
       await this.get().locator(`.nc-pagination-skeleton`).waitFor({ state: 'hidden' });
       records = await this.get().locator(`[data-testid="grid-pagination"]`).allInnerTexts();
-      recordCnt = records[0].split(' ')[0];
+      recordCnt = (records[0] ?? '').split(' ')[0];
 
       // to ensure page loading is complete
       i++;
@@ -402,7 +406,7 @@ export class GridPage extends BasePage {
       return;
     }
 
-    await expect(this.get().locator(`.nc-pagination .ant-select-selection-item`).first()).toHaveText(pageNumber);
+    await expect(this.get().locator(`.nc-pagination .nc-current-page`).first()).toHaveText(pageNumber);
   }
 
   async waitLoading() {

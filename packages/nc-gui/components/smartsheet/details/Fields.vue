@@ -1,10 +1,19 @@
 <script setup lang="ts">
-import { diff } from 'deep-object-diff'
 import { message } from 'ant-design-vue'
-import { UITypes, isSystemColumn, isVirtualCol } from 'nocodb-sdk'
+import { diff } from 'deep-object-diff'
+import type { ColumnType, FilterType, SelectOptionsType } from 'nocodb-sdk'
+import {
+  UITypes,
+  isLinksOrLTAR,
+  isSystemColumn,
+  isVirtualCol,
+  partialUpdateAllowedTypes,
+  readonlyMetaAllowedTypes,
+} from 'nocodb-sdk'
 import Draggable from 'vuedraggable'
+import { generateUniqueColumnName } from '~/helpers/parsers/parserHelpers'
+
 import { onKeyDown, useMagicKeys } from '@vueuse/core'
-import type { ColumnType, SelectOptionsType } from 'nocodb-sdk'
 
 interface TableExplorerColumn extends ColumnType {
   id?: string
@@ -14,6 +23,7 @@ interface TableExplorerColumn extends ColumnType {
     view_id: string
   }
   view_id?: string
+  userHasChangedTitle?: boolean
 }
 
 interface op {
@@ -43,6 +53,8 @@ const { meta, view } = useSmartsheetStoreOrThrow()
 const isLocked = inject(IsLockedInj, ref(false))
 
 const { openedViewsTab } = storeToRefs(useViewsStore())
+
+const localMetaColumns = ref<ColumnType[] | undefined>([])
 
 const moveOps = ref<moveOp[]>([])
 
@@ -97,7 +109,7 @@ const getFieldOrder = (field?: TableExplorerColumn) => {
 
 const fields = computed<TableExplorerColumn[]>({
   get: () => {
-    const x = ((meta.value?.columns as ColumnType[]) ?? [])
+    const x = ((localMetaColumns.value as ColumnType[]) ?? [])
       .filter((field) => !field.fk_column_id && !isSystemColumn(field))
       .concat(newFields.value)
       .map((field) => updateDefaultColumnValues(field))
@@ -107,7 +119,7 @@ const fields = computed<TableExplorerColumn[]>({
     return x
   },
   set: (val) => {
-    meta.value!.columns = meta.value?.columns?.map((col) => {
+    localMetaColumns.value = localMetaColumns.value?.map((col) => {
       const field = val.find((f) => compareCols(f, col))
       if (field) {
         return field
@@ -178,7 +190,29 @@ const setFieldMoveHook = (field: TableExplorerColumn, before = false) => {
   }
 }
 
+const { isMetaReadOnly } = useRoles()
+
+const isColumnUpdateAllowed = (column: ColumnType) => {
+  if (
+    isMetaReadOnly.value &&
+    !readonlyMetaAllowedTypes.includes(column?.uidt) &&
+    !partialUpdateAllowedTypes.includes(column?.uidt)
+  )
+    return false
+  return true
+}
+
 const changeField = (field?: TableExplorerColumn, event?: MouseEvent) => {
+  if (field?.id && field?.uidt && !isColumnUpdateAllowed(field)) {
+    return message.info(t('msg.info.schemaReadOnly'))
+  }
+
+  if (field && field?.pk) {
+    // Editing primary key not supported
+    message.info(t('msg.info.editingPKnotSupported'))
+    return
+  }
+
   if (event) {
     if (event.target instanceof HTMLElement) {
       if (event.target.closest('.no-action')) return
@@ -209,15 +243,15 @@ const addField = (field?: TableExplorerColumn, before = false) => {
 }
 
 const displayColumn = computed(() => {
-  if (!meta.value?.columns) return
-  return meta.value?.columns.find((col) => col.pv)
+  if (!localMetaColumns.value) return
+  return localMetaColumns.value.find((col) => col.pv)
 })
 
 const duplicateField = async (field: TableExplorerColumn) => {
-  if (!meta.value?.columns) return
+  if (!localMetaColumns.value) return
 
   // generate duplicate column name
-  const duplicateColumnName = getUniqueColumnName(`${field.title}_copy`, meta.value?.columns)
+  const duplicateColumnName = getUniqueColumnName(`${field.title}_copy`, localMetaColumns.value)
 
   let fieldPayload = {}
 
@@ -265,8 +299,21 @@ const duplicateField = async (field: TableExplorerColumn) => {
   duplicateFieldHook.value = fieldPayload as TableExplorerColumn
 }
 
+// Check any filter is changed recursively
+const checkForFilterChange = (filters: (FilterType & { status?: string })[]) => {
+  for (const filter of filters) {
+    if (filter.status) {
+      return true
+    }
+    if (filter.is_group) {
+      if (checkForFilterChange(filter.children || [])) {
+        return true
+      }
+    }
+  }
+}
 // This method is called whenever there is a change in field properties
-const onFieldUpdate = (state: TableExplorerColumn) => {
+const onFieldUpdate = (state: TableExplorerColumn, skipLinkChecks = false) => {
   const col = fields.value.find((col) => compareCols(col, state))
   if (!col) return
 
@@ -285,7 +332,12 @@ const onFieldUpdate = (state: TableExplorerColumn) => {
     }
   }
 
-  const diffs = diff(col, state) as Partial<TableExplorerColumn>
+  const pdiffs: Record<string, any> = diff(col, state)
+
+  // remove undefined values
+  const diffs = Object.fromEntries(
+    Object.entries(pdiffs).filter(([_, value]) => value !== undefined),
+  ) as Partial<TableExplorerColumn>
 
   if (Object.keys(diffs).length === 0 || (Object.keys(diffs).length === 1 && 'altered' in diffs)) {
     ops.value = ops.value.filter((op) => op.op === 'add' || !compareCols(op.column, state))
@@ -311,11 +363,31 @@ const onFieldUpdate = (state: TableExplorerColumn) => {
 
     if (field || (field && moveField)) {
       field.column = state
+    } else if (isLinksOrLTAR(state) && !skipLinkChecks) {
+      if (
+        ['title', 'column_name', 'meta'].some((k) => k in diffs) ||
+        ('childViewId' in diffs && diffs.childViewId !== col.colOptions?.fk_target_view_id) ||
+        checkForFilterChange(diffs.filters || [])
+      ) {
+        ops.value.push({
+          op: 'update',
+          column: state,
+        })
+      }
     } else {
       ops.value.push({
         op: 'update',
         column: state,
       })
+    }
+
+    if (
+      activeField.value &&
+      Object.keys(activeField.value).length &&
+      ((state?.id && activeField.value?.id && state?.id === activeField.value?.id) ||
+        (state?.temp_id && activeField.value?.temp_id && state?.temp_id === activeField.value?.temp_id))
+    ) {
+      activeField.value = state
     }
   }
 }
@@ -409,21 +481,27 @@ const onMove = (_event: { moved: { newIndex: number; oldIndex: number } }) => {
   }
 
   if (op) {
-    onFieldUpdate({
-      ...op.column,
-      column_order: {
-        order,
-        view_id: view.value?.id as string,
+    onFieldUpdate(
+      {
+        ...op.column,
+        column_order: {
+          order,
+          view_id: view.value?.id as string,
+        },
       },
-    })
+      true,
+    )
   } else {
-    onFieldUpdate({
-      ...field,
-      column_order: {
-        order,
-        view_id: view.value?.id as string,
+    onFieldUpdate(
+      {
+        ...field,
+        column_order: {
+          order,
+          view_id: view.value?.id as string,
+        },
       },
-    })
+      true,
+    )
   }
 }
 
@@ -431,7 +509,7 @@ const isColumnValid = (column: TableExplorerColumn) => {
   const isDeleteOp = ops.value.find((op) => compareCols(column, op.column) && op.op === 'delete')
   const isNew = ops.value.find((op) => compareCols(column, op.column) && op.op === 'add')
   if (isDeleteOp) return true
-  if (!column.title) {
+  if (!column.title && !isNew) {
     return false
   }
   if ((column.uidt === UITypes.Links || column.uidt === UITypes.LinkToAnotherRecord) && isNew) {
@@ -557,6 +635,21 @@ const clearChanges = () => {
 
 const isColumnsValid = computed(() => fields.value.every((f) => isColumnValid(f)))
 
+const metaToLocal = () => {
+  localMetaColumns.value = meta.value?.columns?.map((c: ColumnType) => {
+    if (c.uidt && c.uidt in columnDefaultMeta) {
+      if (!c.meta) c.meta = {}
+      c.meta = {
+        ...columnDefaultMeta[c.uidt],
+        ...(c.meta || {}),
+      }
+    }
+    return {
+      ...c,
+    }
+  })
+}
+
 const saveChanges = async () => {
   if (!isColumnsValid.value) {
     message.error(t('msg.error.multiFieldSaveValidation'))
@@ -568,10 +661,23 @@ const saveChanges = async () => {
     if (!meta.value?.id) return
 
     loading.value = true
-
+    const newFieldTitles: string[] = []
     for (const mop of moveOps.value) {
       const op = ops.value.find((op) => compareCols(op.column, mop.column))
       if (op && op.op === 'add') {
+        if (!op.column?.userHasChangedTitle && !op.column.title) {
+          const defaultColumnName = generateUniqueColumnName({
+            formState: op.column,
+            tableExplorerColumns: fields.value || [],
+            metaColumns: meta.value?.columns || [],
+            newFieldTitles,
+          })
+          newFieldTitles.push(defaultColumnName)
+
+          op.column.title = defaultColumnName
+          op.column.column_name = defaultColumnName
+        }
+
         op.column.column_order = {
           order: mop.order,
           view_id: view.value?.id as string,
@@ -632,6 +738,9 @@ const saveChanges = async () => {
     }
 
     await getMeta(meta.value.id, true)
+
+    metaToLocal()
+
     columnsHash.value = (await $api.dbTableColumn.hash(meta.value?.id)).hash
 
     visibilityOps.value = []
@@ -781,6 +890,10 @@ onMounted(async () => {
   if (meta.value && meta.value.id) {
     columnsHash.value = (await $api.dbTableColumn.hash(meta.value.id)).hash
   }
+
+  await until(() => meta.value?.columns)
+
+  metaToLocal()
 })
 
 const onFieldOptionUpdate = () => {
@@ -790,13 +903,37 @@ const onFieldOptionUpdate = () => {
 }
 
 watch(
-  fields,
-  () => {
-    if (activeField.value) {
-      activeField.value = fields.value.find((field) => field.id === activeField.value.id) || activeField.value
+  () => activeField.value?.temp_id,
+  (_newValue, oldValue) => {
+    if (!oldValue) return
+
+    const oldField = fields.value.find((field) => field.temp_id === oldValue)
+    if (
+      !oldField ||
+      (oldField &&
+        (oldField.title ||
+          !ops.value.find((op) => op.op === 'add' && op.column.temp_id === oldField.temp_id) ||
+          oldField?.userHasChangedTitle ||
+          !isColumnValid(oldField)))
+    ) {
+      return
     }
+
+    const newFieldTitles = ops.value
+      .filter((op) => op.op === 'add' && op.column.title)
+      .map((op) => op.column.title)
+      .filter((t) => t) as string[]
+
+    const defaultColumnName = generateUniqueColumnName({
+      formState: oldField,
+      tableExplorerColumns: fields.value || [],
+      metaColumns: localMetaColumns.value || [],
+      newFieldTitles,
+    })
+
+    oldField.title = defaultColumnName
+    oldField.column_name = defaultColumnName
   },
-  { deep: true },
 )
 </script>
 
@@ -890,7 +1027,7 @@ watch(
                 <div
                   v-if="field.title.toLowerCase().includes(searchQuery.toLowerCase()) && !field.pv"
                   class="flex px-2 hover:bg-gray-100 first:rounded-t-lg border-b-1 last:rounded-b-none border-gray-200 pl-5 group"
-                  :class="` ${compareCols(field, activeField) ? 'selected' : ''}`"
+                  :class="{ 'selected': compareCols(field, activeField), 'cursor-not-allowed': !isColumnUpdateAllowed(field) }"
                   :data-testid="`nc-field-item-${fieldState(field)?.title || field.title}`"
                   @click="changeField(field, $event)"
                 >
@@ -955,7 +1092,7 @@ watch(
                         {{ $t('labels.multiField.deletedField') }}
                       </NcBadge>
                       <NcBadge
-                        v-else-if="fieldStatus(field) === 'add'"
+                        v-else-if="isColumnValid(field) && fieldStatus(field) === 'add'"
                         color="orange"
                         :border="false"
                         class="bg-green-50 text-green-700"
@@ -1243,6 +1380,7 @@ watch(
                 :column="activeField"
                 :preload="fieldState(activeField)"
                 :table-explorer-columns="fields"
+                :is-column-valid="isColumnValid"
                 embed-mode
                 :readonly="isLocked"
                 from-table-explorer

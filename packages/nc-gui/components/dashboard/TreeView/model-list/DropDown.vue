@@ -23,7 +23,7 @@ const isShowLoading = ref(false)
 const modelPath = ref('')
 const isShowCatalogRenameDialog = ref(false)
 const selectCatalogModelTitle = computed(() => {
-  return props.isCatalogDropDown ? '移动目录' : '移动表格目录'
+  return props.isCatalogDropDown ? '移动目录' : '移动表格'
 })
 
 const setIsShowCatalogRenameDialog = (value: boolean) => {
@@ -73,9 +73,11 @@ const handleShowSelectCatalog = (value: boolean, item?: any) => {
 }
 
 const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
+  let isReSelectCatalog: boolean = false
   try {
     if (selectedCatalogParam && updatedModel.value?.parentId === selectedCatalogParam.id) {
-      message.warning('此表已经在该目录下')
+      message.warning('移动目标已经在该目录下')
+      isReSelectCatalog = true
       return
     }
     isShowLoading.value = true
@@ -85,8 +87,9 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
       await moveModelTo(selectedCatalogParam)
     }
   } catch (error) {
-    console.log(error)
+    console.error(error)
   } finally {
+    if (isReSelectCatalog) return
     isShowLoading.value = false
     handleShowSelectCatalog(false, null)
   }
@@ -139,7 +142,7 @@ const handleSetIsCatalogDeleteDialogVisible = (value: boolean) => {
     <template #overlay>
       <NcMenu>
         <NcMenuItem
-          v-if="isUIAllowed('tableRename', { roles: baseRole })"
+          v-if="isUIAllowed('tableRename', { source: base?.sources?.[0] })"
           :data-testid="`sidebar-table-rename-${item.title}`"
           @click="handleRename(item)"
         >
@@ -150,7 +153,7 @@ const handleSetIsCatalogDeleteDialogVisible = (value: boolean) => {
         </NcMenuItem>
 
         <NcMenuItem
-          v-if="isUIAllowed('tableDuplicate') && !isCatalogDropDown"
+          v-if="isUIAllowed('tableDuplicate', { source: base?.sources?.[0] }) && !isCatalogDropDown"
           :data-testid="`sidebar-table-duplicate-${item.title}`"
           @click="handleCopy(item)"
         >
@@ -167,7 +170,7 @@ const handleSetIsCatalogDeleteDialogVisible = (value: boolean) => {
           </div>
         </NcMenuItem>
 
-        <template v-if="isUIAllowed('tableDelete', { roles: baseRole })">
+        <template v-if="isUIAllowed('tableDelete', { source: base?.sources?.[0] })">
           <NcDivider />
           <NcMenuItem
             :data-testid="`sidebar-table-delete-${item.title}`"
@@ -203,6 +206,7 @@ const handleSetIsCatalogDeleteDialogVisible = (value: boolean) => {
     :handleModalOk="handleSelectCatalogModalOk"
     :modelTitle="selectCatalogModelTitle"
     :modelPath="modelPath"
+    :moveTarget="updatedModel"
   />
   <DlgCatalogRename :catalogMeta="item" :dialogShow="isShowCatalogRenameDialog" :setDialogShow="setIsShowCatalogRenameDialog" />
 

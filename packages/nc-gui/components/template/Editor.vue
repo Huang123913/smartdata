@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import type { CheckboxChangeEvent } from 'ant-design-vue/es/checkbox/interface'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import type { ColumnType, TableType } from 'nocodb-sdk'
 import { UITypes, getDateFormat, getDateTimeFormat, isSystemColumn, isVirtualCol, parseStringDate } from 'nocodb-sdk'
-import type { CheckboxChangeEvent } from 'ant-design-vue/es/checkbox/interface'
+
 import { srcDestMappingColumns, tableColumns } from './utils'
 
 const { quickImportType, baseTemplate, importData, importColumns, importDataOnly, maxRowsToParse, sourceId, importWorker } =

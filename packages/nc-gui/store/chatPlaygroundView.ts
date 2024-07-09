@@ -81,6 +81,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
       chataiData.modelTree.forEach((node) => sortTreeNodesByOrderNo(node))
       chataiData.modelCatalog = chataiData.modelData.filter((item) => item.isCatalog && item.id !== null)
       chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog, false)
+      chataiData.modelCatalogTree.forEach((node) => sortTreeNodesByOrderNo(node))
     } catch (e) {
       console.error(e)
     }
@@ -123,6 +124,15 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
       let catalog = node.children.filter((item: any) => item.isCatalog)
       let model = node.children.filter((item: any) => !item.isCatalog)
       catalog.sort((a: any, b: any) => {
+        if (a.orderNo === null && b.orderNo === null) {
+          return 0
+        }
+        if (a.orderNo === null) {
+          return 1
+        }
+        if (b.orderNo === null) {
+          return -1
+        }
         return a.orderNo - b.orderNo
       })
       model.sort((a: any, b: any) => {
@@ -297,6 +307,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
 
   //移动目录
   const moveCatalog = (catalogId: string, originalParentId: string, newParentId: string, prependToTableId: string) => {
+    updateData(catalogId, newParentId)
     let findCatalog = findNodeById(chataiData.modelTree, catalogId)
     findCatalog.parentId = newParentId
     let originalParentIdCatlog = originalParentId ? findNodeById(chataiData.modelTree, originalParentId) : chataiData.modelTree[0]
@@ -325,6 +336,15 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
       let findLastIndex = newCatalog.children.findLastIndex((item: any) => item.isCatalog)
       newCatalog.children.splice(findLastIndex + 1, 0, findCatalog)
     }
+  }
+
+  //更新数据
+  const updateData = (catalogId: string, newParentId: string) => {
+    let findItem = chataiData.modelData.find((item) => item.id === catalogId)
+    findItem.parentId = newParentId
+    chataiData.modelCatalog = chataiData.modelData.filter((item) => item.isCatalog && item.id !== null)
+    chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog, false)
+    chataiData.modelCatalogTree.forEach((node) => sortTreeNodesByOrderNo(node))
   }
 
   return {

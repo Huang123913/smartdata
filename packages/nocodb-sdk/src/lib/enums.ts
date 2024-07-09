@@ -147,6 +147,10 @@ export enum AppEvents {
   EXTENSION_CREATE = 'extension.create',
   EXTENSION_UPDATE = 'extension.update',
   EXTENSION_DELETE = 'extension.delete',
+
+  COMMENT_CREATE = 'comment.create',
+  COMMENT_DELETE = 'comment.delete',
+  COMMENT_UPDATE = 'comment.update',
 }
 
 export enum ClickhouseTables {
@@ -322,3 +326,11 @@ export enum APIContext {
   FILTERS = 'filters',
   SORTS = 'sorts',
 }
+
+
+export enum SourceRestriction {
+  SCHEMA_READONLY = 'is_schema_readonly',
+  DATA_READONLY = 'is_data_readonly',
+}
+
+

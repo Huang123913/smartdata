@@ -179,22 +179,22 @@ const renameTable = async (undo = false, disableTitleDiffCheck?: boolean | undef
 </script>
 
 <template>
-  <NcModal v-model:visible="dialogShow" size="small">
+  <NcModal v-model:visible="dialogShow" size="small" :show-separator="false">
     <template #header>
       <div class="flex flex-row items-center gap-x-2">
         <GeneralIcon icon="rename" />
         {{ $t('activity.renameTable') }}
       </div>
     </template>
-    <div class="mt-2">
+    <div class="mt-1">
       <a-form :model="formState" name="create-new-table-form">
         <a-form-item label="表名" v-bind="validateInfos.title" class="flex mb-1 rename-to-table">
           <a-input
             ref="inputEl"
             v-model:value="formState.title"
-            class="nc-input-md"
+            class="nc-input-sm nc-input-shadow"
             hide-details
-            size="large"
+            size="small"
             :placeholder="$t('msg.info.enterTableName')"
             @keydown.enter="() => renameTable()"
           />

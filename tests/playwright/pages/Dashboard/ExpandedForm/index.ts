@@ -1,8 +1,8 @@
 import { expect, Locator } from '@playwright/test';
+
+import { DashboardPage } from '../';
 import BasePage from '../../Base';
-import { DashboardPage } from '..';
 import { DateTimeCellPageObject } from '../common/Cell/DateTimeCell';
-import { getTextExcludeIconText } from '../../../tests/utils/general';
 
 export class ExpandedFormPage extends BasePage {
   readonly dashboard: DashboardPage;
@@ -67,7 +67,17 @@ export class ExpandedFormPage extends BasePage {
     await this.dashboard.waitForLoaderToDisappear();
   }
 
-  async fillField({ columnTitle, value, type = 'text' }: { columnTitle: string; value: string; type?: string }) {
+  async fillField({
+    columnTitle,
+    value,
+    type = 'text',
+    ltarCount,
+  }: {
+    columnTitle: string;
+    value: string;
+    type?: string;
+    ltarCount?: number;
+  }) {
     const field = this.get().getByTestId(`nc-expand-col-${columnTitle}`);
     switch (type) {
       case 'text':
@@ -84,21 +94,33 @@ export class ExpandedFormPage extends BasePage {
       case 'belongsTo':
         await field.locator('.nc-virtual-cell').hover();
         await field.locator('.nc-action-icon').click();
+        if (ltarCount !== undefined && ltarCount !== null) {
+          await this.dashboard.linkRecord.verifyCount(ltarCount);
+        }
         await this.dashboard.linkRecord.select(value, false);
         break;
       case 'hasMany':
       case 'manyToMany':
         await field.locator('.nc-virtual-cell').hover();
         await field.locator('.nc-action-icon').click();
+        if (ltarCount !== undefined && ltarCount !== null) {
+          await this.dashboard.linkRecord.verifyCount(ltarCount);
+        }
         await this.dashboard.linkRecord.select(value);
         break;
       case 'dateTime':
-        await field.locator('.nc-cell').click();
+        await field.locator('.nc-cell .nc-date-input').click();
         // eslint-disable-next-line no-case-declarations
         const dateTimeObj = new DateTimeCellPageObject(this.dashboard.grid.cell);
-        await dateTimeObj.selectDate({ date: value.slice(0, 10) });
-        await dateTimeObj.selectTime({ hour: +value.slice(11, 13), minute: +value.slice(14, 16) });
-        await dateTimeObj.save();
+
+        await dateTimeObj.selectDate({ date: value.slice(0, 10), locator: field.locator('.nc-cell') });
+
+        await dateTimeObj.selectTime({
+          hour: +value.slice(11, 13),
+          minute: +value.slice(14, 16),
+          locator: field.locator('.nc-cell'),
+          fillValue: `${value.slice(11, 13).padStart(2, '0')}:${value.slice(14, 16).padStart(2, '0')}`,
+        });
         break;
     }
   }

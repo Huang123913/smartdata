@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import Draggable from 'vuedraggable'
-import type { SourceType } from 'nocodb-sdk'
 import { ClientType } from '#imports'
+import type { SourceType } from 'nocodb-sdk'
+import Draggable from 'vuedraggable'
 
 interface Props {
   state: string
@@ -260,7 +260,7 @@ const openedTab = ref('erd')
 </script>
 
 <template>
-  <div class="flex flex-col h-full">
+  <div class="flex flex-col h-full" data-testid="nc-settings-datasources-tab">
     <div class="px-4 py-2 flex justify-between">
       <a-breadcrumb separator=">" class="w-full cursor-pointer font-weight-bold">
         <a-breadcrumb-item @click="activeSource = null">
@@ -303,11 +303,11 @@ const openedTab = ref('erd')
                 <div>{{ $t('title.auditLogs') }}</div>
               </div>
             </template>
-            <div class="p-4 h-full overflow-auto">
+            <div class="p-4 h-full">
               <LazyDashboardSettingsBaseAudit :source-id="activeSource.id" />
             </div>
           </a-tab-pane>
-          <a-tab-pane v-if="!activeSource.is_meta && !activeSource.is_local" key="audit">
+          <a-tab-pane v-if="!activeSource.is_meta && !activeSource.is_local" key="edit">
             <template #tab>
               <div class="tab" data-testid="nc-connection-tab">
                 <div>{{ $t('labels.connectionDetails') }}</div>
@@ -315,7 +315,7 @@ const openedTab = ref('erd')
             </template>
             <div class="p-6 mt-4 h-full overflow-auto">
               <LazyDashboardSettingsDataSourcesEditBase
-                class="w-600px"
+                class="w-760px pr-5"
                 :source-id="activeSource.id"
                 @source-updated="loadBases(true)"
                 @close="activeSource = null"
@@ -330,7 +330,7 @@ const openedTab = ref('erd')
               </div>
             </template>
 
-            <div class="pt-4 h-full overflow-auto">
+            <div class="pt-4 h-full">
               <LazyDashboardSettingsUIAcl :source-id="activeSource.id" />
             </div>
           </a-tab-pane>
@@ -340,7 +340,7 @@ const openedTab = ref('erd')
                 <div>{{ $t('labels.metaSync') }}</div>
               </div>
             </template>
-            <div class="pt-4 h-full overflow-auto">
+            <div class="pt-4 h-full">
               <LazyDashboardSettingsMetadata :source-id="activeSource.id" @source-synced="loadBases(true)" />
             </div>
           </a-tab-pane>
@@ -397,7 +397,7 @@ const openedTab = ref('erd')
                     <NcButton
                       v-if="!sources[0].is_meta && !sources[0].is_local"
                       size="small"
-                      class="nc-action-btn cursor-pointer outline-0 !w-8 !px-1 !rounded-lg"
+                      class="nc-action-btn nc-edit-base cursor-pointer outline-0 !w-8 !px-1 !rounded-lg"
                       type="text"
                       @click.stop="baseAction(sources[0].id, DataSourcesSubTab.Edit)"
                     >
@@ -446,7 +446,7 @@ const openedTab = ref('erd')
                       <NcButton
                         v-if="!source.is_meta && !source.is_local"
                         size="small"
-                        class="nc-action-btn cursor-pointer outline-0 !w-8 !px-1 !rounded-lg"
+                        class="nc-action-btn nc-delete-base cursor-pointer outline-0 !w-8 !px-1 !rounded-lg"
                         type="text"
                         @click.stop="openDeleteBase(source)"
                       >

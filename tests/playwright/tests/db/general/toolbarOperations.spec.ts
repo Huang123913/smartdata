@@ -162,6 +162,7 @@ test.describe('Toolbar operations (GRID)', () => {
 
     // GroupBy Category Descending Order
     await toolbar.groupBy.add({ title: 'Length', ascending: false, locallySaved: false });
+    await toolbar.rootPage.waitForTimeout(500);
     await toolbar.groupBy.add({ title: 'RentalDuration', ascending: false, locallySaved: false });
 
     // Hide Field and Verify
@@ -544,11 +545,13 @@ test.describe('Toolbar operations (GRID)', () => {
 
     await toolbar.groupBy.remove({ index: 1 });
 
+    await dashboard.grid.groupPage.openGroup({ indexMap: [0] });
+
     await dashboard.grid.groupPage.validateFirstRow({
       indexMap: [0],
       rowIndex: 0,
       columnHeader: 'Title',
-      value: 'CHICAGO NORTH',
+      value: 'ADAPTATION HOLES',
     });
 
     await toolbar.groupBy.remove({ index: 0 });

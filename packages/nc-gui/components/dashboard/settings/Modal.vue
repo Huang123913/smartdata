@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { FunctionalComponent, SVGAttributes } from 'vue'
-import Misc from './Misc.vue'
+
 import DataSources from '~/components/dashboard/settings/DataSources.vue'
+
+import Misc from './Misc.vue'
 
 interface Props {
   modelValue?: boolean
@@ -49,8 +51,6 @@ const { $e } = useNuxtApp()
 const { t } = useI18n()
 
 const { isDataSourceLimitReached } = storeToRefs(useBases())
-
-const dataSourcesReload = ref(false)
 
 const tabsInfo: TabGroup = {
   // teamAndAuth: {

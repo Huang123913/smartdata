@@ -1,6 +1,12 @@
 <script setup lang="ts">
-import type { ColumnReqType, ColumnType } from 'nocodb-sdk'
-import { UITypes, UITypesName } from 'nocodb-sdk'
+import {
+  type ColumnReqType,
+  type ColumnType,
+  UITypes,
+  UITypesName,
+  partialUpdateAllowedTypes,
+  readonlyMetaAllowedTypes,
+} from 'nocodb-sdk'
 
 interface Props {
   column: ColumnType
@@ -27,13 +33,13 @@ const isSurveyForm = inject(IsSurveyFormInj, ref(false))
 
 const isExpandedForm = inject(IsExpandedFormOpenInj, ref(false))
 
-const isDropDownOpen = ref(false)
+const isExpandedBulkUpdateForm = inject(IsExpandedBulkUpdateFormOpenInj, ref(false))
 
-const isKanban = inject(IsKanbanInj, ref(false))
+const isDropDownOpen = ref(false)
 
 const column = toRef(props, 'column')
 
-const { isUIAllowed } = useRoles()
+const { isUIAllowed, isMetaReadOnly } = useRoles()
 
 provide(ColumnInj, column)
 
@@ -58,10 +64,20 @@ const closeAddColumnDropdown = () => {
   editColumnDropdown.value = false
 }
 
-const openHeaderMenu = (e?: MouseEvent) => {
-  if (isLocked.value || (isExpandedForm.value && e?.type === 'dblclick')) return
+const isColumnEditAllowed = computed(() => {
+  if (
+    isMetaReadOnly.value &&
+    !readonlyMetaAllowedTypes.includes(column.value?.uidt) &&
+    !partialUpdateAllowedTypes.includes(column.value?.uidt)
+  )
+    return false
+  return true
+})
 
-  if (!isForm.value && isUIAllowed('fieldEdit') && !isMobileMode.value) {
+const openHeaderMenu = (e?: MouseEvent) => {
+  if (isLocked.value || (isExpandedForm.value && e?.type === 'dblclick') || isExpandedBulkUpdateForm.value) return
+
+  if (!isForm.value && isUIAllowed('fieldEdit') && !isMobileMode.value && isColumnEditAllowed.value) {
     editColumnDropdown.value = true
   }
 }
@@ -84,7 +100,7 @@ const onClick = (e: Event) => {
     e.preventDefault()
     e.stopPropagation()
   } else {
-    if (isExpandedForm.value && !editColumnDropdown.value) {
+    if (isExpandedForm.value && !editColumnDropdown.value && !isExpandedBulkUpdateForm.value) {
       isDropDownOpen.value = true
       return
     }
@@ -99,10 +115,10 @@ const onClick = (e: Event) => {
     class="flex items-center w-full text-xs text-gray-500 font-weight-medium group"
     :class="{
       'h-full': column,
-      '!text-gray-400': isKanban,
-      'flex-col !items-start justify-center': isExpandedForm && !isMobileMode,
-      'cursor-pointer hover:bg-gray-100': isExpandedForm && !isMobileMode && isUIAllowed('fieldEdit'),
-      'bg-gray-100': isExpandedForm ? editColumnDropdown || isDropDownOpen : false,
+      'flex-col !items-start justify-center pt-0.5': isExpandedForm && !isMobileMode && !isExpandedBulkUpdateForm,
+      'nc-cell-expanded-form-header cursor-pointer hover:bg-gray-100':
+        isExpandedForm && !isMobileMode && isUIAllowed('fieldEdit') && !isExpandedBulkUpdateForm,
+      'bg-gray-100': isExpandedForm && !isExpandedBulkUpdateForm ? editColumnDropdown || isDropDownOpen : false,
     }"
     @dblclick="openHeaderMenu"
     @click.right="openDropDown"
@@ -112,7 +128,7 @@ const onClick = (e: Event) => {
       class="nc-cell-name-wrapper flex-1 flex items-center"
       :class="{
         'max-w-[calc(100%_-_23px)]': !isExpandedForm,
-        'max-w-full': isExpandedForm,
+        'max-w-full': isExpandedForm && !isExpandedBulkUpdateForm,
       }"
     >
       <template v-if="column && !props.hideIcon">
@@ -120,7 +136,7 @@ const onClick = (e: Event) => {
           v-if="isGrid"
           class="flex items-center"
           placement="bottom"
-          :disabled="isExpandedForm ? editColumnDropdown || isDropDownOpen : false"
+          :disabled="isExpandedForm && !isExpandedBulkUpdateForm ? editColumnDropdown || isDropDownOpen : false"
         >
           <template #title> {{ columnTypeName }} </template>
           <SmartsheetHeaderCellIcon
@@ -139,21 +155,21 @@ const onClick = (e: Event) => {
       <NcTooltip
         v-if="column"
         :class="{
-          'cursor-pointer pt-0.25': !isForm && isUIAllowed('fieldEdit') && !hideMenu,
+          'cursor-pointer': !isForm && isUIAllowed('fieldEdit') && !hideMenu,
           'cursor-default': isForm || !isUIAllowed('fieldEdit') || hideMenu,
           'truncate': !isForm,
         }"
         class="name pl-1 max-w-full"
         placement="bottom"
         show-on-truncate-only
-        :disabled="isExpandedForm ? editColumnDropdown || isDropDownOpen : false"
+        :disabled="isExpandedForm && !isExpandedBulkUpdateForm ? editColumnDropdown || isDropDownOpen : false"
       >
         <template #title> {{ column.title }} </template>
 
         <span
           :data-test-id="column.title"
           :class="{
-            'select-none': isExpandedForm,
+            'select-none': isExpandedForm && !isExpandedBulkUpdateForm,
           }"
         >
           {{ column.title }}
@@ -163,9 +179,9 @@ const onClick = (e: Event) => {
       <span v-if="(column.rqd && !column.cdf) || required" class="text-red-500">&nbsp;*</span>
 
       <GeneralIcon
-        v-if="isExpandedForm && !isMobileMode && isUIAllowed('fieldEdit')"
+        v-if="isExpandedForm && !isExpandedBulkUpdateForm && !isMobileMode && isUIAllowed('fieldEdit')"
         icon="arrowDown"
-        class="flex-none text-grey h-full text-grey cursor-pointer ml-1 group-hover:visible"
+        class="flex-none cursor-pointer ml-1 group-hover:visible w-4 h-4"
         :class="{
           visible: editColumnDropdown || isDropDownOpen,
           invisible: !(editColumnDropdown || isDropDownOpen),
@@ -189,10 +205,10 @@ const onClick = (e: Event) => {
       v-model:visible="editColumnDropdown"
       class="h-full"
       :trigger="['click']"
-      :placement="isExpandedForm ? 'bottomLeft' : 'bottomRight'"
-      overlay-class-name="nc-dropdown-edit-column"
+      :placement="isExpandedForm && !isExpandedBulkUpdateForm ? 'bottomLeft' : 'bottomRight'"
+      :overlay-class-name="`nc-dropdown-edit-column ${editColumnDropdown ? 'active' : ''}`"
     >
-      <div v-if="isExpandedForm" class="h-[1px]" @dblclick.stop>&nbsp;</div>
+      <div v-if="isExpandedForm && !isExpandedBulkUpdateForm" class="h-[1px]" @dblclick.stop>&nbsp;</div>
       <div v-else />
 
       <template #overlay>

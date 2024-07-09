@@ -1,4 +1,5 @@
 import { expect, Page } from '@playwright/test';
+
 import BasePage from '../Base';
 import { CellPageObject } from '../Dashboard/common/Cell';
 
@@ -74,5 +75,37 @@ export class SharedFormPage extends BasePage {
       .locator(`.ant-card:has-text("${cardTitle}"):visible`)
       .locator('.nc-list-item-link-unlink-btn')
       .click();
+  }
+
+  fieldLabel({ title }: { title: string }) {
+    return this.get()
+      .getByTestId(`nc-shared-form-item-${title.replace(' ', '')}`)
+      .locator('.nc-form-column-label');
+  }
+
+  async getFormFieldErrors({ title }: { title: string }) {
+    const field = this.get().getByTestId(`nc-shared-form-item-${title.replace(' ', '')}`);
+    await field.scrollIntoViewIfNeeded();
+    const fieldErrorEl = field.locator('.ant-form-item-explain');
+    return {
+      locator: fieldErrorEl,
+      verify: async ({ hasError, hasErrorMsg }: { hasError?: boolean; hasErrorMsg?: string | RegExp }) => {
+        if (hasError !== undefined) {
+          if (hasError) {
+            await fieldErrorEl.waitFor({ state: 'visible' });
+
+            await expect(fieldErrorEl).toBeVisible();
+          } else {
+            await expect(fieldErrorEl).not.toBeVisible();
+          }
+        }
+
+        if (hasErrorMsg !== undefined) {
+          await fieldErrorEl.waitFor({ state: 'visible' });
+
+          await expect(fieldErrorEl.locator('> div').filter({ hasText: hasErrorMsg }).first()).toHaveText(hasErrorMsg);
+        }
+      },
+    };
   }
 }

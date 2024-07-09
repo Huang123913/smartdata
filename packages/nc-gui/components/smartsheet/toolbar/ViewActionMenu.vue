@@ -20,7 +20,7 @@ const props = withDefaults(
 
 const emits = defineEmits(['rename', 'closeModal', 'delete'])
 
-const { isUIAllowed } = useRoles()
+const { isUIAllowed, isDataReadOnly } = useRoles()
 
 const isPublicView = inject(IsPublicInj, ref(false))
 
@@ -107,6 +107,7 @@ function onDuplicate() {
     'groupingFieldColumnId': view.value!.view!.fk_grp_col_id,
     'views': views,
     'calendarRange': view.value!.view!.calendar_range,
+    'coverImageColumnId': view.value!.view!.fk_cover_image_col_id,
     'onUpdate:modelValue': closeDialog,
     'onCreated': async (view: ViewType) => {
       closeDialog()

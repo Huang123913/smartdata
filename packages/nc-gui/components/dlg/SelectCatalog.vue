@@ -1,14 +1,18 @@
 <script lang="ts" setup>
+import _ from 'lodash'
+
 import { CloseOutlined } from '@ant-design/icons-vue'
 
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
+const { findNodeById } = store
 const props = defineProps<{
   visible: boolean
   handleShowSelectCatalog: (value: boolean) => void
   handleModalOk: (selectedCatalog: any) => void
   modelTitle: string
   modelPath?: string
+  moveTarget?: object
 }>()
 const selectedKeys = ref<string[]>([]) //勾选的模型
 const expandedKeys = ref<string[]>([]) //展开的父节点
@@ -37,6 +41,28 @@ const handleSearchModelOk = () => {
 const handleSelectModelCancel = () => {
   props.handleShowSelectCatalog(false)
 }
+
+const showModelCatalog = computed(() => {
+  let newModelCatalogTree = _.cloneDeep(chataiData.value.modelCatalogTree)
+  if (props?.moveTarget) {
+    let findItem = findNodeById(newModelCatalogTree, props?.moveTarget.id)
+    findItem.disabled = true
+    if (props?.moveTarget.parentId) {
+      let findItem1 = findNodeById(newModelCatalogTree, props?.moveTarget.parentId)
+      findItem1.disabled = true
+    }
+    const findChild = (data: any[]) => {
+      data.map((item) => {
+        item.disabled = true
+        if (item?.children && item.children.length) {
+          findChild(item.children)
+        }
+      })
+    }
+    findItem.isCatalog && findItem.children.length && findChild(findItem.children)
+  }
+  return newModelCatalogTree
+})
 </script>
 
 <template>
@@ -49,7 +75,7 @@ const handleSelectModelCancel = () => {
     <a-tree
       class="catalog catalog-tree"
       blockNode
-      :tree-data="chataiData.modelCatalogTree"
+      :tree-data="showModelCatalog"
       v-model:selectedKeys="selectedKeys"
       v-model:expandedKeys="expandedKeys"
     >

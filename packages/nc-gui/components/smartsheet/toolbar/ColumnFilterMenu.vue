@@ -27,7 +27,11 @@ watch(
   () => activeView?.value?.id,
   async (viewId) => {
     if (viewId) {
-      await loadFilters(undefined, false, true)
+      await loadFilters({
+        hookId: undefined,
+        isWebhook: false,
+        loadAllFilters: true,
+      })
       filtersLength.value = nonDeletedFilters.value.length || 0
     }
   },
@@ -85,6 +89,7 @@ eventBus.on(async (event, column: ColumnType) => {
         class="nc-table-toolbar-menu"
         :auto-save="true"
         data-testid="nc-filter-menu"
+        :is-open="open"
         @update:filters-length="filtersLength = $event"
       >
       </SmartsheetToolbarColumnFilter>

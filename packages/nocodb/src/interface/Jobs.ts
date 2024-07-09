@@ -1,3 +1,4 @@
+import type { NcContext } from '~/interface/config';
 export const JOBS_QUEUE = 'jobs';
 
 export enum JobTypes {
@@ -12,6 +13,8 @@ export enum JobTypes {
   UpdateWsStat = 'update-ws-stats',
   UpdateSrcStat = 'update-source-stat',
   HealthCheck = 'health-check',
+  HandleWebhook = 'handle-webhook',
+  CleanUp = 'clean-up',
 }
 
 export enum JobStatus {
@@ -39,4 +42,14 @@ export enum InstanceCommands {
   PAUSE_LOCAL = 'pauseLocal',
   RESET = 'reset',
   RELEASE = 'release',
+}
+
+export interface HandleWebhookJobData {
+  context: NcContext;
+  hookId: string;
+  modelId: string;
+  viewId: string;
+  prevData;
+  newData;
+  user;
 }

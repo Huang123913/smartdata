@@ -79,7 +79,7 @@ const onDelete = async () => {
     $e('a:table:delete')
 
     if (oldActiveTableId === toBeDeletedTable.id) {
-      const sourceTables = tables.value.filter((t) => t.source_id === toBeDeletedTable.source_id)
+      const sourceTables = tables.value.filter((t) => t.source_id === toBeDeletedTable.source_id && t.id !== toBeDeletedTable.id)
       // Navigate to base if no tables left or open first table
       if (sourceTables.length === 0) {
         await navigateTo(
@@ -89,6 +89,19 @@ const onDelete = async () => {
           }),
         )
       } else {
+        sourceTables.length > 1 &&
+          sourceTables.sort((a: any, b: any) => {
+            if (a.orderNo === null && b.orderNo === null) {
+              return 0
+            }
+            if (a.orderNo === null) {
+              return 1
+            }
+            if (b.orderNo === null) {
+              return -1
+            }
+            return a.orderNo - b.orderNo
+          })
         await openTable(sourceTables[0])
       }
     }
@@ -110,7 +123,7 @@ const onDelete = async () => {
 <template>
   <GeneralDeleteModal v-model:visible="visible" :entity-name="$t('objects.table')" :on-delete="onDelete">
     <template #entity-preview>
-      <div v-if="table" class="flex flex-row items-center py-2.25 px-2.5 bg-gray-50 rounded-lg text-gray-700 mb-4">
+      <div v-if="table" class="flex flex-row items-center py-2.25 px-2.5 bg-gray-50 rounded-lg text-gray-700">
         <GeneralTableIcon :meta="table" class="nc-view-icon" />
         <div
           class="capitalize text-ellipsis overflow-hidden select-none w-full pl-1.75"

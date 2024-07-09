@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SelectProps } from 'ant-design-vue'
-import type { ColumnType, LinkToAnotherRecordType } from 'nocodb-sdk'
+import type { ColumnType, LinkToAnotherRecordType, TableType } from 'nocodb-sdk'
 import { RelationTypes, UITypes, isHiddenCol, isLinksOrLTAR, isSystemColumn, isVirtualCol } from 'nocodb-sdk'
 
 const { modelValue, isSort, allowEmpty, ...restProps } = defineProps<{
@@ -8,13 +8,14 @@ const { modelValue, isSort, allowEmpty, ...restProps } = defineProps<{
   isSort?: boolean
   columns?: ColumnType[]
   allowEmpty?: boolean
+  meta: TableType
 }>()
 
 const emit = defineEmits(['update:modelValue'])
 
 const customColumns = toRef(restProps, 'columns')
 
-const meta = inject(MetaInj, ref())
+const meta = toRef(restProps, 'meta')
 
 const { metas } = useMetas()
 
@@ -63,24 +64,39 @@ const options = computed<SelectProps['options']>(() =>
         return !isVirtualSystemField
       }
     })
-  )?.map((c: ColumnType) => ({
-    value: c.id,
-    label: c.title,
-    icon: h(
-      isVirtualCol(c) ? resolveComponent('SmartsheetHeaderVirtualCellIcon') : resolveComponent('SmartsheetHeaderCellIcon'),
-      {
-        columnMeta: c,
-      },
-    ),
-    c,
-  })),
+  )
+    // sort and keep system columns at the end
+    ?.sort((field1, field2) => {
+      let orderVal1 = 0
+      let orderVal2 = 0
+
+      if (isSystemColumn(field1)) {
+        orderVal1 = 1
+      }
+      if (isSystemColumn(field2)) {
+        orderVal2 = 1
+      }
+
+      return orderVal1 - orderVal2
+    })
+    ?.map((c: ColumnType) => ({
+      value: c.id,
+      label: c.title,
+      icon: h(
+        isVirtualCol(c) ? resolveComponent('SmartsheetHeaderVirtualCellIcon') : resolveComponent('SmartsheetHeaderCellIcon'),
+        {
+          columnMeta: c,
+        },
+      ),
+      c,
+    })),
 )
 
 const filterOption = (input: string, option: any) => option.label.toLowerCase()?.includes(input.toLowerCase())
 
 // when a new filter is created, select a field by default
 if (!localValue.value && allowEmpty !== true) {
-  localValue.value = (options.value?.[0].value as string) || ''
+  localValue.value = (options.value?.[0]?.value as string) || ''
 }
 
 const relationColor = {

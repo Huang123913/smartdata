@@ -118,6 +118,7 @@ const updateCollaborator = async (collab: any, roles: ProjectRoles) => {
       } else {
         currentCollaborator.roles = ProjectRoles.NO_ACCESS
       }
+      currentCollaborator.base_roles = null
     } else if (currentCollaborator.base_roles) {
       currentCollaborator.roles = roles
       await updateProjectUser(currentBase.value.id!, currentCollaborator as unknown as User)
@@ -153,11 +154,11 @@ onMounted(async () => {
 })
 
 const selected = reactive<{
-  [key: number]: boolean
+  [key: string]: boolean
 }>({})
 
 const toggleSelectAll = (value: boolean) => {
-  filteredCollaborators.value.forEach((_, i) => {
+  filteredCollaborators.value.forEach((_) => {
     selected[_.id] = value
   })
 }

@@ -170,7 +170,7 @@ const semanticsSearchedFields = ref([])
 
 // #Permissions
 const { isUIAllowed } = useRoles()
-const hasEditPermission = computed(() => isUIAllowed('dataEdit'))
+const hasEditPermission = computed(() => true)
 const isAddingColumnAllowed = computed(() => !readOnly.value && !isLocked.value && isUIAllowed('fieldAdd') && !isSqlView.value)
 
 const { onDrag, onDragStart, onDragEnd, draggedCol, dragColPlaceholderDomRef, toBeDroppedColId } = useColumnDrag({
@@ -247,9 +247,10 @@ const getAllSemanticsSearchedFields = async () => {
       let props = tableInfo[0]?.props ? tableInfo[0]?.props : []
       if (props.length) {
         let findSemanticFetrievalProp = props.findLast((p) => p.code == 'belongSemanticFetrieval')
-        JSON.parse(findSemanticFetrievalProp.jsonValue).map((item) => {
-          semanticsSearchedFields.value.push(item.columnId.join(';'))
-        })
+        findSemanticFetrievalProp &&
+          JSON.parse(findSemanticFetrievalProp.jsonValue).map((item) => {
+            semanticsSearchedFields.value.push(item.columnId.join(';'))
+          })
       }
     }
   } catch (error) {
@@ -403,7 +404,7 @@ function makeEditable(row: Row, col: ColumnType) {
 
 // #Computed
 
-const isAddingEmptyRowAllowed = computed(() => !isView && hasEditPermission.value && !isSqlView.value && !isPublicView.value)
+const isAddingEmptyRowAllowed = computed(() => true)
 
 const visibleColLength = computed(() => fields.value?.length)
 
@@ -434,11 +435,12 @@ const dummyRowDataForLoading = computed(() => {
   return Array.from({ length: 40 }).map(() => ({}))
 })
 
-const showSkeleton = computed(
-  () =>
+const showSkeleton = computed(() => {
+  return (
     (disableSkeleton.value !== true && (isViewDataLoading.value || isPaginationLoading.value || isViewColumnsLoading.value)) ||
-    !meta.value,
-)
+    !meta.value
+  )
+})
 
 const cellMeta = computed(() => {
   return dataRef.value.map((row) => {
