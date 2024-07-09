@@ -12273,48 +12273,19 @@ export class Api<
       }),
 
     /**
- * @description saveUFileInfoToTable MCDM
- * 
- * @tags SmartData
- * @name SaveUFileInfoToTable
- * @summary saveUFileInfoToTable MCDM
- * @request POST:/api/v2/smartdata/saveUFileInfoToTable
- * @response `200` `{
-  \** Name of the uploaded file *\
-  filename?: string,
-
-}` File uploaded successfully
- * @response `400` `{
-  \** Error message *\
-  msg?: string,
-
-}` Bad Request
- */
-    saveUFileInfoToTable: (
-      data: {
-        /**
-         * File to be uploaded
-         * @format binary
-         */
-        file: File;
-      },
-      params: RequestParams = {}
-    ) =>
-      this.request<
-        {
-          /** Name of the uploaded file */
-          filename?: string;
-        },
-        {
-          /** Error message */
-          msg?: string;
-        }
-      >({
+     * @description saveUFileInfoToTable MCDM
+     *
+     * @tags SmartData
+     * @name SaveUFileInfoToTable
+     * @summary saveUFileInfoToTable MCDM
+     * @request POST:/api/v2/smartdata/saveUFileInfoToTable
+     */
+    saveUFileInfoToTable: (data: any, params: RequestParams = {}) =>
+      this.request<any, any>({
         path: `/api/v2/smartdata/saveUFileInfoToTable`,
         method: 'POST',
         body: data,
         type: ContentType.FormData,
-        format: 'json',
         ...params,
       }),
 
@@ -12446,6 +12417,23 @@ export class Api<
     setEntityIdData: (data: object, params: RequestParams = {}) =>
       this.request<any, any>({
         path: `/api/v2/smartdata/setEntityIdData`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description semanticSearch LLM
+     *
+     * @tags SmartData
+     * @name SemanticSearch
+     * @summary semanticSearch LLM
+     * @request POST:/api/v2/smartdata/semanticSearch
+     */
+    semanticSearch: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/semanticSearch`,
         method: 'POST',
         body: data,
         type: ContentType.Json,

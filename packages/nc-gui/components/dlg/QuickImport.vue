@@ -265,7 +265,7 @@ function populateUniqueTableName(tn: string) {
   return tn
 }
 
-//保存表格曾上传过的文件’
+//保存表格曾上传过的文件
 const saveFileInfoToTable = async () => {
   for (let i = 0; i < uploadFiles.value.length; i++) {
     let info = uploadFiles.value[i]
@@ -274,8 +274,7 @@ const saveFileInfoToTable = async () => {
     form.append('tableId', route.params.viewId)
     let port = window.location.port
     const hostname = port ? window.location.hostname + ':8080' : window.location.hostname
-    console.log('http', `http://${hostname}/api/v2/smartdata/saveUFileInfoToTable`)
-    await axios.post(`http://${hostname}/api/v2/smartdata/saveUFileInfoToTable`, form)
+    axios.post(`${window.location.protocol}//${hostname}/api/v2/smartdata/saveUFileInfoToTable`, form)
   }
 }
 

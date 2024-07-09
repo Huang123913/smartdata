@@ -574,6 +574,12 @@ export class LLMService {
     });
   }
 
+  //语义搜索
+  async semanticSearch(params: { text: string }) {
+    let res = await this.embeddingtext(params.text);
+    return res;
+  }
+
   //文本向量化
   async embeddingtext(text: string) {
     return await this.llm({

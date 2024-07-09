@@ -1,5 +1,6 @@
+import * as fs from 'fs';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, join } from 'path';
 import { LLMService } from '~/services/smartdata/llm.service';
 import { MCDMService } from '~/services/smartdata/mcdm.service';
 
@@ -198,7 +199,13 @@ export class SmartDataController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: './uploads',
+        destination: (req, file, cb) => {
+          const uploadPath = join(process.cwd(), 'uploads');
+          if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true }); // 递归创建目录
+          }
+          cb(null, uploadPath);
+        },
         filename: (req, file, cb) => {
           const randomName = Array(32)
             .fill(null)
@@ -302,5 +309,15 @@ export class SmartDataController {
   @Post(['/api/v2/smartdata/setEntityIdData'])
   async setSharedData(@Body() data: { isAdd: boolean; id: string }) {
     return setEntityIdData(data.isAdd, data.id);
+  }
+
+  @Post(['/api/v2/smartdata/semanticSearch'])
+  async semanticSearch(
+    @Body()
+    data: {
+      text: string;
+    },
+  ) {
+    return await this.llm.semanticSearch(data);
   }
 }

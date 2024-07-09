@@ -91,13 +91,12 @@ watch(
   { immediate: true },
 )
 
-function onPressEnter() {
+async function onPressEnter() {
   if (selectedOption.value?.isSemanticRetrieval) {
+    if (!search.value.query.trim()) return
     //TODO 语义检索
-    // let tableId = activeView.value.id
-    // console.log('activeView', activeView.value)
-    // console.log('activeView', selectedOption.value.columnName)
-    // console.log('search.value.query', search.value.query)
+    let res = await $api.smartData.semanticSearch({ text: search.value.query })
+    console.log('搜索结果', res)
   } else {
     reloadData.trigger({ shouldShowLoading: false, offset: 0 })
   }
@@ -209,7 +208,6 @@ onClickOutside(globalSearchWrapperRef, (e) => {
             allSemanticRetrieval.length && selectedOption?.isSemanticRetrieval ? '检索范围' : $t('general.searchIn')
           } ${displayColumnLabel}`"
           :bordered="false"
-          data-testid="search-data-input"
           @keyup.enter="onPressEnter"
         >
         </a-input>
