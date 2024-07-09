@@ -18,15 +18,6 @@ const isTab = computed(() => {
 })
 
 const { allowCSVDownload } = useSharedView()
-const { $api } = useNuxtApp()
-const embeddingparquet = async () => {
-  try {
-    let res = await $api.smartData.embeddingparquet({ columns: '' })
-    console.log('数据向量化', res)
-  } catch (error) {
-    console.error('res', error)
-  }
-}
 </script>
 
 <template>
