@@ -1,13 +1,6 @@
 import type { MaybeRef } from 'vue'
 
-import {
-  type Roles,
-  type RolesObj,
-  SourceRestriction,
-  type SourceType,
-  type WorkspaceUserRoles,
-  extractRolesObj,
-} from 'nocodb-sdk'
+import { type Roles, type RolesObj, type SourceType, type WorkspaceUserRoles, extractRolesObj } from 'nocodb-sdk'
 
 import { isString } from '@vue/shared'
 
@@ -155,25 +148,25 @@ export const useRolesShared = createSharedComposable(() => {
     }
 
     // check source level restrictions
-    if (
-      !args.skipSourceCheck &&
-      (sourceRestrictions[SourceRestriction.DATA_READONLY][permission] ||
-        sourceRestrictions[SourceRestriction.SCHEMA_READONLY][permission])
-    ) {
-      const source = unref(args.source || null)
+    // if (
+    //   !args.skipSourceCheck &&
+    //   (sourceRestrictions[SourceRestriction.DATA_READONLY][permission] ||
+    //     sourceRestrictions[SourceRestriction.SCHEMA_READONLY][permission])
+    // ) {
+    //   const source = unref(args.source || null)
 
-      if (!source) {
-        console.warn('Source reference not found', permission)
-        return false
-      }
+    //   if (!source) {
+    //     console.warn('Source reference not found', permission)
+    //     return false
+    //   }
 
-      if (source?.is_data_readonly && sourceRestrictions[SourceRestriction.DATA_READONLY][permission]) {
-        return false
-      }
-      if (source?.is_schema_readonly && sourceRestrictions[SourceRestriction.SCHEMA_READONLY][permission]) {
-        return false
-      }
-    }
+    //   if (source?.is_data_readonly && sourceRestrictions[SourceRestriction.DATA_READONLY][permission]) {
+    //     return false
+    //   }
+    //   if (source?.is_schema_readonly && sourceRestrictions[SourceRestriction.SCHEMA_READONLY][permission]) {
+    //     return false
+    //   }
+    // }
 
     return Object.entries(checkRoles).some(([role, hasRole]) =>
       hasPermission(role as Exclude<Roles, WorkspaceUserRoles>, hasRole, permission),
