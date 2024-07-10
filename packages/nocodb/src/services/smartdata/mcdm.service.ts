@@ -527,11 +527,10 @@ export class MCDMService {
   }
 
   //对模型发起语义分析
-
   async execBizEntityDataSemanticAanalysis(entityId: string) {
     return await this.mcdm({
       method: 'POST',
-      url: `/webapi/innersysapi/VMcdmDuckdbServiceWebApi/execBizEntityDataSemanticAanalysis`,
+      url: `/module-operation!executeOperation?operation=DuckdbSemanticAnalysis`,
       data: {
         entityId: `${entityId}`,
       },
@@ -550,7 +549,7 @@ export class MCDMService {
   ) {
     return await this.mcdm({
       method: 'POST',
-      url: `/webapi/innersysapi/VMcdmDuckdbServiceWebApi/receiveProcessedSemanticAnalysisFileIds`,
+      url: `/module-operation!executeOperation?operation=DuckdbReceiveProcessedSemanticAnalysisFileIds`,
       data: {
         received,
       },
@@ -563,7 +562,7 @@ export class MCDMService {
   async getToBeProcessedSemanticAnalysisFileIds() {
     return await this.mcdm({
       method: 'GET',
-      url: `/webapi/innersysapi/VMcdmDuckdbServiceWebApi/getToBeProcessedSemanticAnalysisFileIds`,
+      url: `/module-operation!executeOperation?operation=DuckdbGetToBeProcessedSemanticAnalysisFileIds`,
     }).then((r) => {
       return r.data;
     });
