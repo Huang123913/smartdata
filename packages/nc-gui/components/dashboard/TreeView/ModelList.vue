@@ -30,6 +30,7 @@ const modelTreeRef = ref<any>(null)
 const layoutLfetHeaderElem = ref<any>(null)
 const layoutLfetFooterElem = ref<any>(null)
 const scrollYHeight = ref(0)
+const { isLeftSidebarOpen } = storeToRefs(useSidebarStore())
 const modelTreeData = computed(() => {
   if (modelTreeRef.value) resizeObserver.observe(modelTreeRef.value)
   if (!layoutLfetHeaderElem.value) layoutLfetHeaderElem.value = document.querySelector('.layout-left-header')
@@ -161,7 +162,11 @@ const dropCatalog = async (info: any) => {
 </script>
 
 <template>
-  <div ref="modelTreeRef" class="model-list rounded-md w-full" :style="{ height: `calc(100vh  - ${otherContentHeight}px)` }">
+  <div
+    ref="modelTreeRef"
+    class="model-list rounded-md w-full"
+    :style="{ height: `calc(${isLeftSidebarOpen ? '100vh' : '79vh'}  - ${otherContentHeight}px)` }"
+  >
     <a-tree
       :height="scrollYHeight"
       :tree-data="modelTreeData"
