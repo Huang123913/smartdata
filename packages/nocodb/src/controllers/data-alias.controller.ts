@@ -30,6 +30,48 @@ import {
 export class DataAliasController {
   constructor(private readonly datasService: DatasService) {}
 
+  @Post([
+    '/api/v1/db/data/:orgs/:baseName/:tableName',
+    '/api/v1/db/data/:orgs/:baseName/:tableName/views/:viewName/filterData',
+  ])
+  @Acl('filterData')
+  @UseInterceptors(
+    MCDMJsonRewrite('NocodbDBTableRowListTableRows', {
+      isSkip: (req) => req.params.viewName != null,
+    }),
+    MCDMJsonRewrite('NocodbDBViewRowListTableViewRows', {
+      isSkip: (req) => req.params.viewName == null,
+    }),
+  )
+  async filterData(
+    @TenantContext() context: NcContext,
+    @Req() req: NcRequest,
+    @Res() res: Response,
+    @Param('baseName') baseName: string,
+    @Param('tableName') tableName: string,
+    @Param('viewName') viewName: string,
+    @Body() body: any,
+    @Query('opt') opt: string,
+  ) {
+    const startTime = process.hrtime();
+    const responseData = await this.datasService.dataList(context, {
+      query: req.query,
+      baseName: baseName,
+      tableName: tableName,
+      viewName: viewName,
+      disableOptimization: opt === 'false',
+    });
+    const elapsedMilliSeconds = parseHrtimeToMilliSeconds(
+      process.hrtime(startTime),
+    );
+    res.setHeader('xc-db-response', elapsedMilliSeconds);
+    if (responseData['stats']) {
+      responseData['stats'].apiHandlingTime = elapsedMilliSeconds;
+    }
+
+    res.json(responseData);
+  }
+
   // todo: Handle the error case where view doesnt belong to model
   @Get([
     '/api/v1/db/data/:orgs/:baseName/:tableName',

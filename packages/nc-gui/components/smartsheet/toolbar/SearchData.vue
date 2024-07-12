@@ -18,7 +18,7 @@ const globalSearchRef = ref<HTMLInputElement>()
 
 const globalSearchWrapperRef = ref<HTMLInputElement>()
 
-const { isMobileMode } = useGlobal()
+const { isMobileMode, appInfo, gridViewPageSize } = useGlobal()
 
 const allSemanticRetrieval = ref<any[]>([])
 
@@ -70,6 +70,7 @@ const getAllSemanticsSearchedFields = async () => {
             value: allColumnId.join(';'),
             isSemanticRetrieval: true,
             id: '全局检索',
+            columnId: allColumnId,
           })
           selectedOption.value = allSemanticRetrieval.value[0]
         }
@@ -90,13 +91,40 @@ watch(
   },
   { immediate: true },
 )
-
+const { base, isSharedBase } = storeToRefs(useBase())
+const route = useRoute()
 async function onPressEnter() {
   if (selectedOption.value?.isSemanticRetrieval) {
     if (!search.value.query.trim()) return
-    //TODO 语义检索
+    const appInfoDefaultLimit = gridViewPageSize.value || appInfo.value.defaultLimit || 25
+    console.log('所有检索语义', allSemanticRetrieval.value)
+    console.log('选中的数据', selectedOption.value)
+    let embeddingKey = allSemanticRetrieval.value
+      .filter((item) => item.id === selectedOption.value.id)
+      .map((item) => ({ id: item.id, columnId: item.columnId }))
+    console.log('embeddingKey', embeddingKey)
+    console.log('每页页数', appInfoDefaultLimit)
     let res = await $api.smartData.semanticSearch({ text: search.value.query })
-    console.log('搜索结果', res)
+    console.log('文本向量化', res)
+    let result = await $api.dbViewRow.filterData(
+      'noco',
+      base.value.id!,
+      meta.value!.id!,
+      route.params?.viewId!,
+      {
+        semanticConditionKey: JSON.stringify({
+          embeddingKey: embeddingKey,
+        }),
+        semanticConditionValue: JSON.stringify({
+          embeddingValue: res[0],
+        }),
+      },
+      {
+        offset: 0,
+        limit: appInfoDefaultLimit,
+      },
+    )
+    console.log('执行结果', result)
   } else {
     reloadData.trigger({ shouldShowLoading: false, offset: 0 })
   }
