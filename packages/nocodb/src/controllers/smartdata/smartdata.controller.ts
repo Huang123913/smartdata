@@ -303,7 +303,7 @@ export class SmartDataController {
 
   @Get(['/api/v2/smartdata/getToBeProcessedSemanticAnalysisFileIds'])
   async getToBeProcessedSemanticAnalysisFileIds() {
-    return await this.mcdm.getToBeProcessedSemanticAnalysisFileIds();
+    return await this.llm.readMd();
   }
 
   @Post(['/api/v2/smartdata/setEntityIdData'])

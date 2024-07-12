@@ -8,6 +8,9 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import { setEntityIdData } from '../../cronJobs';
 
+const fs = require('fs').promises;
+const path = require('path');
+
 @Injectable()
 export class LLMService {
   protected logger = new Logger(LLMService.name);
@@ -592,5 +595,16 @@ export class LLMService {
     }).then((r) => {
       return r.data;
     });
+  }
+
+  async readMd() {
+    const filePath = path.join(__dirname, 'smartdata.s2.md'); // Replace with your .md file path
+    try {
+      const fileContent = await fs.readFile(filePath, 'utf8');
+      return fileContent;
+    } catch (error) {
+      console.error('Error reading the Markdown file:', error);
+      throw error;
+    }
   }
 }

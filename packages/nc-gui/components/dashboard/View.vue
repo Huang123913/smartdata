@@ -1,10 +1,12 @@
 <script lang="ts" setup>
-import { Pane, Splitpanes } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
+
+import { Pane, Splitpanes } from 'splitpanes'
 
 const router = useRouter()
 const route = router.currentRoute
-
+const { activeTable } = storeToRefs(useTablesStore())
+const { isIntelligentQuestionOpen } = storeToRefs(useIntelligentQuestionStore())
 const { isMobileMode } = storeToRefs(useConfigStore())
 
 const {
@@ -212,13 +214,22 @@ const normalizedWidth = computed(() => {
       </div>
     </Pane>
     <Pane
-      :size="mobileNormalizedContentSize"
+      :size="`${mobileNormalizedContentSize - 30}`"
       class="flex-grow"
       :style="{
-        'min-width': `${100 - mobileNormalizedSidebarSize}%`,
+        'min-width': `${100 - mobileNormalizedSidebarSize - 30}%`,
       }"
     >
       <slot name="content" />
+    </Pane>
+    <Pane
+      v-if="activeTable?.id && isIntelligentQuestionOpen"
+      class="flex-grow"
+      :style="{
+        width: `${activeTable?.id && isIntelligentQuestionOpen ? 1 * 30 : 0}%`,
+      }"
+    >
+      <slot name="intelligentQuestion" />
     </Pane>
   </Splitpanes>
 </template>

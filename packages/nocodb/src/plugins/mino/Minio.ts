@@ -1,10 +1,10 @@
-import fs from 'fs';
-import { promisify } from 'util';
-import { Client as MinioClient } from 'minio';
 import axios from 'axios';
-import { useAgent } from 'request-filtering-agent';
+import fs from 'fs';
+import { Client as MinioClient } from 'minio';
 import type { IStorageAdapterV2, XcFile } from 'nc-plugin';
+import { useAgent } from 'request-filtering-agent';
 import type { Readable } from 'stream';
+import { promisify } from 'util';
 import { generateTempFilePath, waitForStreamClose } from '~/utils/pluginUtils';
 
 export default class Minio implements IStorageAdapterV2 {
@@ -33,7 +33,7 @@ export default class Minio implements IStorageAdapterV2 {
       };
       // call S3 to retrieve upload file to specified bucket
       this.minioClient
-        .putObject(this.input?.bucket, key, fileStream, metaData)
+        .putObject(this.input?.bucket, key, fileStream)
         .then(() => {
           resolve(
             `http${this.input.useSSL ? 's' : ''}://${this.input.endPoint}:${
@@ -51,15 +51,15 @@ export default class Minio implements IStorageAdapterV2 {
 
   public async fileRead(key: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.minioClient.getObject(this.input.bucket, key, (err, data) => {
-        if (err) {
-          return reject(err);
-        }
-        if (!data) {
-          return reject(data);
-        }
-        return resolve(data);
-      });
+      // this.minioClient.getObject(this.input.bucket, key, (err, data) => {
+      //   if (err) {
+      //     return reject(err);
+      //   }
+      //   if (!data) {
+      //     return reject(data);
+      //   }
+      //   return resolve(data);
+      // });
     });
   }
 
@@ -115,7 +115,7 @@ export default class Minio implements IStorageAdapterV2 {
           };
           // call S3 to retrieve upload file to specified bucket
           this.minioClient
-            .putObject(this.input?.bucket, key, response.data, metaData)
+            .putObject(this.input?.bucket, key, response.data)
             .then(() => {
               resolve(
                 `http${this.input.useSSL ? 's' : ''}://${this.input.endPoint}:${

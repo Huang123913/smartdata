@@ -23,7 +23,7 @@ export async function startCronJobs() {
       return;
       let response =
         await api.smartData.getToBeProcessedSemanticAnalysisFileIds();
-      let toBeProcessed = response.toBeProcessed;
+      let toBeProcessed = response.data.toBeProcessed;
       if (toBeProcessed?.length) {
         for (let index = 0; index < toBeProcessed.length; index++) {
           const item = toBeProcessed[index];

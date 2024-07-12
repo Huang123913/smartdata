@@ -124,7 +124,7 @@ provide(ToggleDialogInj, toggleDialog)
 </script>
 
 <template>
-  <div>
+  <div class="测试">
     <NuxtLayout v-if="isSharedFormView">
       <NuxtPage />
     </NuxtLayout>
@@ -137,6 +137,9 @@ provide(ToggleDialogInj, toggleDialog)
       </template>
       <template #content>
         <NuxtPage />
+      </template>
+      <template #intelligentQuestion>
+        <DashboardIntelligentQuestion />
       </template>
     </NuxtLayout>
     <LazyDashboardSettingsModal

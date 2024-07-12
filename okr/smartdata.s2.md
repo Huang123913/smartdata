@@ -46,6 +46,7 @@
 
 ## 7.9
    > 正式环境: http://smartdata.yindangu.com
+   >
    > 测试环境: http://smartdata-server.yindangu.com
 
 ### 场景
@@ -137,3 +138,18 @@
    - 【未开始】V: 门户卡片可配置
    - 【完成】V: 小数精度显示问题
    - 【暂缓】V: 前端导出规则不要把隐藏的字段也导出来 (项目不急)
+
+```
+const emits = defineEmits(['update:value', 'focus', 'blur'])
+
+const { fullMode, isFormField, hiddenBubbleMenuOptions } = toRefs(props)
+
+const isExpandedFormOpen = inject(IsExpandedFormOpenInj, ref(false))!
+
+const rowHeight = inject(RowHeightInj, ref(1 as const))
+
+const readOnlyCell = inject(ReadonlyInj, ref(false))
+
+const isEditColumn = inject(EditColumnInj, ref(false))
+```
+

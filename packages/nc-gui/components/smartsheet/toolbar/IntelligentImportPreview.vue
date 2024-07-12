@@ -177,7 +177,6 @@ const handleSelectOptionClick = (item: any) => {
                     'wordBreak': 'keep-all',
                     'whiteSpace': 'nowrap',
                     'font-size': '13px',
-                    s,
                   }"
                   >{{ col.title }}</span
                 >

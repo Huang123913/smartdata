@@ -5,7 +5,9 @@ import { v4 as uuidv4 } from 'uuid'
 import { CloseOutlined, DeleteFilled, SearchOutlined, SendOutlined } from '@ant-design/icons-vue'
 
 import { useChatPlaygroundViewStore } from '../../../../store/chatPlaygroundView'
+import { useIntelligentQuestionStore } from '../../../../store/intellignetQuestion'
 
+const { isIntelligentQuestionOpen, dialogList } = storeToRefs(useIntelligentQuestionStore())
 export interface SessionItem {
   id: string
   textAreaValue: string
@@ -148,6 +150,18 @@ const handleSend = async () => {
       columns: [],
       tip: '',
     }
+    dialogList.value = [
+      ...dialogList.value,
+      {
+        id: '0000',
+        isQuestion: false,
+        type: 'table',
+        data: {
+          tabledata: datas,
+          columns: fields,
+        },
+      },
+    ]
   } catch (e: any) {
     message.error(e?.message)
   } finally {
