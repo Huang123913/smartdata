@@ -44,7 +44,7 @@
  - ⚪️ 数据向量化 (增量)
  - ⚪️ 语义化查询
 
-## 7.11
+## 7.12
    > 正式环境: http://smartdata.yindangu.com
    > 测试环境: http://smartdata-server.yindangu.com
 
@@ -65,7 +65,8 @@
 ### 前端
    - 【进行中】侧栏聊天控件
       > 正在封装控件, 先实现: Table, Image, Text 三种消息类型
-      > Table(完成), Image(完成), Text(进行中)
+      > Table(完成), Image(完成), Text(完成)
+      > 正在优化样式问题
    - 【联调中】语义搜索: /embeddingtext
    - 【联调中】语义搜索: 数据同步
    - 【完成】合并 nocodb v0.251.0
