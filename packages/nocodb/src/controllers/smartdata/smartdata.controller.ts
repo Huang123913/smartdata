@@ -296,4 +296,14 @@ export class SmartDataController {
   async getToBeProcessedSemanticAnalysisFileIds() {
     return await this.mcdm.getToBeProcessedSemanticAnalysisFileIds();
   }
+
+  @Post(['/api/v2/smartdata/semanticSearch'])
+  async semanticSearch(
+    @Body()
+    data: {
+      text: string;
+    },
+  ) {
+    return await this.llm.semanticSearch(data);
+  }
 }

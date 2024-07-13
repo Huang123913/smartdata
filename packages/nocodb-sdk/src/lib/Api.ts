@@ -8713,6 +8713,35 @@ export class Api<
       }),
 
     /**
+     * No description
+     *
+     * @tags DB View Row
+     * @name FilterData
+     * @summary filter data
+     * @request POST:/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/filterData
+     */
+    filterData: (
+      orgs: string,
+      baseName: string,
+      tableName: string,
+      viewName: string,
+      data: object,
+      query?: {
+        limit?: number;
+        offset?: number;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<any, any>({
+        path: `/api/v1/db/data/${orgs}/${baseName}/${tableName}/views/${viewName}/filterData`,
+        method: 'POST',
+        query: query,
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
  * @description List all table view rows
  * 
  * @tags DB View Row
@@ -12432,6 +12461,23 @@ export class Api<
       this.request<any, any>({
         path: `/api/v2/smartdata/getToBeProcessedSemanticAnalysisFileIds`,
         method: 'GET',
+        ...params,
+      }),
+
+    /**
+     * @description semanticSearch LLM
+     *
+     * @tags SmartData
+     * @name SemanticSearch
+     * @summary semanticSearch LLM
+     * @request POST:/api/v2/smartdata/semanticSearch
+     */
+    semanticSearch: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/semanticSearch`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
   };

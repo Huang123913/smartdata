@@ -10328,6 +10328,94 @@
         ]
       }
     },
+    "/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}/filterData": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "orgs",
+          "in": "path",
+          "required": true,
+          "description": "Organisation Name. Currently `noco` will be used."
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "baseName",
+          "in": "path",
+          "required": true,
+          "description": "Base Name"
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "tableName",
+          "in": "path",
+          "required": true,
+          "description": "Table Name"
+        },
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "viewName",
+          "in": "path",
+          "required": true
+        },
+        {
+          "$ref": "#/components/parameters/xc-auth"
+        },
+        {
+          "schema": {
+            "type": "number"
+          },
+          "in": "query",
+          "name": "limit"
+        },
+        {
+          "schema": {
+            "type": "number"
+          },
+          "in": "query",
+          "name": "offset"
+        }
+      ],
+      "post": {
+        "summary": "filter data",
+        "operationId": "db-view-row-filterData",
+        "tags": [
+          "DB View Row"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "query",
+            "name": "limit"
+          },
+          {
+            "schema": {
+              "type": "number"
+            },
+            "in": "query",
+            "name": "offset"
+          }
+        ]
+      }
+    },
     "/api/v1/db/data/{orgs}/{baseName}/{tableName}/views/{viewName}": {
       "parameters": [
         {
@@ -18513,6 +18601,28 @@
         "description": "getToBeProcessedSemanticAnalysisFileIds MCDM",
         "tags": ["SmartData"]
       }
+    },
+    "/api/v2/smartdata/semanticSearch":{
+      "post": {
+        "summary": "semanticSearch LLM",
+        "operationId": "semanticSearch",
+        "description": "semanticSearch LLM",
+        "tags": ["SmartData"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/xc-auth"
+        }
+      ]
     }
   },
   "components": {

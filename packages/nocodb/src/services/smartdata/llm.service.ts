@@ -571,14 +571,20 @@ export class LLMService {
     });
   }
 
+  //语义搜索
+  async semanticSearch(params: { text: string }) {
+    let res = await this.embeddingtext(params.text);
+    return res;
+  }
+
   //文本向量化
-  async embeddingtext(params: { text: string }) {
+  async embeddingtext(text: string) {
     return await this.llm({
       method: 'POST',
       url: `/embeddingtext`,
       params: {
         id: uuidv4(),
-        text: params.text,
+        text: text,
       },
     }).then((r) => {
       return r.data;

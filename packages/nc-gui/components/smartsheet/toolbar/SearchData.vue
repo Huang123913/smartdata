@@ -18,7 +18,7 @@ const globalSearchRef = ref<HTMLInputElement>()
 
 const globalSearchWrapperRef = ref<HTMLInputElement>()
 
-const { isMobileMode } = useGlobal()
+const { isMobileMode, appInfo, gridViewPageSize } = useGlobal()
 
 const allSemanticRetrieval = ref<any[]>([])
 
@@ -70,6 +70,7 @@ const getAllSemanticsSearchedFields = async () => {
             value: allColumnId.join(';'),
             isSemanticRetrieval: true,
             id: '全局检索',
+            columnId: allColumnId,
           })
           selectedOption.value = allSemanticRetrieval.value[0]
         }
@@ -90,14 +91,39 @@ watch(
   },
   { immediate: true },
 )
-
-function onPressEnter() {
+const { base, isSharedBase } = storeToRefs(useBase())
+const route = useRoute()
+async function onPressEnter() {
   if (selectedOption.value?.isSemanticRetrieval) {
-    //TODO 语义检索
-    // let tableId = activeView.value.id
-    // console.log('activeView', activeView.value)
-    // console.log('activeView', selectedOption.value.columnName)
-    // console.log('search.value.query', search.value.query)
+    if (!search.value.query.trim()) return
+    const appInfoDefaultLimit = gridViewPageSize.value || appInfo.value.defaultLimit || 25
+    console.log('所有检索语义', allSemanticRetrieval.value)
+    console.log('选中的数据', selectedOption.value)
+    let embeddingKey = allSemanticRetrieval.value
+      .filter((item) => item.id === selectedOption.value.id)
+      .map((item) => ({ id: item.id, columnId: item.columnId }))
+    console.log('embeddingKey', embeddingKey)
+    let res = await $api.smartData.semanticSearch({ text: search.value.query })
+    console.log('文本向量化', res)
+    let result = await $api.dbViewRow.filterData(
+      'noco',
+      base.value.id!,
+      meta.value!.id!,
+      route.params?.viewId!,
+      {
+        semanticConditionKey: JSON.stringify({
+          embeddingKey: embeddingKey,
+        }),
+        semanticConditionValue: JSON.stringify({
+          embeddingValue: res[0],
+        }),
+      },
+      {
+        offset: 0,
+        limit: appInfoDefaultLimit,
+      },
+    )
+    console.log('执行结果', result)
   } else {
     reloadData.trigger({ shouldShowLoading: false, offset: 0 })
   }
@@ -199,21 +225,19 @@ onClickOutside(globalSearchWrapperRef, (e) => {
         </template>
       </NcDropdown>
 
-      <form class="p-0">
-        <a-input
-          v-if="search.query || showSearchBox"
-          v-model:value="search.query"
-          size="small"
-          class="text-xs w-40 h-full"
-          :placeholder="`${
-            allSemanticRetrieval.length && selectedOption?.isSemanticRetrieval ? '检索范围' : $t('general.searchIn')
-          } ${displayColumnLabel}`"
-          :bordered="false"
-          data-testid="search-data-input"
-          @keyup.enter="onPressEnter"
-        >
-        </a-input>
-      </form>
+      <a-input
+        v-if="search.query || showSearchBox"
+        v-model:value="search.query"
+        size="small"
+        class="text-xs w-40 h-full"
+        :placeholder="`${
+          allSemanticRetrieval.length && selectedOption?.isSemanticRetrieval ? '检索范围' : $t('general.searchIn')
+        } ${displayColumnLabel}`"
+        :bordered="false"
+        data-testid="search-data-input"
+        @keyup.enter="onPressEnter"
+      >
+      </a-input>
     </div>
   </div>
 </template>
