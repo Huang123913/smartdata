@@ -111,12 +111,12 @@ async function onPressEnter() {
       meta.value!.id!,
       route.params?.viewId!,
       {
-        semanticConditionKey: JSON.stringify({
+        semanticConditionKey: {
           embeddingKey: embeddingKey,
-        }),
-        semanticConditionValue: JSON.stringify({
+        },
+        semanticConditionValue: {
           embeddingValue: res[0],
-        }),
+        },
       },
       {
         offset: 0,
