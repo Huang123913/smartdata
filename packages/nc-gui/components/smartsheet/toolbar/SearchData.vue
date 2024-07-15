@@ -31,7 +31,6 @@ const columns = computed(() => {
 })
 
 const { $api } = useNuxtApp()
-const fields = inject(FieldsInj, ref([]))
 const { eventBus } = useSmartsheetStoreOrThrow()
 eventBus.on((event) => {
   if (event === SmartsheetStoreEvents.TABLE_Props_RELOAD) {
@@ -47,13 +46,13 @@ const getAllSemanticsSearchedFields = async () => {
     let props = tableInfo[0]?.props ? tableInfo[0]?.props : []
     if (props.length) {
       let findSemanticFetrievalProp = props.findLast((p) => p.code == 'belongSemanticFetrieval')
-      if (findSemanticFetrievalProp) {
+      if (findSemanticFetrievalProp && (meta.value as TableType)?.columns) {
         let allColumnId: string[] = []
         JSON.parse(findSemanticFetrievalProp.jsonValue).map((item) => {
           let title: string[] = []
           item.columnId.map((id) => {
             allColumnId.push(...item.columnId)
-            let findColumn = fields.value.find((item) => item.id === id)
+            let findColumn = (meta.value as TableType)?.columns.find((item) => item.id === id)
             title.push(findColumn?.title)
           })
           allSemanticRetrieval.value.push({
@@ -72,7 +71,13 @@ const getAllSemanticsSearchedFields = async () => {
             id: '全局检索',
             columnId: allColumnId,
           })
-          selectedOption.value = allSemanticRetrieval.value[0]
+          if (!search.value.field) {
+            selectedOption.value = allSemanticRetrieval.value[0]
+            search.value.selectedOption = selectedOption.value
+            search.value.field = selectedOption.value.id
+          } else {
+            selectedOption.value = search.value.selectedOption
+          }
         }
       }
     }
@@ -85,48 +90,16 @@ watch(
   () => activeView.value?.id,
   (n, o) => {
     if (n !== o) {
-      getAllSemanticsSearchedFields()
       loadFieldQuery(activeView.value?.id)
+      getAllSemanticsSearchedFields()
     }
   },
   { immediate: true },
 )
 const { base, isSharedBase } = storeToRefs(useBase())
-const route = useRoute()
+
 async function onPressEnter() {
-  if (selectedOption.value?.isSemanticRetrieval) {
-    if (!search.value.query.trim()) return
-    const appInfoDefaultLimit = gridViewPageSize.value || appInfo.value.defaultLimit || 25
-    console.log('所有检索语义', allSemanticRetrieval.value)
-    console.log('选中的数据', selectedOption.value)
-    let embeddingKey = allSemanticRetrieval.value
-      .filter((item) => item.id === selectedOption.value.id)
-      .map((item) => ({ id: item.id, columnId: item.columnId }))
-    console.log('embeddingKey', embeddingKey)
-    let res = await $api.smartData.semanticSearch({ text: search.value.query })
-    console.log('文本向量化', res)
-    let result = await $api.dbViewRow.filterData(
-      'noco',
-      base.value.id!,
-      meta.value!.id!,
-      route.params?.viewId!,
-      {
-        semanticConditionKey: {
-          embeddingKey: embeddingKey,
-        },
-        semanticConditionValue: {
-          embeddingValue: res[0],
-        },
-      },
-      {
-        offset: 0,
-        limit: appInfoDefaultLimit,
-      },
-    )
-    console.log('执行结果', result)
-  } else {
-    reloadData.trigger({ shouldShowLoading: false, offset: 0 })
-  }
+  reloadData.trigger({ shouldShowLoading: false, offset: 0 })
 }
 
 const displayColumnLabel = computed(() => {
@@ -156,6 +129,7 @@ watchDebounced(
 
 const onSelectOption = (column: ColumnType) => {
   search.value.field = column.id as string
+  search.value.selectedOption = column
   isDropdownOpen.value = false
   selectedOption.value = column
 }

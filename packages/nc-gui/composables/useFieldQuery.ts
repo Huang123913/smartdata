@@ -3,13 +3,19 @@ export function useFieldQuery() {
   const emptyFieldQueryObj = {
     field: '',
     query: '',
+    selectedOption: {},
   }
 
   // mapping view id (key) to corresponding emptyFieldQueryObj (value)
-  const searchMap = useState<Record<string, { field: string; query: string }>>('field-query-search-map', () => ({}))
+  const searchMap = useState<Record<string, { field: string; query: string; selectedOption: any }>>(
+    'field-query-search-map',
+    () => ({}),
+  )
 
   // the fieldQueryObj under the current view
-  const search = useState<{ field: string; query: string }>('field-query-search', () => ({ ...emptyFieldQueryObj }))
+  const search = useState<{ field: string; query: string; selectedOption: any }>('field-query-search', () => ({
+    ...emptyFieldQueryObj,
+  }))
 
   // retrieve the fieldQueryObj of the given view id
   // if it is not found in `searchMap`, init with emptyFieldQueryObj

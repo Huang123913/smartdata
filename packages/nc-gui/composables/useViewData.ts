@@ -52,6 +52,8 @@ export function useViewData(
 
   const isPublic = inject(IsPublicInj, ref(false))
 
+  const { search } = useFieldQuery()
+
   const { base, isSharedBase } = storeToRefs(useBase())
 
   const { sharedView, fetchSharedViewData, paginationData: sharedPaginationData } = useSharedView()
@@ -173,25 +175,63 @@ export function useViewData(
     let response
 
     try {
-      response = !isPublic.value
-        ? await api.dbViewRow.list(
+      console.log('search', search.value)
+      if (search.value && search.value.selectedOption?.isSemanticRetrieval) {
+        let { limit, offset } = queryParams.value
+        if (search.value.query) {
+          let res = await $api.smartData.semanticSearch({ text: search.value.query })
+          response = await $api.dbViewRow.filterData(
             'noco',
             base.value.id!,
             metaId.value!,
             viewMeta.value!.id!,
             {
-              ...queryParams.value,
-              ...params,
-              ...(isUIAllowed('sortSync') ? {} : { sortArrJson: JSON.stringify(sorts.value) }),
-              ...(isUIAllowed('filterSync') ? {} : { filterArrJson: JSON.stringify(nestedFilters.value) }),
-              where: where?.value,
-              ...(excludePageInfo.value ? { excludeCount: 'true' } : {}),
-            } as any,
+              semanticConditionKey: {
+                embeddingKey: [{ id: search.value.selectedOption.id, columnId: search.value.selectedOption.columnId }],
+              },
+              semanticConditionValue: {
+                embeddingValue: res[0],
+              },
+            },
+            { limit, offset },
             {
               cancelToken: controller.value.token,
             },
           )
-        : await fetchSharedViewData({ sortsArr: sorts.value, filtersArr: nestedFilters.value, where: where?.value })
+        } else {
+          let query = { limit, offset }
+          response = await api.dbViewRow.list(
+            'noco',
+            base.value.id!,
+            metaId.value!,
+            viewMeta.value!.id!,
+            { ...query },
+            {
+              cancelToken: controller.value.token,
+            },
+          )
+        }
+      } else {
+        response = !isPublic.value
+          ? await api.dbViewRow.list(
+              'noco',
+              base.value.id!,
+              metaId.value!,
+              viewMeta.value!.id!,
+              {
+                ...queryParams.value,
+                ...params,
+                ...(isUIAllowed('sortSync') ? {} : { sortArrJson: JSON.stringify(sorts.value) }),
+                ...(isUIAllowed('filterSync') ? {} : { filterArrJson: JSON.stringify(nestedFilters.value) }),
+                where: where?.value,
+                ...(excludePageInfo.value ? { excludeCount: 'true' } : {}),
+              } as any,
+              {
+                cancelToken: controller.value.token,
+              },
+            )
+          : await fetchSharedViewData({ sortsArr: sorts.value, filtersArr: nestedFilters.value, where: where?.value })
+      }
     } catch (error) {
       // if the request is canceled, then do nothing
       if (error.code === 'ERR_CANCELED') {
