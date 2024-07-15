@@ -3,7 +3,8 @@ import FormData from 'form-data';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 import { v4 as uuidv4 } from 'uuid';
 import { MCDMService } from '~/services/smartdata/mcdm.service';
-
+import * as fs from 'fs';
+import path from 'path';
 import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
@@ -32,12 +33,10 @@ export class LLMService {
     this.llm.interceptors.request.use((config) => {
       let projectid = process.env.LLM_PROJECTID ?? '2';
       let orgid = process.env.LLM_ORGID ?? '2';
-      if (config.params?.columns) {
-        config.params.orgid = orgid;
-      } else if (config?.data) {
+      if (config?.data) {
         config.data.projectid = projectid;
         config.data.orgid = orgid;
-      } else {
+      } else if (config?.params) {
         config.params.projectid = projectid;
         config.params.orgid = orgid;
       }
@@ -554,16 +553,16 @@ export class LLMService {
 
   //数据向量化
   async embeddingparquet(columnsJson: string, fileId: string) {
+    let orgid = process.env.LLM_ORGID ?? '2';
     let mcdmFile = await this.mcdm.downLoadFile(fileId);
     const formData = new FormData();
     formData.append('file', mcdmFile, `${fileId}.parquet`);
+    formData.append('id', uuidv4());
+    formData.append('columns', columnsJson);
+    formData.append('orgid', orgid);
     return await this.llm({
       method: 'POST',
       url: `/embeddingparquet`,
-      params: {
-        id: uuidv4(),
-        columns: columnsJson,
-      },
       data: formData,
       responseType: 'stream', // 确保返回数据是一个流
     }).then((r) => {
@@ -589,5 +588,50 @@ export class LLMService {
     }).then((r) => {
       return r.data;
     });
+  }
+
+  //数据向量化测试
+  async embeddingparquetTest() {
+    const filePath = path.resolve(
+      __dirname,
+      'Project_20240712113520763.parquet',
+    );
+    if (fs.existsSync(filePath)) {
+      const formData = new FormData();
+      const fileStream = fs.createReadStream(filePath);
+      formData.append('file', fileStream, 'Project_20240712113520763.parquet');
+      formData.append('id', uuidv4());
+      formData.append(
+        'columns',
+        JSON.stringify([
+          ['projectName'],
+          'projectType',
+          ['description'],
+          ['projectName', 'projectType'],
+          ['projectName', 'description'],
+          ['projectType', 'description'],
+          ['projectName', 'projectType', 'description'],
+        ]),
+      );
+      formData.append('orgid', '2');
+      return await this.llm({
+        method: 'POST',
+        url: `/embeddingparquet`,
+        data: formData,
+      }).then((r) => {
+        let a = typeof r.data;
+        const filePath = path.join(__dirname, 'downloaded_file2.parquet');
+        const writer = fs.createWriteStream(filePath);
+        r.data.pipe(writer);
+        return new Promise((resolve, reject) => {
+          writer.on('finish', () => {
+            resolve(filePath);
+          });
+          writer.on('error', (err) => {
+            reject(err);
+          });
+        });
+      });
+    }
   }
 }
