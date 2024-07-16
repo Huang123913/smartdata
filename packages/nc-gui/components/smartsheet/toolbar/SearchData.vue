@@ -45,6 +45,7 @@ const getAllSemanticsSearchedFields = async () => {
     })
     let props = tableInfo[0]?.props ? tableInfo[0]?.props : []
     if (props.length) {
+      allSemanticRetrieval.value = []
       let findSemanticFetrievalProp = props.findLast((p) => p.code == 'belongSemanticFetrieval')
       if (findSemanticFetrievalProp && (meta.value as TableType)?.columns) {
         let allColumnId: string[] = []
