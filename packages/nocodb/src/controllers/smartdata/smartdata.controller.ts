@@ -306,4 +306,21 @@ export class SmartDataController {
   ) {
     return await this.llm.semanticSearch(data);
   }
+
+  @Post(['/api/v2/smartdata/findAllBizCustomEntity'])
+  async findAllBizCustomEntity(
+    @Body()
+    data: {
+      isShowFields: boolean;
+      isShowEntityProps: boolean;
+      isShowFieldProps: boolean;
+    },
+  ) {
+    let { isShowFields, isShowEntityProps, isShowFieldProps } = data;
+    return await this.mcdm.findAllBizCustomEntity(
+      isShowFields,
+      isShowEntityProps,
+      isShowFieldProps,
+    );
+  }
 }

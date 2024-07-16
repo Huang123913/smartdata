@@ -39,6 +39,7 @@ export class MCDMService {
     this.mcdm.interceptors.response.use(
       (r) => r,
       (r) => {
+        if (!r.response?.data) throw r;
         const message = r.response.data;
         const { method, baseURL, url, params, data, headers } = r.config;
         const config = { method, baseURL, url, params, data, headers };
@@ -83,6 +84,23 @@ export class MCDMService {
       url: `/webapi/innersysapi/VMcdmDataServiceWebApi/findBizCustomEntity`,
       data: {
         entityIds: entityId,
+      },
+    }).then((r) => {
+      return r.data.data.datas ?? [];
+    });
+  }
+
+  async findAllBizCustomEntity(
+    isShowFields: boolean = true,
+    isShowEntityProps: boolean = false,
+    isShowFieldProps: boolean = false,
+  ) {
+    return await this.mcdm({
+      url: `/webapi/innersysapi/VMcdmDataServiceWebApi/findAllBizCustomEntity`,
+      data: {
+        isShowFields,
+        isShowEntityProps,
+        isShowFieldProps,
       },
     }).then((r) => {
       return r.data.data.datas ?? [];

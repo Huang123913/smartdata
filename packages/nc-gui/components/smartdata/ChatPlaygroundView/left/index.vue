@@ -1,11 +1,14 @@
 <script lang="ts" setup>
 import { getNowDate } from '#imports'
 import { v4 as uuidv4 } from 'uuid'
+import _ from 'lodash'
 
 import { CloseOutlined, DeleteFilled, SearchOutlined, SendOutlined } from '@ant-design/icons-vue'
 
 import { useChatPlaygroundViewStore } from '../../../../store/chatPlaygroundView'
+import { useIntelligentQuestionStore } from '../../../../store/intellignetQuestion'
 
+const { isIntelligentQuestionOpen, dialogList } = storeToRefs(useIntelligentQuestionStore())
 export interface SessionItem {
   id: string
   textAreaValue: string
@@ -98,17 +101,25 @@ const clearSesstionItem = () => {
   })
 }
 
-const allTableMode = computed(() => {
-  let data = chataiData.value.modelData.filter((item) => !item.isCatalog && item.id).map((item) => ({ ...item, fields: [] }))
-  return data
-})
-
 //发送按钮
 const handleSend = async () => {
   try {
     if (!textAreaValue.value.trim()) return
     isShowLoading.value = true
-    let selectedModel = chataiData.value.checkedModelData.length ? chataiData.value.checkedModelData : allTableMode.value
+    let selectedModel
+    if (chataiData.value.checkedModelData.length) {
+      let newSelectedModel = _.cloneDeep(chataiData.value.checkedModelData)
+      for (let i = 0; i < newSelectedModel.length; i++) {
+        let modelItem = newSelectedModel[i]
+        if (modelItem?.fields && modelItem.fields.length === 0) {
+          let findItem = chataiData.value.allModel.find((item) => item.id === modelItem.id)
+          modelItem.fields = findItem.fields
+        }
+      }
+      selectedModel = newSelectedModel
+    } else {
+      selectedModel = chataiData.value.allModel
+    }
     let params = {
       selectedModel: JSON.stringify(selectedModel),
       question: textAreaValue.value,

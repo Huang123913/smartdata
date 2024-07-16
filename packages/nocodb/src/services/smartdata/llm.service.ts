@@ -3,9 +3,9 @@ import FormData from 'form-data';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 import { v4 as uuidv4 } from 'uuid';
 import { MCDMService } from '~/services/smartdata/mcdm.service';
-import * as fs from 'fs';
-import path from 'path';
 import { Injectable, Logger } from '@nestjs/common';
+const fs = require('fs').promises;
+const path = require('path');
 
 @Injectable()
 export class LLMService {
@@ -46,6 +46,7 @@ export class LLMService {
     this.llm.interceptors.response.use(
       (r) => r,
       (r) => {
+        if (!r.response?.data) throw r;
         const message = r.response.data;
         const { method, baseURL, url, params, data, headers } = r.config;
         const config = { method, baseURL, url, params, data, headers };
@@ -254,15 +255,6 @@ export class LLMService {
 
   async getModelrange(selectedModel: any[]) {
     let modelrange = [];
-    for (let i = 0; i < selectedModel.length; i++) {
-      let modelItem = selectedModel[i];
-      if (modelItem?.fields && modelItem.fields.length === 0) {
-        let entities = await this.mcdm.getEntity(modelItem.id);
-        let fields =
-          entities.length && entities[0]?.fields ? entities[0]?.fields : [];
-        modelItem.fields = fields;
-      }
-    }
     modelrange = selectedModel.map((model) => {
       let props = [];
       if (model?.fields && model.fields.length) {
@@ -590,48 +582,14 @@ export class LLMService {
     });
   }
 
-  //数据向量化测试
-  async embeddingparquetTest() {
-    const filePath = path.resolve(
-      __dirname,
-      'Project_20240712113520763.parquet',
-    );
-    if (fs.existsSync(filePath)) {
-      const formData = new FormData();
-      const fileStream = fs.createReadStream(filePath);
-      formData.append('file', fileStream, 'Project_20240712113520763.parquet');
-      formData.append('id', uuidv4());
-      formData.append(
-        'columns',
-        JSON.stringify([
-          ['projectName'],
-          'projectType',
-          ['description'],
-          ['projectName', 'projectType'],
-          ['projectName', 'description'],
-          ['projectType', 'description'],
-          ['projectName', 'projectType', 'description'],
-        ]),
-      );
-      formData.append('orgid', '2');
-      return await this.llm({
-        method: 'POST',
-        url: `/embeddingparquet`,
-        data: formData,
-      }).then((r) => {
-        let a = typeof r.data;
-        const filePath = path.join(__dirname, 'downloaded_file2.parquet');
-        const writer = fs.createWriteStream(filePath);
-        r.data.pipe(writer);
-        return new Promise((resolve, reject) => {
-          writer.on('finish', () => {
-            resolve(filePath);
-          });
-          writer.on('error', (err) => {
-            reject(err);
-          });
-        });
-      });
+  async readMd() {
+    const filePath = path.join(__dirname, 'smartdata.s2.md'); // Replace with your .md file path
+    try {
+      const fileContent = await fs.readFile(filePath, 'utf8');
+      return fileContent;
+    } catch (error) {
+      console.error('Error reading the Markdown file:', error);
+      throw error;
     }
   }
 }

@@ -12480,5 +12480,22 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+     * @description findAllBizCustomEntity MCDM
+     *
+     * @tags SmartData
+     * @name FindAllBizCustomEntity
+     * @summary findAllBizCustomEntity MCDM
+     * @request POST:/api/v2/smartdata/findAllBizCustomEntity
+     */
+    findAllBizCustomEntity: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/findAllBizCustomEntity`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
 }

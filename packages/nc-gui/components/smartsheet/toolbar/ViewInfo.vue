@@ -39,10 +39,7 @@ const activeTableParentCatalog = computed(() => {
     return ''
   }
 })
-const allTableMode = computed(() => {
-  let data = chataiData.value.modelData.filter((item) => !item.isCatalog && item.id).map((item) => ({ ...item, fields: [] }))
-  return data
-})
+
 const intelligentImport = async () => {
   try {
     await loadFilters('')
@@ -74,7 +71,7 @@ const intelligentImport = async () => {
     let result = await $api.smartData.intelligentImport({
       tableId: activeTable.value.id,
       tableHeader,
-      allTableMode: JSON.stringify(allTableMode.value),
+      allTableMode: JSON.stringify(chataiData.value.allModel),
     })
     if (result?.success && result?.data.success) {
       console.log('result', result)

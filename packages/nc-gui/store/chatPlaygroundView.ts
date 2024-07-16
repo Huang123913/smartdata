@@ -22,6 +22,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     modelTree: any[]
     modelCatalog: any[]
     modelCatalogTree: any[]
+    allModel: any[]
     checkedModelData: any[]
     sessionItem: SessionItem
     isOpenModel: boolean
@@ -33,6 +34,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     modelTree: [], //模型树
     modelCatalog: [], //模型目录
     modelCatalogTree: [], //模型目录树
+    allModel: [],
     checkedModelData: [], //选中的模型
     sessionItem: {
       id: '',
@@ -53,6 +55,11 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
   const getCustomCatalogEntityTree = async () => {
     try {
       let bizCatalogEntityCustom = await $api.smartData.entities()
+      chataiData.allModel = await $api.smartData.findAllBizCustomEntity({
+        isShowFields: true,
+        isShowEntityProps: false,
+        isShowFieldProps: false,
+      })
       if (!bizCatalogEntityCustom.length) return
       bizCatalogEntityCustom = bizCatalogEntityCustom.map((item) => ({ ...item, parentId: item.parentId ? item.parentId : null }))
       chataiData.modelData = [
