@@ -44,7 +44,7 @@
  - ⚪️ 数据向量化 (增量)
  - ⚪️ 语义化查询
 
-## 7.15
+## 7.16
    > 正式环境: http://smartdata.yindangu.com
    > 测试环境: http://smartdata-server.yindangu.com
 
@@ -63,12 +63,14 @@
          5. 🟡 发送 parquet 文件 (SD -> MCDM) **联调中**
 
 ### 前端
-   - 【联调中】语义搜索: /embeddingtext
-   - 【联调中】语义搜索: 数据同步
+   - 【进行中】排查AI服务偶发崩溃问题
    - 【进行中】侧栏聊天控件
       > 正在封装控件, 先实现: Table, Image, Text 三种消息类型
       > Table(完成), Image(完成), Text(完成)
       > 正在优化样式问题
+   - 【完成】优化提问建表性能 /findAllBizCustomEntity
+   - 【完成】语义搜索: 数据同步
+   - 【完成】语义搜索: /embeddingtext
    - 【完成】合并 nocodb v0.251.0
       > 先部署在测试库验证一段时间
    - 【完成】语义搜索: 自动补偿
