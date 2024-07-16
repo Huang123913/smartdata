@@ -6,9 +6,6 @@ import _ from 'lodash'
 import { CloseOutlined, DeleteFilled, SearchOutlined, SendOutlined } from '@ant-design/icons-vue'
 
 import { useChatPlaygroundViewStore } from '../../../../store/chatPlaygroundView'
-import { useIntelligentQuestionStore } from '../../../../store/intellignetQuestion'
-
-const { isIntelligentQuestionOpen, dialogList } = storeToRefs(useIntelligentQuestionStore())
 export interface SessionItem {
   id: string
   textAreaValue: string
