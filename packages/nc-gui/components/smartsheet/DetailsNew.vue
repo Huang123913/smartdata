@@ -158,6 +158,9 @@ const init = async () => {
 .update-frequency-icon {
   margin-right: 0 !important;
 }
+::v-deep .ant-tabs-tab-active.ant-tabs-tab-disabled {
+  opacity: 0.5 !important;
+}
 </style>
 
 <style lang="scss">
