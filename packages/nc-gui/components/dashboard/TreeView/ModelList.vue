@@ -29,6 +29,7 @@ const isShowLoading = ref(false)
 const modelTreeRef = ref<any>(null)
 const layoutLfetHeaderElem = ref<any>(null)
 const layoutLfetFooterElem = ref<any>(null)
+const { isLeftSidebarOpen } = storeToRefs(useSidebarStore())
 const scrollYHeight = ref(0)
 const modelTreeData = computed(() => {
   if (modelTreeRef.value) resizeObserver.observe(modelTreeRef.value)
@@ -161,7 +162,11 @@ const dropCatalog = async (info: any) => {
 </script>
 
 <template>
-  <div ref="modelTreeRef" class="model-list rounded-md w-full" :style="{ height: `calc(100vh  - ${otherContentHeight}px)` }">
+  <div
+    ref="modelTreeRef"
+    class="model-list rounded-md w-full"
+    :style="{ height: `calc(${isLeftSidebarOpen ? '100vh' : '79vh'}  - ${otherContentHeight}px)` }"
+  >
     <a-tree
       :height="scrollYHeight"
       :tree-data="modelTreeData"
