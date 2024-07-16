@@ -46,7 +46,7 @@ const showModelCatalog = computed(() => {
   let newModelCatalogTree = _.cloneDeep(chataiData.value.modelCatalogTree)
   if (props?.moveTarget) {
     let findItem = findNodeById(newModelCatalogTree, props?.moveTarget.id)
-    findItem.disabled = true
+    if (findItem) findItem.disabled = true
     if (props?.moveTarget.parentId) {
       let findItem1 = findNodeById(newModelCatalogTree, props?.moveTarget.parentId)
       findItem1.disabled = true
@@ -59,7 +59,7 @@ const showModelCatalog = computed(() => {
         }
       })
     }
-    findItem.isCatalog && findItem.children.length && findChild(findItem.children)
+    findItem && findItem.isCatalog && findItem.children.length && findChild(findItem.children)
   }
   return newModelCatalogTree
 })
