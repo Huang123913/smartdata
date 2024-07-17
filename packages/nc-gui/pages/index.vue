@@ -138,6 +138,9 @@ provide(ToggleDialogInj, toggleDialog)
       <template #content>
         <NuxtPage />
       </template>
+      <template #intelligentQuestion>
+        <DashboardIntelligentQuestion />
+      </template>
     </NuxtLayout>
     <LazyDashboardSettingsModal
       v-model:model-value="dialogOpen"

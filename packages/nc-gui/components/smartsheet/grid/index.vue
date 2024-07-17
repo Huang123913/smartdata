@@ -2,7 +2,9 @@
 import type { ColumnType, GridType } from 'nocodb-sdk'
 import Table from './Table.vue'
 import GroupBy from './GroupBy.vue'
+import { useIntelligentQuestionStore } from '../../../store/intellignetQuestion.ts'
 
+const { intelligentQuestionWidth } = storeToRefs(useIntelligentQuestionStore())
 const meta = inject(MetaInj, ref())
 
 const view = inject(ActiveViewInj, ref())
@@ -189,7 +191,7 @@ const updateViewWidth = () => {
     viewWidth.value = windowSize.value
     return
   }
-  viewWidth.value = windowSize.value - leftSidebarWidth.value
+  viewWidth.value = windowSize.value - leftSidebarWidth.value - intelligentQuestionWidth.value
 }
 
 const baseColor = computed(() => {
@@ -205,7 +207,7 @@ const baseColor = computed(() => {
   }
 })
 
-watch([windowSize, leftSidebarWidth], updateViewWidth)
+watch([windowSize, leftSidebarWidth, intelligentQuestionWidth], updateViewWidth)
 
 onMounted(() => {
   updateViewWidth()

@@ -1,10 +1,13 @@
 <script lang="ts" setup>
-import { Pane, Splitpanes } from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 
+import { Pane, Splitpanes } from 'splitpanes'
+import { useIntelligentQuestionStore } from '../../store/intellignetQuestion.ts'
 const router = useRouter()
 const route = router.currentRoute
-
+const { activeTable } = storeToRefs(useTablesStore())
+const { isIntelligentQuestionOpen, mobileNormalizedIntelligentQuestionSize, intelligentQuestionWidth, intelligentQuestionSize } =
+  storeToRefs(useIntelligentQuestionStore())
 const { isMobileMode } = storeToRefs(useConfigStore())
 
 const {
@@ -30,7 +33,7 @@ const currentSidebarSize = computed({
 
 const { handleSidebarOpenOnMobileForNonViews } = useConfigStore()
 
-const contentSize = computed(() => 100 - sideBarSize.value.current)
+const contentSize = computed(() => 100 - sideBarSize.value.current - intelligentQuestionSize.value)
 
 const mobileNormalizedContentSize = computed(() => {
   if (isMobileMode.value) {
@@ -215,10 +218,26 @@ const normalizedWidth = computed(() => {
       :size="mobileNormalizedContentSize"
       class="flex-grow"
       :style="{
-        'min-width': `${100 - mobileNormalizedSidebarSize}%`,
+        'min-width': `${100 - mobileNormalizedSidebarSize - mobileNormalizedIntelligentQuestionSize}%`,
       }"
     >
       <slot name="content" />
+    </Pane>
+
+    <Pane
+      :size="mobileNormalizedIntelligentQuestionSize"
+      :style="{
+        width: `${mobileNormalizedIntelligentQuestionSize}%`,
+      }"
+    >
+      <div
+        ref="intelligentQuestionRef"
+        :style="{
+          width: `${intelligentQuestionWidth}px`,
+        }"
+      >
+        <slot name="intelligentQuestion" />
+      </div>
     </Pane>
   </Splitpanes>
 </template>
