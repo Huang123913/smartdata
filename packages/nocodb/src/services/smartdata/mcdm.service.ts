@@ -36,6 +36,11 @@ export class MCDMService {
       return;
     }
 
+    this.mcdm.interceptors.request.use((config) => {
+      this.logger.debug(`${config.method} ${config.url}`);
+      return config;
+    });
+
     this.mcdm.interceptors.response.use(
       (r) => r,
       (r) => {

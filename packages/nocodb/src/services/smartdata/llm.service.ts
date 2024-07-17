@@ -6,7 +6,6 @@ import { MCDMService } from '~/services/smartdata/mcdm.service';
 import { Injectable, Logger } from '@nestjs/common';
 const fs = require('fs').promises;
 const path = require('path');
-
 @Injectable()
 export class LLMService {
   protected logger = new Logger(LLMService.name);
@@ -31,6 +30,7 @@ export class LLMService {
     }
 
     this.llm.interceptors.request.use((config) => {
+      this.logger.debug(`${config.method} ${config.url}`);
       let projectid = process.env.LLM_PROJECTID ?? '2';
       let orgid = process.env.LLM_ORGID ?? '2';
       if (config?.data) {
@@ -583,7 +583,7 @@ export class LLMService {
   }
 
   async readMd() {
-    const filePath = path.join(__dirname, 'smartdata.s2.md'); // Replace with your .md file path
+    const filePath = path.join(__dirname, 'smartdata.s2.md');
     try {
       const fileContent = await fs.readFile(filePath, 'utf8');
       return fileContent;
