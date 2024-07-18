@@ -18645,6 +18645,22 @@
           "$ref": "#/components/parameters/xc-auth"
         }
       ]
+    },
+    "/api/v2/smartdata/readMd": {
+      "get": {
+        "summary": "readMd LLM ",
+        "operationId": "readMd",
+        "description": "readMd LLM",
+        "tags": ["SmartData"]
+      }
+    },
+    "/api/v2/smartdata/getBaseUrl": {
+      "get": {
+        "summary": "getBaseUrl MCDM ",
+        "operationId": "getBaseUrl",
+        "description": "getBaseUrl MCDM",
+        "tags": ["SmartData"]
+      }
     }
 
   },

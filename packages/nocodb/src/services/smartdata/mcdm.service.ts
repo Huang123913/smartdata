@@ -620,4 +620,29 @@ export class MCDMService {
       return r.data;
     });
   }
+
+  async readMd() {
+    return await this.mcdm({
+      method: 'GET',
+      url: `/module-operation!executeOperation`,
+      params: {
+        operation: 'FileDown',
+        token: JSON.stringify({
+          data: {
+            isMulti: false,
+            dataId: 'ff80818190bfd6f90190bffc353f23ba',
+            isShow: 0,
+          },
+        }),
+      },
+      responseType: 'arraybuffer',
+    }).then((r) => {
+      const fileContent = Buffer.from(r.data, 'binary').toString('utf-8');
+      return fileContent;
+    });
+  }
+
+  async getBaseUrl() {
+    return process.env.MCDM_URL;
+  }
 }

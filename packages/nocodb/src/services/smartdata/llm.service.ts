@@ -581,15 +581,4 @@ export class LLMService {
       return r.data;
     });
   }
-
-  async readMd() {
-    const filePath = path.join(__dirname, 'smartdata.s2.md');
-    try {
-      const fileContent = await fs.readFile(filePath, 'utf8');
-      return fileContent;
-    } catch (error) {
-      console.error('Error reading the Markdown file:', error);
-      throw error;
-    }
-  }
 }

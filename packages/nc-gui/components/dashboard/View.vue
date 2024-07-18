@@ -110,6 +110,16 @@ watch(route, () => {
   if (route.value.name === 'index-index') {
     isLeftSidebarOpen.value = true
   }
+  if (
+    route.value.name === 'index-typeOrId-baseId-index-index-viewId-viewTitle-slugs' &&
+    route.value.params.slugs.includes('field')
+  ) {
+    isIntelligentQuestionOpen.value = false
+    return
+  }
+  if (route.value.name !== 'index-typeOrId-baseId-index-index-viewId-viewTitle') {
+    isIntelligentQuestionOpen.value = false
+  }
 })
 
 watch(isMobileMode, () => {
@@ -123,6 +133,16 @@ watch(sidebarState, () => {
     }, animationDuration)
   }
 })
+
+watch(
+  () => activeTable.value?.id,
+  async () => {
+    isIntelligentQuestionOpen.value = false
+  },
+  {
+    immediate: true,
+  },
+)
 
 onMounted(() => {
   handleSidebarOpenOnMobileForNonViews()

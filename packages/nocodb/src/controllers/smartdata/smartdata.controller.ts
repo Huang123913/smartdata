@@ -323,4 +323,14 @@ export class SmartDataController {
       isShowFieldProps,
     );
   }
+
+  @Get(['/api/v2/smartdata/readMd'])
+  async readMd() {
+    return await this.mcdm.readMd();
+  }
+
+  @Get(['/api/v2/smartdata/getBaseUrl'])
+  async getBaseUrl() {
+    return await this.mcdm.getBaseUrl();
+  }
 }

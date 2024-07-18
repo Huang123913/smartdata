@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
 export const useIntelligentQuestionStore = defineStore('intelligentQuestionStore', () => {
+  const { $api } = useNuxtApp()
+  const baseUrl = ref('')
   const { width } = useWindowSize()
 
   const { isMobileMode } = useGlobal()
@@ -856,11 +858,17 @@ export const useIntelligentQuestionStore = defineStore('intelligentQuestionStore
     },
   })
 
+  const getBaseUrl = async () => {
+    baseUrl.value = await $api.smartData.getBaseUrl()
+  }
+
   return {
     dialogList,
     intelligentQuestionWidth,
     isIntelligentQuestionOpen,
     intelligentQuestionSize,
     mobileNormalizedIntelligentQuestionSize,
+    baseUrl,
+    getBaseUrl,
   }
 })

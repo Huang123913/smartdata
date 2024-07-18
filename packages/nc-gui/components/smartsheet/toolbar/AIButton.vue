@@ -4,9 +4,12 @@ import { iconMap } from '#imports'
 import { useIntelligentQuestionStore } from '../../../store/intellignetQuestion.ts'
 
 const { isMobileMode } = useGlobal()
-const { isIntelligentQuestionOpen } = storeToRefs(useIntelligentQuestionStore())
+const store = useIntelligentQuestionStore()
+const { isIntelligentQuestionOpen, baseUrl } = storeToRefs(store)
+const { getBaseUrl } = store
 const { $api } = useNuxtApp()
 const analysis = async () => {
+  if (!baseUrl.value) getBaseUrl()
   isIntelligentQuestionOpen.value = true
 }
 </script>

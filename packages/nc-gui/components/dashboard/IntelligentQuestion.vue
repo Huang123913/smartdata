@@ -8,7 +8,7 @@ const { t } = useI18n()
 const { $api } = useNuxtApp()
 const { copy } = useCopy()
 const store = useIntelligentQuestionStore()
-const { dialogList } = storeToRefs(store)
+const { dialogList, baseUrl } = storeToRefs(store)
 
 const scrollContainer = ref(null)
 const isSending = ref(false)
@@ -32,7 +32,7 @@ const handleSend = async (searchValue: string, callback: () => void) => {
     scrollToBottom()
     const wait = (time: number) => new Promise((resolve) => setTimeout(resolve, time))
     await wait(1000)
-    let res = await $api.smartData.getToBeProcessedSemanticAnalysisFileIds()
+    let res = await $api.smartData.readMd()
     dialogList.value = [
       ...dialogList.value,
       {
@@ -42,13 +42,11 @@ const handleSend = async (searchValue: string, callback: () => void) => {
         data: res,
       },
     ]
-    //TODO 进行请求
   } catch (error) {
     console.error(error)
   } finally {
     isSending.value = false
     callback()
-    scrollToBottom()
   }
 }
 
@@ -89,7 +87,26 @@ const onCopyToClipboard = async (text: string) => {
 }
 
 //下载
-const download = (item: any, isAll: boolean, index: number) => {}
+const download = (item: any, isAll: boolean, index: number) => {
+  let fileIds = 'ff80818190bfd6f90190bffc353f23ba'
+  let isDownLoadFile = true
+  const host = window.location.host
+  const token = {
+    data: {
+      dataId: fileIds,
+      isMulti: false,
+    },
+  }
+  const url = `module-operation!executeOperation?operation=${isDownLoadFile ? 'FileDown' : 'PreviewFileIcon'}`
+  const uploadURL = `${baseUrl.value}/${url}&token=${encodeURI(JSON.stringify(token))}`
+  let link = document.createElement('a')
+  link.download = 'fileName'
+  link.href = uploadURL
+  link.style.display = 'none'
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+}
 </script>
 
 <template>

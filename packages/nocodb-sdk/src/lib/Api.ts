@@ -12497,5 +12497,35 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+     * @description readMd LLM
+     *
+     * @tags SmartData
+     * @name ReadMd
+     * @summary readMd LLM
+     * @request GET:/api/v2/smartdata/readMd
+     */
+    readMd: (params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/readMd`,
+        method: 'GET',
+        ...params,
+      }),
+
+    /**
+     * @description getBaseUrl MCDM
+     *
+     * @tags SmartData
+     * @name GetBaseUrl
+     * @summary getBaseUrl MCDM
+     * @request GET:/api/v2/smartdata/getBaseUrl
+     */
+    getBaseUrl: (params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/getBaseUrl`,
+        method: 'GET',
+        ...params,
+      }),
   };
 }
