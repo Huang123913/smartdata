@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 import { getNowDate } from '#imports'
-import { v4 as uuidv4 } from 'uuid'
 import _ from 'lodash'
+import { v4 as uuidv4 } from 'uuid'
 
 import { CloseOutlined, DeleteFilled, SearchOutlined, SendOutlined } from '@ant-design/icons-vue'
 
 import { useChatPlaygroundViewStore } from '../../../../store/chatPlaygroundView'
+
 export interface SessionItem {
   id: string
   textAreaValue: string
@@ -18,7 +19,7 @@ export interface SessionItem {
 const { $api } = useNuxtApp()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
-const { setSessionItem, getCustomCatalogEntityTree, setChataiDataIsOpenMode } = store
+const { setSessionItem, getCustomCatalogEntityTree, setChataiDataIsOpenMode, getAllModel } = store
 
 const searchSessionText = ref<string>('') //搜索会话文本
 const isShowSearchSessionResult = ref<boolean>(false) //是否显示搜索的会话结果
@@ -42,6 +43,7 @@ onMounted(async () => {
   try {
     isShowLoading.value = true
     if (!chataiData.value.modelData.length) await getCustomCatalogEntityTree()
+    if (!chataiData.value.allModel.length) await getAllModel()
   } catch (e: any) {
     message.error(e?.message)
   } finally {

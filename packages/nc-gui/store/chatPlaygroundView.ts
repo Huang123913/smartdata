@@ -1,7 +1,10 @@
 import { reactive } from 'vue'
 
 import type { ChatPlaygroundViewStoreEvents } from '#imports'
-import { useEventBus, useNuxtApp } from '#imports'
+import {
+  useEventBus,
+  useNuxtApp,
+} from '#imports'
 import { defineStore } from 'pinia'
 
 export interface SessionItem {
@@ -55,11 +58,6 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
   const getCustomCatalogEntityTree = async () => {
     try {
       let bizCatalogEntityCustom = await $api.smartData.entities()
-      chataiData.allModel = await $api.smartData.findAllBizCustomEntity({
-        isShowFields: true,
-        isShowEntityProps: false,
-        isShowFieldProps: false,
-      })
       if (!bizCatalogEntityCustom.length) return
       bizCatalogEntityCustom = bizCatalogEntityCustom.map((item) => ({ ...item, parentId: item.parentId ? item.parentId : null }))
       chataiData.modelData = [
@@ -92,6 +90,14 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     } catch (e) {
       console.error(e)
     }
+  }
+
+  const getAllModel = async () =>{
+    chataiData.allModel = await $api.smartData.findAllBizCustomEntity({
+      isShowFields: true,
+      isShowEntityProps: false,
+      isShowFieldProps: false,
+    })
   }
 
   // 构建树
@@ -372,5 +378,6 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     createCatalog,
     moveModel,
     moveCatalog,
+    getAllModel
   }
 })
