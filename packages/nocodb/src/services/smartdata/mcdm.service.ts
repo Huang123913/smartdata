@@ -543,9 +543,18 @@ export class MCDMService {
     option: string;
     optionId: string;
   }) {
+    let res = null;
     let { entityId, belongCode, data, option, optionId } = params;
-    await this.saveModelProps({ entityId, belongCode, data, option, optionId });
-    let res = await this.execBizEntityDataSemanticAanalysis(entityId);
+    res = await this.saveModelProps({
+      entityId,
+      belongCode,
+      data,
+      option,
+      optionId,
+    });
+    if (option !== 'del') {
+      res = await this.execBizEntityDataSemanticAanalysis(entityId);
+    }
     return res;
   }
 
