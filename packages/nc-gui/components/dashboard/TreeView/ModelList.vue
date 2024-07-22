@@ -200,7 +200,7 @@ const dropCatalog = async (info: any) => {
           >
             <div class="table-name">
               <GeneralTableIcon v-if="item.key.indexOf('Empty') === -1" :meta="item" class="text-gray-500" />
-              <span class="mode-text">{{ item.title }}</span>
+              <span class="mode-text" :class="{ 'emty-style': item.key.indexOf('Empty') > -1 }">{{ item.title }}</span>
             </div>
             <div class="flex more-action-btn">
               <DashboardTreeViewModelListDropDown
@@ -320,6 +320,9 @@ const dropCatalog = async (info: any) => {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    .emty-style {
+      color: #6a7184;
     }
   }
 }
