@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
+
 export const useIntelligentQuestionStore = defineStore('intelligentQuestionStore', () => {
+  const { activeTableId } = storeToRefs(useTablesStore())
   const { $api } = useNuxtApp()
   const baseUrl = ref('')
   const { width } = useWindowSize()
@@ -7,6 +9,17 @@ export const useIntelligentQuestionStore = defineStore('intelligentQuestionStore
   const { isMobileMode } = useGlobal()
 
   const tablesStore = useTablesStore()
+
+  const _conversationId = ref<{ [key: string]: any }>({})
+
+  const conversationId = computed({
+    get() {
+      return _conversationId.value
+    },
+    set(value) {
+      _conversationId.value[value.key as string] = value.value
+    },
+  })
 
   const _isIntelligentQuestionOpen = ref(false)
 
@@ -32,9 +45,9 @@ export const useIntelligentQuestionStore = defineStore('intelligentQuestionStore
 
   const intelligentQuestionWidth = computed(() => (width.value * mobileNormalizedIntelligentQuestionSize.value) / 100)
 
-  const _dialogList = ref<any[]>([])
+  const dialogListDefault = ref<any[]>([])
 
-  _dialogList.value = [
+  dialogListDefault.value = [
     {
       id: '1',
       isQuestion: true,
@@ -849,12 +862,13 @@ export const useIntelligentQuestionStore = defineStore('intelligentQuestionStore
       messages: '文字',
     },
   ]
+  const _dialogList = ref<{ [key: string]: any }>({})
   const dialogList = computed({
     get() {
-      return _dialogList.value
+      return _dialogList.value[activeTableId.value!] ? _dialogList.value[activeTableId.value!] : dialogListDefault.value
     },
     set(value) {
-      _dialogList.value = value
+      _dialogList.value[value.key as string] = value.value
     },
   })
 
@@ -870,5 +884,6 @@ export const useIntelligentQuestionStore = defineStore('intelligentQuestionStore
     mobileNormalizedIntelligentQuestionSize,
     baseUrl,
     getBaseUrl,
+    conversationId,
   }
 })

@@ -5,10 +5,15 @@ const searchValue = ref('')
 
 const props = defineProps<{
   handleSend: (value: string, callback: () => void) => void
+  isSending: boolean
 }>()
 
 const setSearch = () => {
   searchValue.value = ''
+}
+
+const handleSend = () => {
+  if (!props.isSending && searchValue.value.trim()) props.handleSend(searchValue.value, setSearch)
 }
 </script>
 
@@ -22,7 +27,7 @@ const setSearch = () => {
         <NcTooltip>
           <template #title>发送</template>
           <icon
-            @click="handleSend(searchValue, setSearch)"
+            @click="handleSend()"
             :style="{
               opacity: !searchValue?.trim() || isSending ? 0.5 : 1,
               cursor: !searchValue?.trim() || isSending ? 'not-allowed' : 'pointer',

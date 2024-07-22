@@ -12527,5 +12527,39 @@ export class Api<
         method: 'GET',
         ...params,
       }),
+
+    /**
+     * @description createSession LLM
+     *
+     * @tags SmartData
+     * @name CreateSession
+     * @summary createSession LLM
+     * @request POST:/api/v2/smartdata/createSession
+     */
+    createSession: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/createSession`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description talktodata LLM
+     *
+     * @tags SmartData
+     * @name Talktodata
+     * @summary talktodata LLM
+     * @request POST:/api/v2/smartdata/talktodata
+     */
+    talktodata: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/talktodata`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
 }

@@ -3,7 +3,9 @@ import FormData from 'form-data';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 import { v4 as uuidv4 } from 'uuid';
 import { MCDMService } from '~/services/smartdata/mcdm.service';
+
 import { Injectable, Logger } from '@nestjs/common';
+
 const fs = require('fs').promises;
 const path = require('path');
 @Injectable()
@@ -576,6 +578,59 @@ export class LLMService {
       params: {
         id: uuidv4(),
         text: text,
+      },
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  //创建会话
+  async createSession(params: { entityId: string; datafiles: string }) {
+    let { entityId, datafiles } = params;
+    let submitdataRes = await this.submitdata('json', datafiles);
+    let saveDdlProps = [
+      {
+        id: entityId,
+        props: [
+          {
+            name: 'belongConversationId',
+            code: 'belongConversationId',
+            value: submitdataRes.conversation_id,
+          },
+        ],
+      },
+    ];
+    let res = await this.mcdm.saveModel({ entities: saveDdlProps });
+    return { ...res, ...submitdataRes };
+  }
+
+  async submitdata(datatype: string, datafiles: string) {
+    return await this.llm({
+      method: 'POST',
+      url: `/submitdata`,
+      params: {
+        datatype: datatype,
+        datafiles: datafiles,
+      },
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  //智能分析-提问
+  async talktodata(params: {
+    conversation_id: string;
+    datatype: string;
+    question: string;
+  }) {
+    let { conversation_id, datatype, question } = params;
+    return await this.llm({
+      method: 'POST',
+      url: `/talktodata`,
+      params: {
+        conversation_id: conversation_id,
+        datatype: datatype,
+        question: question,
       },
     }).then((r) => {
       return r.data;

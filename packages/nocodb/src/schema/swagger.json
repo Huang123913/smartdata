@@ -18661,8 +18661,51 @@
         "description": "getBaseUrl MCDM",
         "tags": ["SmartData"]
       }
+    },
+    "/api/v2/smartdata/createSession":{
+      "post": {
+        "summary": "createSession LLM",
+        "operationId": "createSession",
+        "description": "createSession LLM",
+        "tags": ["SmartData"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/xc-auth"
+        }
+      ]
+    },
+    "/api/v2/smartdata/talktodata":{
+      "post": {
+        "summary": "talktodata LLM",
+        "operationId": "talktodata",
+        "description": "talktodata LLM",
+        "tags": ["SmartData"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/xc-auth"
+        }
+      ]
     }
-
   },
   "components": {
     "schemas": {

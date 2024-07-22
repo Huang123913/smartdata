@@ -333,4 +333,27 @@ export class SmartDataController {
   async getBaseUrl() {
     return await this.mcdm.getBaseUrl();
   }
+
+  @Post(['/api/v2/smartdata/createSession'])
+  async createSession(
+    @Body()
+    data: {
+      entityId: string;
+      datafiles: string;
+    },
+  ) {
+    return await this.llm.createSession(data);
+  }
+
+  @Post(['/api/v2/smartdata/talktodata'])
+  async talktodata(
+    @Body()
+    data: {
+      conversation_id: string;
+      datatype: string;
+      question: string;
+    },
+  ) {
+    return await this.llm.talktodata(data);
+  }
 }

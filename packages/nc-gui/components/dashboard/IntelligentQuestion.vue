@@ -2,46 +2,56 @@
 import _ from 'lodash'
 import { v4 as uuidv4 } from 'uuid'
 
+import { ArrowRightOutlined } from '@ant-design/icons-vue'
+
 import { useIntelligentQuestionStore } from '../../store/intellignetQuestion'
 
 const { t } = useI18n()
 const { $api } = useNuxtApp()
 const { copy } = useCopy()
 const store = useIntelligentQuestionStore()
-const { dialogList, baseUrl } = storeToRefs(store)
+const { dialogList, baseUrl, conversationId } = storeToRefs(store)
 
 const scrollContainer = ref(null)
 const isSending = ref(false)
 
-const { activeTable } = storeToRefs(useTablesStore())
-const { isIntelligentQuestionOpen } = storeToRefs(useIntelligentQuestionStore())
+const { activeTableId } = storeToRefs(useTablesStore())
 
 //发送
 const handleSend = async (searchValue: string, callback: () => void) => {
   try {
     if (!searchValue.trim() || isSending.value) return
     isSending.value = true
-    dialogList.value = [
-      ...dialogList.value,
-      {
-        id: uuidv4(),
-        isQuestion: true,
-        messages: searchValue,
-      },
-    ]
+    dialogList.value = {
+      key: activeTableId.value,
+      value: [
+        ...dialogList.value,
+        {
+          id: uuidv4(),
+          isQuestion: true,
+          messages: searchValue,
+        },
+      ],
+    }
     scrollToBottom()
-    const wait = (time: number) => new Promise((resolve) => setTimeout(resolve, time))
-    await wait(1000)
-    let res = await $api.smartData.readMd()
-    dialogList.value = [
-      ...dialogList.value,
-      {
-        type: 'md',
-        id: '1',
-        isQuestion: false,
-        data: res,
-      },
-    ]
+    let res = await $api.smartData.talktodata({
+      conversation_id: conversationId.value[activeTableId.value],
+      datatype: 'text',
+      question: searchValue,
+    })
+    dialogList.value = {
+      key: activeTableId.value,
+      value: [
+        ...dialogList.value,
+        {
+          type: 'md',
+          id: '1',
+          isQuestion: false,
+          data: `${res.response}`,
+          questions: res.questions,
+        },
+      ],
+    }
   } catch (error) {
     console.error(error)
   } finally {
@@ -74,7 +84,7 @@ const contentWidth = computed(() => {
 const deleteMessage = (deleteItem: any) => {
   let newDialogList = _.cloneDeep(dialogList.value)
   newDialogList = newDialogList.filter((item) => item.id !== deleteItem.id)
-  dialogList.value = newDialogList
+  dialogList.value = { key: activeTableId.value, value: newDialogList }
 }
 
 const onCopyToClipboard = async (text: string) => {
@@ -139,10 +149,18 @@ const download = (item: any, isAll: boolean, index: number) => {
               <GeneralIcon icon="delete" @click="deleteMessage(item)" />
             </NcTooltip>
           </div>
+          <div class="recommend" v-if="item.questions">
+            <div class="recommend-list" @click="handleSend(recommend, () => {})" v-for="recommend in item.questions">
+              <div class="text">
+                {{ recommend }}
+              </div>
+              <arrow-right-outlined />
+            </div>
+          </div>
         </div>
         <DashboardIntelligentQuestionLoading :isSending="isSending" />
       </div>
-      <DashboardIntelligentQuestionSearch :handleSend="handleSend" />
+      <DashboardIntelligentQuestionSearch :handleSend="handleSend" :isSending="isSending" />
     </div>
   </div>
 </template>
@@ -199,6 +217,25 @@ const download = (item: any, isAll: boolean, index: number) => {
         }
         &:hover .action {
           opacity: 1;
+        }
+        .recommend {
+          max-width: 100%;
+          margin-top: 30px;
+          .recommend-list {
+            width: fit-content;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #f5f5f5;
+            padding: 8px 16px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            .text {
+              max-width: calc(100% - 14px);
+              overflow-wrap: break-word;
+              margin-right: 8px;
+            }
+          }
         }
       }
       &::-webkit-scrollbar {
