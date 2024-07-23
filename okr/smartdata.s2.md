@@ -44,7 +44,7 @@
  - ⚪️ 数据向量化 (增量)
  - ⚪️ 语义化查询
 
-## 7.19
+## 7.23
    > 正式环境: http://smartdata.yindangu.com
    > 测试环境: http://smartdata-server.yindangu.com
 
@@ -67,7 +67,12 @@
    - 【进行中】侧栏聊天控件
       > 正在封装控件, 先实现: Table, Image, Text 三种消息类型
       > Table(完成), Image(完成), Text(完成)
-      > 进行中: 显示talktodata返回的提问建议
+      > 完成: 显示talktodata返回的建议
+      > 进行中: /rephrasequestion 对接
+      > 进行中: /talktodata 表格数据
+      > 进行中: 排查: 批量数据向量化会偶发报错、服务器无响应
+   - 【完成】修改批量设置检索语义删除逻辑(清除到最后一个字段不对模型发起语义分析)
+   - 【完成】表格模型树'Empty'字体样式修改  
    - 【完成】联调 /talktodata
    - 【完成】排查AI服务偶发崩溃问题
    - 【完成】优化提问建表性能 /findAllBizCustomEntity
