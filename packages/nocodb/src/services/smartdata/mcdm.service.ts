@@ -37,7 +37,10 @@ export class MCDMService {
     }
 
     this.mcdm.interceptors.request.use((config) => {
-      this.logger.debug(`${config.method} ${config.url}`);
+      let inputDebug = config?.params?.operation
+        ? `${config.method} ${config.url} > ${config.params?.operation}`
+        : `${config.method} ${config.url}`;
+      this.logger.debug(inputDebug);
       return config;
     });
 

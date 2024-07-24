@@ -530,19 +530,25 @@ export class LLMService {
     columnsJson: string;
     fileId: string;
   }) {
-    let { entityId, columnsJson, fileId } = params;
-    let llmFile = await this.embeddingparquet(columnsJson, fileId);
-    const formData = new FormData();
-    formData.append('file', llmFile, `${uuidv4()}.parquet`);
-    let uploadFileInfo = await this.mcdm.uploadFileNew(formData);
-    let res = await this.mcdm.receiveProcessedSemanticAnalysisFileIds([
-      {
-        entityId,
-        toBeProcessedFileId: fileId,
-        processedFileId: uploadFileInfo.id,
-      },
-    ]);
-    return res;
+    try {
+      this.logger.debug('post /toBeProcessed');
+      let { entityId, columnsJson, fileId } = params;
+      let llmFile = await this.embeddingparquet(columnsJson, fileId);
+      const formData = new FormData();
+      formData.append('file', llmFile, `${uuidv4()}.parquet`);
+      let uploadFileInfo = await this.mcdm.uploadFileNew(formData);
+      let res = await this.mcdm.receiveProcessedSemanticAnalysisFileIds([
+        {
+          entityId,
+          toBeProcessedFileId: fileId,
+          processedFileId: uploadFileInfo.id,
+        },
+      ]);
+      return res;
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
   }
 
   //数据向量化
