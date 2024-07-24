@@ -1,10 +1,7 @@
 import { reactive } from 'vue'
 
 import type { ChatPlaygroundViewStoreEvents } from '#imports'
-import {
-  useEventBus,
-  useNuxtApp,
-} from '#imports'
+import { useEventBus, useNuxtApp } from '#imports'
 import { defineStore } from 'pinia'
 
 export interface SessionItem {
@@ -92,7 +89,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     }
   }
 
-  const getAllModel = async () =>{
+  const getAllModel = async () => {
     chataiData.allModel = await $api.smartData.findAllBizCustomEntity({
       isShowFields: true,
       isShowEntityProps: false,
@@ -300,6 +297,27 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     chataiData.modelCatalogTree = buildTree(chataiData.modelCatalog, false)
     let findCatalog = catalog.parentId ? findNodeById(chataiData.modelTree, catalog.parentId) : chataiData.modelTree[0]
     let findLastIndex = findCatalog.children.findLastIndex((item: any) => item.isCatalog)
+    if (findCatalog.children.length === 1 && findCatalog.children[0].key.indexOf('Empty') > -1) {
+      findCatalog.children = [
+        {
+          ...catalog,
+          title: catalog.name_cn,
+          key: catalog.id,
+          isCatalog: true,
+          children: [
+            {
+              title: 'Empty',
+              key: 'Empty' + catalog.id,
+              fields: [],
+              isCatalog: false,
+              parentId: catalog.id,
+            },
+          ],
+          fields: [],
+        },
+      ]
+      return
+    }
     findCatalog.children.splice(findLastIndex + 1, 0, {
       ...catalog,
       title: catalog.name_cn,
@@ -378,6 +396,6 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     createCatalog,
     moveModel,
     moveCatalog,
-    getAllModel
+    getAllModel,
   }
 })
