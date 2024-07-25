@@ -2,22 +2,26 @@
 import { iconMap } from '#imports'
 import type { TableType } from 'nocodb-sdk'
 
-import { useIntelligentQuestionStore } from '../../../store/intellignetQuestion.ts'
+import { useaiAnalyticsStore } from '../../../store/aiAnalytics'
+
+const { isMobileMode } = useGlobal()
+const { $api } = useNuxtApp()
+const { meta } = useSmartsheetStoreOrThrow()
 
 const { base } = storeToRefs(useBase())
-const { isMobileMode } = useGlobal()
-const store = useIntelligentQuestionStore()
+const store = useaiAnalyticsStore()
 const { isIntelligentQuestionOpen, baseUrl, conversationId } = storeToRefs(store)
 const { getBaseUrl } = store
-const { $api } = useNuxtApp()
 const { activeTableId, activeTable } = storeToRefs(useTablesStore())
-const { meta } = useSmartsheetStoreOrThrow()
+
 const isCreateing = ref(false)
+
+//智能分析
 const analysis = async () => {
   try {
     if (isIntelligentQuestionOpen.value) return
     if (!baseUrl.value) getBaseUrl()
-    if (conversationId.value[activeTableId.value]) {
+    if (conversationId.value[activeTableId.value!]) {
       isIntelligentQuestionOpen.value = true
       return
     }
@@ -32,14 +36,26 @@ const analysis = async () => {
       isIntelligentQuestionOpen.value = true
       return
     }
-    let tableData = {}
-    let fieldDescriptions = {}
+    await createSession()
+  } catch (error) {
+    message.error('会话创建失败')
+    console.error(error)
+  } finally {
+    isCreateing.value = false
+  }
+}
+
+//创建会话
+const createSession = async () => {
+  try {
+    let tableData: { [key: string]: any } = {}
+    let fieldDescriptions: { [key: string]: any } = {}
     let response = await $api.dbViewRow.list('noco', base.value.id!, activeTableId.value!, activeTableId.value!)
-    let tableDataRes = response.list
+    let tableDataRes = response?.list
     let columns = (meta.value as TableType)?.columns?.filter((item) => !item?.system)
     columns?.map((item) => {
-      fieldDescriptions[item.column_name] = item.title
-      tableData[item.column_name] = []
+      fieldDescriptions[item.column_name!] = item.title
+      tableData[item.column_name!] = []
     })
     tableDataRes.map((item) => {
       for (const key in tableData) {
@@ -57,13 +73,12 @@ const analysis = async () => {
       entityId: activeTableId.value,
       datafiles: JSON.stringify(datafiles),
     })
-    conversationId.value = { key: activeTableId.value, value: createSessionRes.conversation_id }
-    isIntelligentQuestionOpen.value = true
+    if (createSessionRes?.conversation_id) {
+      conversationId.value = { key: activeTableId.value, value: createSessionRes.conversation_id }
+      isIntelligentQuestionOpen.value = true
+    }
   } catch (error) {
-    message.error('会话创建失败')
-    console.error(error)
-  } finally {
-    isCreateing.value = false
+    throw error
   }
 }
 </script>

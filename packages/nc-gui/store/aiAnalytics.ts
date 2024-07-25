@@ -1,17 +1,16 @@
 import { defineStore } from 'pinia'
 
-export const useIntelligentQuestionStore = defineStore('intelligentQuestionStore', () => {
-  const { activeTableId } = storeToRefs(useTablesStore())
-  const { $api } = useNuxtApp()
+//智能分析
+export const useaiAnalyticsStore = defineStore('useaiAnalyticsStore', () => {
   const baseUrl = ref('')
+  const { $api } = useNuxtApp()
   const { width } = useWindowSize()
-
   const { isMobileMode } = useGlobal()
-
   const tablesStore = useTablesStore()
+  const { activeTableId } = storeToRefs(useTablesStore())
 
+  //会话id
   const _conversationId = ref<{ [key: string]: any }>({})
-
   const conversationId = computed({
     get() {
       return _conversationId.value
@@ -21,8 +20,8 @@ export const useIntelligentQuestionStore = defineStore('intelligentQuestionStore
     },
   })
 
+  //是否打开智能提问
   const _isIntelligentQuestionOpen = ref(false)
-
   const isIntelligentQuestionOpen = computed({
     get() {
       return (isMobileMode.value && !tablesStore.activeTableId) || _isIntelligentQuestionOpen.value
@@ -32,10 +31,12 @@ export const useIntelligentQuestionStore = defineStore('intelligentQuestionStore
     },
   })
 
+  //占据页面的宽度占比
   const intelligentQuestionSize = computed(() => {
     return isIntelligentQuestionOpen.value ? 30 : 0
   })
 
+  //移动/PC占据页面的宽度占比
   const mobileNormalizedIntelligentQuestionSize = computed(() => {
     if (isMobileMode.value) {
       return isIntelligentQuestionOpen.value ? 100 : 0
@@ -43,8 +44,10 @@ export const useIntelligentQuestionStore = defineStore('intelligentQuestionStore
     return intelligentQuestionSize.value
   })
 
+  //具体宽度
   const intelligentQuestionWidth = computed(() => (width.value * mobileNormalizedIntelligentQuestionSize.value) / 100)
 
+  //对话列表
   const _dialogList = ref<{ [key: string]: any }>({})
   const dialogList = computed({
     get() {

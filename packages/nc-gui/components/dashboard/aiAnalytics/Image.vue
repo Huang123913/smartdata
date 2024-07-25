@@ -12,15 +12,15 @@ const locale = {
 
 <template>
   <div class="img">
-    <div class="img-item border-1 border-gray-200" v-for="image in item.data">
+    <div class="img-item border-1 border-gray-200" v-for="(image, index) in item.data">
       <div class="left">
         <a-config-provider :locale="locale">
-          <a-image :width="80" :src="image" />
+          <a-image :width="80" :src="image.content" />
         </a-config-provider>
         <div class="name">
           <NcTooltip class="truncate max-w-full" show-on-truncate-only>
             <template #title>
-              {{ 'xxx.png' }}
+              {{ image.name }}
             </template>
             <span
               class="text-ellipsis overflow-hidden"
@@ -30,7 +30,7 @@ const locale = {
                 display: 'inline',
               }"
             >
-              {{ 'xxx.png' }}
+              {{ image.name }}
             </span>
           </NcTooltip>
         </div>

@@ -138,8 +138,8 @@ provide(ToggleDialogInj, toggleDialog)
       <template #content>
         <NuxtPage />
       </template>
-      <template #intelligentQuestion>
-        <DashboardIntelligentQuestion />
+      <template #aiAnalytics>
+        <DashboardAIAnalytics />
       </template>
     </NuxtLayout>
     <LazyDashboardSettingsModal

@@ -1,10 +1,11 @@
 <script lang="ts" setup>
 import type { ColumnType, GridType } from 'nocodb-sdk'
-import Table from './Table.vue'
-import GroupBy from './GroupBy.vue'
-import { useIntelligentQuestionStore } from '../../../store/intellignetQuestion.ts'
 
-const { intelligentQuestionWidth } = storeToRefs(useIntelligentQuestionStore())
+import { useaiAnalyticsStore } from '../../../store/aiAnalytics'
+import GroupBy from './GroupBy.vue'
+import Table from './Table.vue'
+
+const { intelligentQuestionWidth } = storeToRefs(useaiAnalyticsStore())
 const meta = inject(MetaInj, ref())
 
 const view = inject(ActiveViewInj, ref())

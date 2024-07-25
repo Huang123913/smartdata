@@ -1,13 +1,12 @@
 <script lang="ts" setup>
-import { useIntelligentQuestionStore } from '../../../store/intellignetQuestion'
+import { useaiAnalyticsStore } from '../../../store/aiAnalytics'
 
 const { activeTable } = storeToRefs(useTablesStore())
-const store = useIntelligentQuestionStore()
-const { isIntelligentQuestionOpen } = storeToRefs(store)
+const { isIntelligentQuestionOpen } = storeToRefs(useaiAnalyticsStore())
 </script>
 
 <template>
-  <div class="intellignet-question-header border-b-1 border-gray-200 group flex items-center md:(px-2 py-1.2) xs:(px-1 py-1)">
+  <div class="ai-analytics-header border-b-1 border-gray-200 group flex items-center md:(px-2 py-1.2) xs:(px-1 py-1)">
     <div class="table-name">{{ activeTable?.title }}</div>
     <NcButton
       type="text"
@@ -23,7 +22,7 @@ const { isIntelligentQuestionOpen } = storeToRefs(store)
 </template>
 
 <style lang="scss" scoped>
-.intellignet-question-header {
+.ai-analytics-header {
   height: var(--topbar-height);
   justify-content: space-between;
   font-weight: 600;

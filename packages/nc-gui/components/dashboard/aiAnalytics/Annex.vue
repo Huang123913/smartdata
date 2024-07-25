@@ -42,7 +42,7 @@ const fileLogos = {
               </span>
             </NcTooltip>
           </div>
-          <div class="size">{{ annex.size }}</div>
+          <div class="size">{{ annex?.size }}</div>
         </div>
       </div>
       <div class="right">

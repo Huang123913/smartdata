@@ -2,12 +2,14 @@
 import 'splitpanes/dist/splitpanes.css'
 
 import { Pane, Splitpanes } from 'splitpanes'
-import { useIntelligentQuestionStore } from '../../store/intellignetQuestion.ts'
+
+import { useaiAnalyticsStore } from '../../store/aiAnalytics'
+
 const router = useRouter()
 const route = router.currentRoute
 const { activeTable } = storeToRefs(useTablesStore())
 const { isIntelligentQuestionOpen, mobileNormalizedIntelligentQuestionSize, intelligentQuestionWidth, intelligentQuestionSize } =
-  storeToRefs(useIntelligentQuestionStore())
+  storeToRefs(useaiAnalyticsStore())
 const { isMobileMode } = storeToRefs(useConfigStore())
 
 const {
@@ -256,7 +258,7 @@ const normalizedWidth = computed(() => {
           width: `${intelligentQuestionWidth}px`,
         }"
       >
-        <slot name="intelligentQuestion" />
+        <slot name="aiAnalytics" />
       </div>
     </Pane>
   </Splitpanes>

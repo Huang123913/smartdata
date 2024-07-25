@@ -20,8 +20,8 @@ export default {
       <template #content>
         <slot name="content" />
       </template>
-      <template #intelligentQuestion>
-        <slot name="intelligentQuestion" />
+      <template #aiAnalytics>
+        <slot name="aiAnalytics" />
       </template>
     </LazyDashboardView>
   </NuxtLayout>
