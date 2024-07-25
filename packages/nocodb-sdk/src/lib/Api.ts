@@ -12561,5 +12561,22 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+     * @description rephrasequestion LLM
+     *
+     * @tags SmartData
+     * @name Rephrasequestion
+     * @summary rephrasequestion LLM
+     * @request POST:/api/v2/smartdata/rephrasequestion
+     */
+    rephrasequestion: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/rephrasequestion`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
 }

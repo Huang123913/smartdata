@@ -15,8 +15,12 @@ const { meta } = useSmartsheetStoreOrThrow()
 const isCreateing = ref(false)
 const analysis = async () => {
   try {
+    if (isIntelligentQuestionOpen.value) return
     if (!baseUrl.value) getBaseUrl()
-    if (conversationId.value[activeTableId.value]) return
+    if (conversationId.value[activeTableId.value]) {
+      isIntelligentQuestionOpen.value = true
+      return
+    }
     let tableInfo = await $api.smartData.entity({
       entityId: activeTableId.value,
     })
@@ -25,6 +29,7 @@ const analysis = async () => {
     let belongConversationIdProp = props.length ? props.findLast((p) => p.code == 'belongConversationId') : null
     if (belongConversationIdProp) {
       conversationId.value = { key: activeTableId.value, value: belongConversationIdProp.value }
+      isIntelligentQuestionOpen.value = true
       return
     }
     let tableData = {}
@@ -53,10 +58,11 @@ const analysis = async () => {
       datafiles: JSON.stringify(datafiles),
     })
     conversationId.value = { key: activeTableId.value, value: createSessionRes.conversation_id }
+    isIntelligentQuestionOpen.value = true
   } catch (error) {
+    message.error('会话创建失败')
     console.error(error)
   } finally {
-    isIntelligentQuestionOpen.value = true
     isCreateing.value = false
   }
 }

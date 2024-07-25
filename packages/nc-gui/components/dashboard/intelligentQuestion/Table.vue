@@ -1,25 +1,39 @@
 <script lang="ts" setup>
+import { Empty } from 'ant-design-vue'
+
 const props = defineProps<{
   item: any
   contentWidth: number
 }>()
+
+const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 let frame: number | null = null
 const tableContainerHeight = 400
 const itemHeight = 32 // 每个数据项的高度
 const buffer = 5 // 缓冲区行数
 const startIndex = ref(0) // 当前滚动的起始索引
 const offsetY = ref(0) // 滚动偏移量
+const tdWidth = ref('180px')
 const columns = computed(() => {
   if (!props.item.data.columns.length) return []
+  let columnLength = props.item.data.columns.length
+  let calculativeWidth = props.contentWidth - 64
+  tdWidth.value =
+    calculativeWidth > 180 * columnLength
+      ? `${Math.floor(calculativeWidth / columnLength) - (columnLength > 1 ? 10 : 18)}px`
+      : '180px'
+  console.log('props.contentWidth', props.contentWidth)
+  console.log('columnLength', columnLength)
+  console.log('tdWidth1', tdWidth.value)
+
   let newFileds = props.item.data.columns.map((item) => {
     return {
-      ...item,
-      title: item.name_cn ?? item.name ?? item.code,
-      dataIndex: item.name ?? item.code,
-      name_en: item.name ?? item.code,
-      width: '180px',
-      value: item.name,
-      label: item.name_cn ?? item.name ?? item.code,
+      title: item,
+      name_en: item,
+      width: tdWidth.value,
+      value: item,
+      label: item,
+      name: item,
     }
   })
   return newFileds
@@ -27,9 +41,14 @@ const columns = computed(() => {
 
 const tableData = computed(() => {
   if (!props.item.data.tabledata.length) return []
-  let newDatas = props.item.data.tabledata.map((item: any, index: number) => {
-    let newItem = { ...item, indexItem: index + 1 }
-    return newItem
+  let fields = props.item.data.columns
+  let newDatas: any[] = []
+  props.item.data.tabledata.map((item: any, index: number) => {
+    let data = { index: index + 1 }
+    fields.map((field: string, index: number) => {
+      data[field] = item[index]
+    })
+    newDatas.push(data)
   })
   return newDatas
 })
@@ -63,7 +82,11 @@ const onScroll = (event: any) => {
 </script>
 
 <template>
-  <div :style="{ height: '400px' }" class="nc-grid-wrapper flex-1 relative nc-scrollbar-x-lg !overflow-auto" @scroll="onScroll">
+  <div
+    :style="{ 'max-height': '400px', 'min-height': '76px' }"
+    class="nc-grid-wrapper flex-1 relative nc-scrollbar-x-lg !overflow-auto"
+    @scroll="onScroll"
+  >
     <table class="xc-row-table nc-grid backgroundColorDefault !h-auto bg-white sticky top-0 z-5 bg-white">
       <thead>
         <tr class="!h-auto bg-white sticky top-0 z-5 bg-white desktop">
@@ -84,9 +107,9 @@ const onScroll = (event: any) => {
             :data-title="col.title"
             class="nc-grid-column-header text-gray-500 header-title"
             :style="{
-              'min-width': '180px',
-              'max-width': '180px',
-              'width': '180px',
+              'min-width': col.width,
+              'max-width': col.width,
+              'width': col.width,
             }"
           >
             <NcTooltip class="truncate text" show-on-truncate-only :style="{ 'text-align': 'left' }">
@@ -130,16 +153,16 @@ const onScroll = (event: any) => {
                 'width': '64px',
               }"
             >
-              {{ row.indexItem }}
+              {{ row.index }}
             </td>
             <td
-              v-for="(columnObj, colIndex) of columns"
+              v-for="columnObj of columns"
               :key="columnObj.id"
               class="caption nc-grid-cell w-[64px] min-w-[64px]"
               :style="{
-                'min-width': '180px',
-                'max-width': '180px',
-                'width': '180px',
+                'min-width': tdWidth,
+                'max-width': tdWidth,
+                'width': tdWidth,
               }"
             >
               <NcTooltip class="truncate" show-on-truncate-only>
@@ -163,6 +186,9 @@ const onScroll = (event: any) => {
           </tr>
         </tbody>
       </table>
+    </div>
+    <div v-if="tableData.length === 0" class="no-data">
+      <a-empty :description="'暂无数据'" :image="simpleImage" />
     </div>
   </div>
 </template>
@@ -216,5 +242,11 @@ const onScroll = (event: any) => {
     @apply border-l-1;
     border-color: rgb(244, 244, 245);
   }
+}
+.no-data {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translateX(-50%);
 }
 </style>

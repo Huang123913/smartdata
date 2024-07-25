@@ -611,13 +611,17 @@ export class LLMService {
   }
 
   async submitdata(datatype: string, datafiles: string) {
+    let orgid = process.env.LLM_ORGID ?? '2';
+    let projectid = process.env.LLM_PROJECTID ?? '2';
+    const formData = new FormData();
+    formData.append('datatype', datatype);
+    formData.append('datafiles', datafiles);
+    formData.append('projectid', projectid);
+    formData.append('orgid', orgid);
     return await this.llm({
       method: 'POST',
       url: `/submitdata`,
-      params: {
-        datatype: datatype,
-        datafiles: datafiles,
-      },
+      data: formData,
     }).then((r) => {
       return r.data;
     });
@@ -630,14 +634,40 @@ export class LLMService {
     question: string;
   }) {
     let { conversation_id, datatype, question } = params;
+    let orgid = process.env.LLM_ORGID ?? '2';
+    let projectid = process.env.LLM_PROJECTID ?? '2';
+    const formData = new FormData();
+    formData.append('conversation_id', conversation_id);
+    formData.append('datatype', datatype);
+    formData.append('question', question);
+    formData.append('projectid', projectid);
+    formData.append('orgid', orgid);
     return await this.llm({
       method: 'POST',
       url: `/talktodata`,
-      params: {
-        conversation_id: conversation_id,
-        datatype: datatype,
-        question: question,
-      },
+      data: formData,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  //优化提问
+  async rephrasequestion(params: {
+    conversation_id: string;
+    question: string;
+  }) {
+    let { conversation_id, question } = params;
+    let orgid = process.env.LLM_ORGID ?? '2';
+    let projectid = process.env.LLM_PROJECTID ?? '2';
+    const formData = new FormData();
+    formData.append('conversation_id', conversation_id);
+    formData.append('question', question);
+    formData.append('projectid', projectid);
+    formData.append('orgid', orgid);
+    return await this.llm({
+      method: 'POST',
+      url: `/rephrasequestion`,
+      data: formData,
     }).then((r) => {
       return r.data;
     });

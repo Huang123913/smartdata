@@ -356,4 +356,15 @@ export class SmartDataController {
   ) {
     return await this.llm.talktodata(data);
   }
+
+  @Post(['/api/v2/smartdata/rephrasequestion'])
+  async rephrasequestion(
+    @Body()
+    data: {
+      conversation_id: string;
+      question: string;
+    },
+  ) {
+    return await this.llm.rephrasequestion(data);
+  }
 }
