@@ -1,6 +1,11 @@
 <script lang="ts" setup>
 import type { SelectProps } from 'ant-design-vue'
-import { type CalendarRangeType, FormulaDataTypes, isSystemColumn, UITypes } from 'nocodb-sdk'
+import {
+  type CalendarRangeType,
+  FormulaDataTypes,
+  UITypes,
+  isSystemColumn,
+} from 'nocodb-sdk'
 
 const meta = inject(MetaInj, ref())
 
@@ -129,17 +134,7 @@ const saveCalendarRanges = async () => {
   }
 }
 
-const dateFieldOptions = computed<SelectProps['options']>(() => {
-  return (
-    meta.value?.columns
-      ?.filter((c) => c.uidt === UITypes.Date || (c.uidt === UITypes.DateTime && !isSystemColumn(c)))
-      .map((c) => ({
-        label: c.title,
-        value: c.id,
-        uidt: c.uidt,
-      })) ?? []
-  )
-})
+
 /*
 const removeRange = async (id: number) => {
   _calendar_ranges.value = _calendar_ranges.value.filter((_, i) => i !== id)
