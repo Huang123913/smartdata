@@ -1,14 +1,17 @@
 <script lang="ts" setup>
-import type { SourceType, TableType } from 'nocodb-sdk'
-import dayjs from 'dayjs'
+import dayjs from 'dayjs';
+import type {
+  SourceType,
+  TableType,
+} from 'nocodb-sdk';
 
 const { activeTables } = storeToRefs(useTablesStore())
 const { openTable } = useTablesStore()
 const { openedProject, isDataSourceLimitReached } = storeToRefs(useBases())
 
-const { base } = useBase()
 
 const isNewBaseModalOpen = ref(false)
+const { base } = storeToRefs(useBase())
 
 const { isUIAllowed } = useRoles()
 

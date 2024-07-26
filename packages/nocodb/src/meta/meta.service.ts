@@ -1,18 +1,20 @@
-import { Injectable, Optional } from '@nestjs/common';
-import { customAlphabet } from 'nanoid';
 import CryptoJS from 'crypto-js';
 import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 import type * as knex from 'knex';
 import type { Knex } from 'knex';
+import { customAlphabet } from 'nanoid';
 import type { Condition } from '~/db/CustomKnex';
+import { XKnex } from '~/db/CustomKnex';
+import { NcError } from '~/helpers/catchError';
 import XcMigrationSource from '~/meta/migrations/XcMigrationSource';
 import XcMigrationSourcev2 from '~/meta/migrations/XcMigrationSourcev2';
-import { XKnex } from '~/db/CustomKnex';
-import { NcConfig } from '~/utils/nc-config';
 import { MetaTable, RootScopes, RootScopeTables } from '~/utils/globals';
-import { NcError } from '~/helpers/catchError';
+import { NcConfig } from '~/utils/nc-config';
+
+import { Injectable, Optional } from '@nestjs/common';
+
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -251,6 +253,7 @@ export class MetaService {
       [MetaTable.COMMENTS]: 'com',
       [MetaTable.COMMENTS_REACTIONS]: 'cre',
       [MetaTable.USER_COMMENTS_NOTIFICATIONS_PREFERENCE]: 'cnp',
+      [MetaTable.JOBS]: 'job',
     };
 
     const prefix = prefixMap[target] || 'nc';
@@ -718,6 +721,16 @@ export class MetaService {
 
   public now(): any {
     return dayjs()
+      .utc()
+      .format(
+        this.isMySQL() || this.isMssql()
+          ? 'YYYY-MM-DD HH:mm:ss'
+          : 'YYYY-MM-DD HH:mm:ssZ',
+      );
+  }
+
+  public formatDateTime(date: string): string {
+    return dayjs(date)
       .utc()
       .format(
         this.isMySQL() || this.isMssql()

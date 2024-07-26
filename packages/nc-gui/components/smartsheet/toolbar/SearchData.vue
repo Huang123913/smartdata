@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { ColumnType, TableType } from 'nocodb-sdk'
-import { UITypes, isSystemColumn } from 'nocodb-sdk'
+import { isSystemColumn, UITypes } from 'nocodb-sdk'
 
 const reloadData = inject(ReloadViewDataHookInj)!
 
@@ -14,13 +14,13 @@ const isDropdownOpen = ref(false)
 
 const showSearchBox = ref(false)
 
-const globalSearchRef = ref<HTMLInputElement>()
-
-const globalSearchWrapperRef = ref<HTMLInputElement>()
-
 const { isMobileMode, appInfo, gridViewPageSize } = useGlobal()
 
 const allSemanticRetrieval = ref<any[]>([])
+
+const globalSearchRef = ref<HTMLInputElement>()
+
+const globalSearchWrapperRef = ref<HTMLInputElement>()
 
 const selectedOption = ref({})
 

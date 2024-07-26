@@ -85,7 +85,7 @@ export const useColumnDrag = ({
           if (isDefaultView.value) {
             updateDefaultViewColumnOrder(toBeReorderedViewCol.fk_column_id, oldOrder)
           }
-          await updateGridViewColumn(colId, { order: oldOrder, prependToColumnId: oldPrependToColumnId } as any)
+          await updateGridViewColumn(colId, { order: oldOrder } as any)
 
           eventBus.emit(SmartsheetStoreEvents.FIELD_RELOAD)
         },
@@ -99,7 +99,7 @@ export const useColumnDrag = ({
           if (isDefaultView.value) {
             updateDefaultViewColumnOrder(toBeReorderedViewCol.fk_column_id, newOrder)
           }
-          await updateGridViewColumn(colId, { order: newOrder, prependToColumnId: newPrependToColumnId } as any)
+          await updateGridViewColumn(colId, { order: newOrder } as any)
 
           eventBus.emit(SmartsheetStoreEvents.FIELD_RELOAD)
         },

@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import type { Ref } from 'vue'
+import type { Ref } from 'vue';
 
-import type { ListItem as AntListItem } from 'ant-design-vue'
-import jsep from 'jsep'
-import type { ColumnType, FormulaType } from 'nocodb-sdk'
+import type { ListItem as AntListItem } from 'ant-design-vue';
+import jsep from 'jsep';
+import type {
+  ColumnType,
+  FormulaType,
+} from 'nocodb-sdk';
 import {
   FormulaError,
-  UITypes,
   isHiddenCol,
   jsepCurlyHook,
   substituteColumnIdWithAliasInFormula,
+  UITypes,
   validateFormulaAndExtractTreeWithType,
-} from 'nocodb-sdk'
+} from 'nocodb-sdk';
 
 const props = defineProps<{
   value: any
@@ -291,23 +294,26 @@ onMounted(() => {
 
 const suggestionPreviewPostion = ref({
   top: '0px',
-  left: '-344px',
+  left: '344px',
 })
 
 onMounted(() => {
-  // wait until MFE field modal transition complete
-  setTimeout(() => {
-    const textAreaPosition = formulaRef.value?.$el?.getBoundingClientRect()
-    if (!textAreaPosition) return
+  until(() => formulaRef.value?.$el as Ref<HTMLTextAreaElement>)
+    .toBeTruthy()
+    .then(() => {
+      setTimeout(() => {
+        const textAreaPosition = formulaRef.value?.$el?.getBoundingClientRect()
+        if (!textAreaPosition) return
 
-    if (fromTableExplorer?.value) {
-      suggestionPreviewPostion.value.left = `${textAreaPosition.left - 344}px`
-      suggestionPreviewPostion.value.top = `${textAreaPosition.top}px`
-    } else {
-      suggestionPreviewPostion.value.left = textAreaPosition.left < 352 ? '350px' : '-344px'
-      suggestionPreviewPostion.value.top = `0px`
-    }
-  }, 250)
+        suggestionPreviewPostion.value.top = `${textAreaPosition.top}px`
+
+        if (fromTableExplorer?.value || textAreaPosition.left > 352) {
+          suggestionPreviewPostion.value.left = `${textAreaPosition.left - 344}px`
+        } else {
+          suggestionPreviewPostion.value.left = `${textAreaPosition.right + 8}px`
+        }
+      }, 250)
+    })
 })
 
 const handleKeydown = (e: KeyboardEvent) => {
@@ -336,11 +342,7 @@ const handleKeydown = (e: KeyboardEvent) => {
   <div class="formula-wrapper relative">
     <div
       v-if="suggestionPreviewed && !suggestionPreviewed.unsupported && suggestionPreviewed.type === 'function'"
-      class="w-84 bg-white z-10 pl-3 pt-3 border-1 shadow-md rounded-xl"
-      :class="{
-        'fixed': fromTableExplorer,
-        'absolute top-0': !fromTableExplorer,
-      }"
+      class="w-84 fixed bg-white z-10 pl-3 pt-3 border-1 shadow-md rounded-xl"
       :style="{
         left: suggestionPreviewPostion.left,
         top: suggestionPreviewPostion.top,

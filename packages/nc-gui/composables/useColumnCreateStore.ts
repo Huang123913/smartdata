@@ -1,8 +1,9 @@
-import rfdc from 'rfdc'
+import type { Ref } from 'vue'
+
+import type { RuleObject } from 'ant-design-vue/es/form'
 import type { ColumnReqType, ColumnType, TableType } from 'nocodb-sdk'
 import { UITypes, isLinksOrLTAR } from 'nocodb-sdk'
-import type { Ref } from 'vue'
-import type { RuleObject } from 'ant-design-vue/es/form'
+import rfdc from 'rfdc'
 import { generateUniqueColumnName } from '~/helpers/parsers/parserHelpers'
 
 const clone = rfdc()
@@ -48,7 +49,9 @@ const [useProvideColumnCreateStore, useColumnCreateStore] = createInjectionState
         : Object.values(sqlUis.value)[0],
     )
 
-    const { activeView } = storeToRefs(useViewsStore())
+    const viewsStore = useViewsStore()
+
+    const { activeView } = storeToRefs(viewsStore)
 
     const disableSubmitBtn = ref(false)
 
@@ -297,6 +300,14 @@ const [useProvideColumnCreateStore, useColumnCreateStore] = createInjectionState
           await $api.dbTableColumn.update(column.value?.id as string, formState.value)
 
           await postSaveOrUpdateCbk?.({ update: true, colId: column.value?.id })
+
+          if (meta.value?.id && column.value.uidt === UITypes.Attachment && column.value.uidt !== formState.value.uidt) {
+            viewsStore.updateViewCoverImageColumnId({
+              metaId: meta.value.id as string,
+              columnIds: new Set([column.value.id as string]),
+            })
+          }
+
           // Column updated
           // message.success(t('msg.success.columnUpdated'))
         } else {

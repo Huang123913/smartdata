@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { extractEmail } from '~/helpers/parsers/parserHelpers'
+import { extractEmail } from '~/helpers/parsers/parserHelpers';
 
-import type { VNodeRef } from '@vue/runtime-core'
+import type { VNodeRef } from '@vue/runtime-core';
 
 interface Props {
   modelValue: string | null | undefined

@@ -14,7 +14,11 @@ import { NcError } from '~/helpers/catchError';
 import { extractProps } from '~/helpers/extractProps';
 import { getFormulasReferredTheColumn } from '~/helpers/formulaHelpers';
 import type { NcContext } from '~/interface/config';
-import { LinksColumn } from '~/models';
+import {
+  GalleryView,
+  KanbanView,
+  LinksColumn,
+} from '~/models';
 import BarcodeColumn from '~/models/BarcodeColumn';
 import Filter from '~/models/Filter';
 import FormulaColumn from '~/models/FormulaColumn';
@@ -877,6 +881,8 @@ export default class Column<T = any> implements ColumnType {
         await Filter.delete(context, filter.id, ncMeta);
       }
     }
+    // Set Gallery & Kanban view `fk_cover_image_col_id` value to null
+    await Column.deleteCoverImageColumnId(context, id, ncMeta);
 
     // Delete from view columns
     let colOptionTableName = null;
@@ -1208,6 +1214,11 @@ export default class Column<T = any> implements ColumnType {
         },
         ncMeta,
       );
+    }
+
+    if (oldCol.uidt === UITypes.Attachment && oldCol.uidt !== column.uidt) {
+      // Set Gallery & Kanban view `fk_cover_image_col_id` value to null
+      await Column.deleteCoverImageColumnId(context, column.id, ncMeta);
     }
 
     // set meta
@@ -1729,5 +1740,65 @@ export default class Column<T = any> implements ColumnType {
           break;
       }
     }
+  }
+
+  private static async deleteCoverImageColumnId(
+    context: NcContext,
+    id: string,
+    ncMeta = Noco.ncMeta,
+  ) {
+    const promises = [];
+
+    // Gallery views
+    const galleryViews: GalleryView[] = await ncMeta.metaList2(
+      context.workspace_id,
+      context.base_id,
+      MetaTable.GALLERY_VIEW,
+      {
+        condition: {
+          fk_cover_image_col_id: id,
+        },
+      },
+    );
+
+    for (const galleryView of galleryViews) {
+      promises.push(
+        GalleryView.update(
+          context,
+          galleryView.fk_view_id,
+          {
+            fk_cover_image_col_id: null,
+          },
+          ncMeta,
+        ),
+      );
+    }
+
+    // Kanban views
+    const kanbanViews: KanbanView[] = await ncMeta.metaList2(
+      context.workspace_id,
+      context.base_id,
+      MetaTable.KANBAN_VIEW,
+      {
+        condition: {
+          fk_cover_image_col_id: id,
+        },
+      },
+    );
+
+    for (const kanbanView of kanbanViews) {
+      promises.push(
+        KanbanView.update(
+          context,
+          kanbanView.fk_view_id,
+          {
+            fk_cover_image_col_id: null,
+          },
+          ncMeta,
+        ),
+      );
+    }
+
+    await Promise.all(promises);
   }
 }

@@ -1,7 +1,8 @@
+import type { Ref } from 'vue'
+
+import { message } from 'ant-design-vue'
 import type { ColumnType, LinkToAnotherRecordType, LookupType, SelectOptionsType, TableType, ViewType } from 'nocodb-sdk'
 import { UITypes } from 'nocodb-sdk'
-import type { Ref } from 'vue'
-import { message } from 'ant-design-vue'
 
 const excludedGroupingUidt = [UITypes.Attachment, UITypes.QrCode, UITypes.Barcode]
 
@@ -20,7 +21,7 @@ const [useProvideViewGroupBy, useViewGroupBy] = useInjectionState(
 
     const { base } = storeToRefs(useBase())
 
-    const { sharedView, fetchSharedViewData } = useSharedView()
+    const { sharedView, fetchSharedViewData, fetchBulkAggregatedData } = useSharedView()
 
     const { gridViewCols } = useViewColumnsOrThrow()
 
@@ -82,6 +83,7 @@ const [useProvideViewGroupBy, useViewGroupBy] = useInjectionState(
       count: 0,
       column: {} as any,
       nestedIn: [],
+      aggregations: {},
       paginationData: { page: 1, pageSize: groupByGroupLimit.value },
       nested: true,
       children: [],
@@ -303,6 +305,7 @@ const [useProvideViewGroupBy, useViewGroupBy] = useInjectionState(
                   column_uidt: groupby.column.uidt,
                 },
               ],
+              aggregations: curr.aggregations ?? {},
               paginationData: {
                 page: 1,
                 pageSize: group!.nestedIn.length < groupBy.value.length - 1 ? groupByGroupLimit.value : groupByRecordLimit.value,
@@ -350,6 +353,29 @@ const [useProvideViewGroupBy, useViewGroupBy] = useInjectionState(
         if (expectedPage < group.paginationData.page!) {
           await groupWrapperChangePage(expectedPage, group)
         }
+
+        if (appInfo.value.ee) {
+          const aggregationParams = (group.children ?? []).map((child) => ({
+            where: calculateNestedWhere(child.nestedIn, where?.value),
+            alias: child.key,
+          }))
+
+          const aggResponse = !isPublic
+            ? await api.dbDataTableBulkAggregate.dbDataTableBulkAggregate(meta.value!.id, {
+                viewId: view.value!.id,
+                aggregateFilterList: aggregationParams,
+              })
+            : await fetchBulkAggregatedData({
+                aggregateFilterList: aggregationParams,
+              })
+
+          Object.entries(aggResponse).forEach(([key, value]) => {
+            const child = (group?.children ?? []).find((c) => c.key.toString() === key.toString())
+            if (child) {
+              Object.assign(child.aggregations, value)
+            }
+          })
+        }
       } catch (e) {
         message.error(await extractSdkResponseErrorMsg(e))
       }
@@ -385,6 +411,47 @@ const [useProvideViewGroupBy, useViewGroupBy] = useInjectionState(
         group.count = response.pageInfo.totalRows ?? 0
         group.rows = formatData(response.list)
         group.paginationData = response.pageInfo
+      } catch (e) {
+        message.error(await extractSdkResponseErrorMsg(e))
+      }
+    }
+
+    async function loadGroupAggregation(
+      group: Group,
+      fields?: Array<{
+        field: string
+        type: string
+      }>,
+    ) {
+      try {
+        if (!meta?.value?.id || !view.value?.id || !view.value?.fk_model_id || !appInfo.value.ee) return
+
+        const filteredFields = fields?.filter((x) => x.type !== CommonAggregations.None)
+
+        if (filteredFields && !filteredFields?.length) return
+
+        const aggregationParams = (group.children ?? []).map((child) => ({
+          where: calculateNestedWhere(child.nestedIn, where?.value),
+          alias: child.key,
+        }))
+
+        const response = !isPublic
+          ? await api.dbDataTableBulkAggregate.dbDataTableBulkAggregate(meta.value!.id, {
+              viewId: view.value!.id,
+              aggregateFilterList: aggregationParams,
+              ...(filteredFields ? { aggregation: filteredFields } : {}),
+            })
+          : await fetchBulkAggregatedData({
+              aggregateFilterList: aggregationParams,
+              ...(filteredFields ? { aggregation: filteredFields } : {}),
+            })
+
+        Object.entries(response).forEach(([key, value]) => {
+          const child = (group.children ?? []).find((c) => c.key.toString() === key.toString())
+          if (child) {
+            Object.assign(child.aggregations, value)
+          }
+        })
       } catch (e) {
         message.error(await extractSdkResponseErrorMsg(e))
       }
@@ -479,6 +546,8 @@ const [useProvideViewGroupBy, useViewGroupBy] = useInjectionState(
             valueToTitle(row.row[groupBy.value[nestLevel].column.title!], groupBy.value[nestLevel].column, group.displayValueProp)
           )
         })
+        console.log(child)
+
         if (child) {
           return findGroupForRow(row, child, nestLevel + 1)
         }
@@ -501,15 +570,20 @@ const [useProvideViewGroupBy, useViewGroupBy] = useInjectionState(
               }
               if (group) {
                 group.rows?.splice(group!.rows.indexOf(row), 1)
+                console.log('removed Bunch')
                 modifyCount(group, -1)
               }
             }
           } else {
             if (group) {
               group.rows?.splice(group!.rows.indexOf(row), 1)
+              console.log('removed Bunch22')
+
               modifyCount(group, -1)
+            } else {
+              rootGroup.value.rows?.splice(rootGroup.value.rows!.indexOf(row), 1)
             }
-            if (properGroup.group?.children) loadGroups({}, properGroup.group)
+            // if (properGroup.group?.children) loadGroups({}, properGroup.group)
           }
         })
       } else {
@@ -545,8 +619,8 @@ const [useProvideViewGroupBy, useViewGroupBy] = useInjectionState(
             if (nextCol?.id === col.id) {
               break
             }
+            if (properGroup.group?.children) loadGroups({}, properGroup.group)
           }
-
           if (nextCol?.uidt !== UITypes.Attachment && col.id) filteredLookupCols.push(col.id)
         }
 
@@ -572,6 +646,7 @@ const [useProvideViewGroupBy, useViewGroupBy] = useInjectionState(
       loadGroups,
       loadGroupData,
       loadGroupPage,
+      loadGroupAggregation,
       groupWrapperChangePage,
       redistributeRows,
     }

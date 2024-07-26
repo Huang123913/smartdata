@@ -1,3 +1,19 @@
+import { Response } from 'express';
+import { TenantContext } from '~/decorators/tenant-context.decorator';
+import { DataApiLimiterGuard } from '~/guards/data-api-limiter.guard';
+import { GlobalGuard } from '~/guards/global/global.guard';
+import { parseHrtimeToMilliSeconds } from '~/helpers';
+import {
+  NcContext,
+  NcRequest,
+} from '~/interface/config';
+import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
+import {
+  DeleteTableRecords,
+} from '~/modules/smartdata/interceptors/data/TableRecords/DeleteTableRecords';
+import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
+import { DataTableService } from '~/services/data-table.service';
+
 import {
   Body,
   Controller,
@@ -11,24 +27,13 @@ import {
   Req,
   Res,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { Response } from 'express';
-import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
-import { DataTableService } from '~/services/data-table.service';
-import { parseHrtimeToMilliSeconds } from '~/helpers';
-import { DataApiLimiterGuard } from '~/guards/data-api-limiter.guard';
-import { GlobalGuard } from '~/guards/global/global.guard';
-import { TenantContext } from '~/decorators/tenant-context.decorator';
-import { NcContext, NcRequest } from '~/interface/config';
-
-import { UseInterceptors } from '@nestjs/common';
-import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
-import { DeleteTableRecords } from '~/modules/smartdata/interceptors/data/TableRecords/DeleteTableRecords';
 
 @Controller()
 @UseGuards(DataApiLimiterGuard, GlobalGuard)
 export class DataTableController {
-  constructor(private readonly dataTableService: DataTableService) {}
+  constructor(protected readonly dataTableService: DataTableService) {}
 
   // todo: Handle the error case where view doesnt belong to model
   @Get('/api/v2/tables/:modelId/records')

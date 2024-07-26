@@ -1,9 +1,10 @@
-import debug from 'debug';
-import { Process, Processor } from '@nestjs/bull';
 import { Job } from 'bull';
+import debug from 'debug';
 import { JOBS_QUEUE, JobTypes } from '~/interface/Jobs';
-import { SourcesService } from '~/services/sources.service';
 import { JobsLogService } from '~/modules/jobs/jobs/jobs-log.service';
+import { SourcesService } from '~/services/sources.service';
+
+import { Process, Processor } from '@nestjs/bull';
 
 @Processor(JOBS_QUEUE)
 export class SourceCreateProcessor {
@@ -46,7 +47,5 @@ export class SourceCreateProcessor {
     }
 
     this.debugLog(`job completed for ${job.id}`);
-
-    return createdSource;
   }
 }

@@ -1,6 +1,7 @@
 import type { Ref } from 'vue'
-import rfdc from 'rfdc'
+
 import type { BaseType, TableType, ViewType } from 'nocodb-sdk'
+import rfdc from 'rfdc'
 
 export const useUndoRedo = createSharedComposable(() => {
   const clone = rfdc()
@@ -167,7 +168,9 @@ export const useUndoRedo = createSharedComposable(() => {
   useEventListener(document, 'keydown', async (e: KeyboardEvent) => {
     const cmdOrCtrl = isMac() ? e.metaKey : e.ctrlKey
 
-    if ((e && (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) || isExpandedFormOpen()) return
+    if ((e && (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) || isExpandedFormOpenExist()) {
+      return
+    }
 
     if (cmdOrCtrl && !e.altKey) {
       switch (e.keyCode) {

@@ -1,13 +1,14 @@
 <script lang="ts" setup>
+import { marked } from 'marked'
+import tippy from 'tippy.js'
+import TurndownService from 'turndown'
+import { Link } from '~/helpers/dbTiptapExtensions/links'
+
+import Placeholder from '@tiptap/extension-placeholder'
+import Underline from '@tiptap/extension-underline'
+import { generateJSON } from '@tiptap/html'
 import StarterKit from '@tiptap/starter-kit'
 import { EditorContent, useEditor } from '@tiptap/vue-3'
-import TurndownService from 'turndown'
-import { marked } from 'marked'
-import { generateJSON } from '@tiptap/html'
-import Underline from '@tiptap/extension-underline'
-import Placeholder from '@tiptap/extension-placeholder'
-import tippy from 'tippy.js'
-import { Link } from '~/helpers/dbTiptapExtensions/links'
 
 const props = withDefaults(
   defineProps<{
@@ -97,7 +98,7 @@ const editor = useEditor({
     const targetEl = e?.event.relatedTarget as HTMLElement
 
     if (
-      !targetEl.closest(
+      !targetEl?.closest(
         '.comment-bubble-menu, .nc-rich-text-comment, .tippy-box, .nc-comment-save-btn, .rich-text-bottom-bar, .mention, .nc-mention-list, .tippy-content, .nc-comment-rich-editor',
       )
     ) {
@@ -133,7 +134,7 @@ const setEditorContent = (contentMd: any, focusEndOfDoc?: boolean) => {
   }, 100)
 }
 
-const onFocusWrapper = () => {
+function onFocusWrapper() {
   if (!props.readOnly && !keys.shift.value) {
     editor.value?.chain().focus().run()
     setEditorContent(vModel.value, true)
@@ -170,11 +171,17 @@ useEventListener(
     const targetEl = e?.relatedTarget as HTMLElement
     if (
       !targetEl &&
-      (e.target as HTMLElement)?.closest('.comment-bubble-menu, .nc-comment-save-btn, .tippy-content, .nc-comment-rich-editor')
+      (e.target as HTMLElement)?.closest(
+        '.comment-bubble-menu, .nc-comment-save-btn, .nc-mention-list, .mention, .rich-text-bottom-bar, .tippy-content, .nc-comment-rich-editor',
+      )
     )
       return
 
-    if (!targetEl?.closest('.comment-bubble-menu, .nc-comment-save-btn, .tippy-content, .nc-comment-rich-editor')) {
+    if (
+      !targetEl?.closest(
+        '.comment-bubble-menu, .nc-comment-save-btn, .rich-text-bottom-bar, .mention, .tippy-content, .nc-mention-list, .nc-comment-rich-editor',
+      )
+    ) {
       isFocused.value = false
 
       emits('blur')
@@ -189,7 +196,7 @@ onClickOutside(editorDom, (e) => {
 
   if (
     !targetEl?.closest(
-      '.tippy-content, .nc-rich-text-comment, .nc-comment-save-btn, .comment-bubble-menu, .nc-comment-rich-editor',
+      '.tippy-content, .nc-rich-text-comment, .nc-comment-save-btn, .nc-mention-list, .rich-text-bottom-bar, .mention, .comment-bubble-menu, .nc-comment-rich-editor',
     )
   ) {
     isFocused.value = false
@@ -216,7 +223,7 @@ const emitSave = (event: KeyboardEvent) => {
 
 const handleEnterDown = (event: KeyboardEvent) => {
   const isListsActive =
-    editor.value?.isActive('bulletList') || editor.value?.isActive('orderedList') || editor.value.isActive('blockquote')
+    editor.value?.isActive('bulletList') || editor.value?.isActive('orderedList') || editor.value?.isActive('blockquote')
   if (isListsActive) {
     triggerSaveFromList.value = true
     setTimeout(() => {
@@ -238,6 +245,12 @@ const handleKeyPress = (event: KeyboardEvent) => {
     isFocused.value = false
     emits('blur')
   }
+}
+
+const saveComment = (e) => {
+  e.preventDefault()
+  e.stopPropagation()
+  emits('save')
 }
 
 defineExpose({
@@ -262,12 +275,6 @@ onMounted(() => {
     })
   }, 1000)
 })
-
-const saveComment = (e) => {
-  e.preventDefault()
-  e.stopPropagation()
-  emits('save')
-}
 </script>
 
 <template>
@@ -297,14 +304,14 @@ const saveComment = (e) => {
         ref="editorDom"
         :editor="editor"
         :class="{
-          'px-2': !props.readOnly,
+          'p-1': !props.readOnly,
           'px-[0.25rem]': props.readOnly,
         }"
-        class="flex flex-col nc-comment-rich-editor py-2.125 w-full scrollbar-thin scrollbar-thumb-gray-200 nc-truncate scrollbar-track-transparent"
+        class="flex flex-col nc-comment-rich-editor w-full scrollbar-thin scrollbar-thumb-gray-200 nc-truncate scrollbar-track-transparent"
         @keydown.stop="handleKeyPress"
       />
 
-      <div v-if="!hideOptions" class="flex justify-between p-2 items-center">
+      <div v-if="!hideOptions" class="flex justify-between pt-1 rich-text-bottom-bar items-center">
         <LazySmartsheetExpandedFormRichTextOptions :editor="editor" class="!bg-transparent" />
         <NcButton
           v-e="['a:row-expand:comment:save']"
@@ -362,7 +369,7 @@ const saveComment = (e) => {
       }
     }
     .tiptap p.is-editor-empty:first-child::before {
-      color: #9aa2af;
+      @apply text-gray-500;
       content: attr(data-placeholder);
       float: left;
       height: 0;
@@ -375,7 +382,7 @@ const saveComment = (e) => {
     }
 
     p {
-      @apply !m-0;
+      @apply !m-0 !leading-5;
     }
 
     .ProseMirror-focused {

@@ -1,3 +1,13 @@
+import { TenantContext } from '~/decorators/tenant-context.decorator';
+import { GlobalGuard } from '~/guards/global/global.guard';
+import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
+import { NcError } from '~/helpers/catchError';
+import { NcContext, NcRequest } from '~/interface/config';
+import { JobTypes } from '~/interface/Jobs';
+import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
+import { IJobsService } from '~/modules/jobs/jobs-service.interface';
+import { SourcesService } from '~/services/sources.service';
+
 import {
   Controller,
   Delete,
@@ -6,15 +16,6 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { GlobalGuard } from '~/guards/global/global.guard';
-import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
-import { NcError } from '~/helpers/catchError';
-import { JobTypes } from '~/interface/Jobs';
-import { SourcesService } from '~/services/sources.service';
-import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
-import { IJobsService } from '~/modules/jobs/jobs-service.interface';
-import { TenantContext } from '~/decorators/tenant-context.decorator';
-import { NcContext, NcRequest } from '~/interface/config';
 
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
@@ -47,6 +48,7 @@ export class SourceDeleteController {
 
     const job = await this.jobsService.add(JobTypes.SourceDelete, {
       context,
+      user: req.user,
       sourceId,
       req: {
         user: req.user,

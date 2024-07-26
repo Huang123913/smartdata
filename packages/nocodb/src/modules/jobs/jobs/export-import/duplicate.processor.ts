@@ -1,22 +1,50 @@
-import { Readable } from 'stream';
-import { Process, Processor } from '@nestjs/bull';
 import { Job } from 'bull';
-import papaparse from 'papaparse';
 import debug from 'debug';
-import { isLinksOrLTAR, isVirtualCol, RelationTypes } from 'nocodb-sdk';
-import type { NcContext } from '~/interface/config';
-import { Base, Column, Model, Source } from '~/models';
-import { BasesService } from '~/services/bases.service';
+import {
+  isLinksOrLTAR,
+  isVirtualCol,
+  RelationTypes,
+} from 'nocodb-sdk';
+import papaparse from 'papaparse';
+import { Readable } from 'stream';
 import {
   findWithIdentifier,
   generateUniqueName,
 } from '~/helpers/exportImportHelpers';
+import type { NcContext } from '~/interface/config';
+import type {
+  DuplicateBaseJobData,
+  DuplicateColumnJobData,
+  DuplicateModelJobData,
+} from '~/interface/Jobs';
+import {
+  JOBS_QUEUE,
+  JobTypes,
+} from '~/interface/Jobs';
+import {
+  Base,
+  Column,
+  Model,
+  Source,
+} from '~/models';
+import {
+  elapsedTime,
+  initTime,
+} from '~/modules/jobs/helpers';
+import {
+  ExportService,
+} from '~/modules/jobs/jobs/export-import/export.service';
+import {
+  ImportService,
+} from '~/modules/jobs/jobs/export-import/import.service';
+import { BasesService } from '~/services/bases.service';
 import { BulkDataAliasService } from '~/services/bulk-data-alias.service';
 import { ColumnsService } from '~/services/columns.service';
-import { JOBS_QUEUE, JobTypes } from '~/interface/Jobs';
-import { elapsedTime, initTime } from '~/modules/jobs/helpers';
-import { ExportService } from '~/modules/jobs/jobs/export-import/export.service';
-import { ImportService } from '~/modules/jobs/jobs/export-import/import.service';
+
+import {
+  Process,
+  Processor,
+} from '@nestjs/bull';
 
 @Processor(JOBS_QUEUE)
 export class DuplicateProcessor {
@@ -31,7 +59,7 @@ export class DuplicateProcessor {
   ) {}
 
   @Process(JobTypes.DuplicateBase)
-  async duplicateBase(job: Job) {
+  async duplicateBase(job: Job<DuplicateBaseJobData>) {
     this.debugLog(`job started for ${job.id} (${JobTypes.DuplicateBase})`);
 
     const hrTime = initTime();
@@ -131,10 +159,12 @@ export class DuplicateProcessor {
     }
 
     this.debugLog(`job completed for ${job.id} (${JobTypes.DuplicateBase})`);
+
+    return { id: dupProject.id };
   }
 
   @Process(JobTypes.DuplicateModel)
-  async duplicateModel(job: Job) {
+  async duplicateModel(job: Job<DuplicateModelJobData>) {
     this.debugLog(`job started for ${job.id} (${JobTypes.DuplicateModel})`);
 
     const hrTime = initTime();
@@ -241,11 +271,11 @@ export class DuplicateProcessor {
 
     this.debugLog(`job completed for ${job.id} (${JobTypes.DuplicateModel})`);
 
-    return await Model.get(context, findWithIdentifier(idMap, sourceModel.id));
+    return { id: findWithIdentifier(idMap, sourceModel.id) };
   }
 
   @Process(JobTypes.DuplicateColumn)
-  async duplicateColumn(job: Job) {
+  async duplicateColumn(job: Job<DuplicateColumnJobData>) {
     this.debugLog(`job started for ${job.id} (${JobTypes.DuplicateColumn})`);
 
     const hrTime = initTime();
@@ -398,10 +428,7 @@ export class DuplicateProcessor {
 
     this.debugLog(`job completed for ${job.id} (${JobTypes.DuplicateModel})`);
 
-    return await Column.get(context, {
-      source_id: base.id,
-      colId: findWithIdentifier(idMap, sourceColumn.id),
-    });
+    return { id: findWithIdentifier(idMap, sourceColumn.id) };
   }
 
   async importModelsData(

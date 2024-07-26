@@ -2,13 +2,30 @@
 import type { CheckboxChangeEvent } from 'ant-design-vue/es/checkbox/interface'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
-import type { ColumnType, TableType } from 'nocodb-sdk'
-import { UITypes, getDateFormat, getDateTimeFormat, isSystemColumn, isVirtualCol, parseStringDate } from 'nocodb-sdk'
+import type { ColumnType, OracleUi, TableType } from 'nocodb-sdk'
+import {
+  SqlUiFactory,
+  UITypes,
+  getDateFormat,
+  getDateTimeFormat,
+  isSystemColumn,
+  isVirtualCol,
+  parseStringDate,
+} from 'nocodb-sdk'
 
 import { srcDestMappingColumns, tableColumns } from './utils'
 
-const { quickImportType, baseTemplate, importData, importColumns, importDataOnly, maxRowsToParse, sourceId, importWorker } =
-  defineProps<Props>()
+const {
+  quickImportType,
+  baseTemplate,
+  importData,
+  importColumns,
+  importDataOnly,
+  maxRowsToParse,
+  sourceId,
+  importWorker,
+  baseId,
+} = defineProps<Props>()
 
 const emit = defineEmits(['import', 'error', 'change'])
 
@@ -23,6 +40,7 @@ interface Props {
   importColumns: any[]
   importDataOnly: boolean
   maxRowsToParse: number
+  baseId: string
   sourceId: string
   importWorker: Worker
 }
@@ -44,13 +62,33 @@ const { $api } = useNuxtApp()
 
 const { addTab } = useTabs()
 
-const baseStrore = useBase()
-const { loadTables } = baseStrore
-const { sqlUis, base } = storeToRefs(baseStrore)
-const { openTable } = useTablesStore()
-const { baseTables } = storeToRefs(useTablesStore())
+const basesStore = useBases()
+const { bases } = storeToRefs(basesStore)
 
-const sqlUi = ref(sqlUis.value[sourceId] || Object.values(sqlUis.value)[0])
+const { base: activeBase } = storeToRefs(useBase())
+
+const base = computed(() => bases.value.get(baseId) || activeBase.value)
+
+const tablesStore = useTablesStore()
+const { openTable, loadProjectTables } = tablesStore
+const { baseTables } = storeToRefs(tablesStore)
+
+const sqlUis = computed(() => {
+  const temp: Record<string, any> = {}
+
+  for (const source of base.value.sources ?? []) {
+    if (source.id) {
+      temp[source.id] = SqlUiFactory.create({ client: source.type }) as Exclude<
+        ReturnType<(typeof SqlUiFactory)['create']>,
+        typeof OracleUi
+      >
+    }
+  }
+
+  return temp
+})
+
+const sqlUi = computed(() => sqlUis.value[sourceId] || Object.values(sqlUis.value)[0])
 
 const hasSelectColumn = ref<boolean[]>([])
 
@@ -95,7 +133,10 @@ const srcDestMapping = ref<Record<string, Record<string, any>[]>>({})
 const data = reactive<{
   title: string | null
   name: string
-  tables: (TableType & { ref_table_name: string; columns: (ColumnType & { key: number; _disableSelect?: boolean })[] })[]
+  tables: (TableType & {
+    ref_table_name: string
+    columns: (ColumnType & { key: number; _disableSelect?: boolean })[]
+  })[]
 }>({
   title: null,
   name: 'Base Name',
@@ -279,7 +320,7 @@ function remapColNames(batchData: any[], columns: ColumnType[]) {
 function missingRequiredColumnsValidation(tn: string) {
   const missingRequiredColumns = columns.value.filter(
     (c: Record<string, any>) =>
-      (c.pk ? !c.ai && !c.cdf && !c.meta?.ag && c.rqd : !c.cdf && c.rqd) &&
+      (c.pk ? !c.ai && !c.cdf && !c.meta?.ag : !c.cdf && c.rqd) &&
       !srcDestMapping.value[tn].some((r: Record<string, any>) => r.destCn === c.title),
   )
 
@@ -561,7 +602,7 @@ async function importTemplate() {
         )
       }
       // reload table list
-      await loadTables()
+      await loadProjectTables(base.value.id!, true)
 
       addTab({
         ...tab,

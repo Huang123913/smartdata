@@ -56,13 +56,13 @@ const { navigateToComingSoon } = useSmartDataStore()
 
       <NcButton
         type="text"
-        size="small"
-        class="nc-sidebar-top-button !xs:hidden"
+        size="xsmall"
+        class="nc-sidebar-top-button !xs:hidden my-0.5 !h-7"
         data-testid="nc-sidebar-team-settings-btn"
         :centered="false"
         :class="{
-          '!text-brand-500 !bg-brand-50 !hover:bg-brand-50': isWorkspaceSettingsPageOpened,
-          '!hover:bg-gray-200': !isWorkspaceSettingsPageOpened,
+          '!text-brand-600 !bg-brand-50 !hover:bg-brand-50': isWorkspaceSettingsPageOpened,
+          '!hover:(bg-gray-200 text-gray-700)': !isWorkspaceSettingsPageOpened,
         }"
         @click="navigateToComingSoon"
       >

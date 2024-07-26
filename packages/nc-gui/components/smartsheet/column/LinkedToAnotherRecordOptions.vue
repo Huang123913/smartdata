@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import MdiPlusIcon from '~icons/mdi/plus-circle-outline'
-import MdiMinusIcon from '~icons/mdi/minus-circle-outline'
-import { ModelTypes, MssqlUi, RelationTypes, SqliteUi, UITypes, ViewTypes } from 'nocodb-sdk'
+import {
+  ModelTypes,
+  MssqlUi,
+  RelationTypes,
+  SqliteUi,
+  UITypes,
+  ViewTypes,
+} from 'nocodb-sdk';
 
 const props = defineProps<{
   value: any

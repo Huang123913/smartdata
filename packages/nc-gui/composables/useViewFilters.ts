@@ -1,14 +1,16 @@
+import type { ComputedRef, Ref } from 'vue'
+
+import type { SelectProps } from 'ant-design-vue'
 import {
   type ColumnType,
   type FilterType,
+  getEquivalentUIType,
+  isSystemColumn,
   type LinkToAnotherRecordType,
   type LookupType,
+  UITypes,
   type ViewType,
-  getEquivalentUIType,
 } from 'nocodb-sdk'
-import type { ComputedRef, Ref } from 'vue'
-import type { SelectProps } from 'ant-design-vue'
-import { UITypes, isSystemColumn } from 'nocodb-sdk'
 
 type ColumnFilterType = FilterType & { status?: string; id?: string; children?: ColumnFilterType[]; is_group?: boolean }
 
@@ -528,12 +530,6 @@ export function useViewFilters(
       deleteFilterGroupFromAllFilters(filter)
     } else {
       if (!isLink && !isWebhook) allFilters.value = allFilters.value.filter((f) => f.id !== filter.id)
-    }
-
-    if (filter.is_group) {
-      deleteFilterGroupFromAllFilters(filter)
-    } else {
-      allFilters.value = allFilters.value.filter((f) => f.id !== filter.id)
     }
   }
   const addFilter = async (undo = false, draftFilter: Partial<FilterType> = {}) => {

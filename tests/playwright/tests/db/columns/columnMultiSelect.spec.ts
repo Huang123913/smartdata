@@ -1,9 +1,12 @@
+import { Api } from 'nocodb-sdk';
+
 import { test } from '@playwright/test';
+
 import { DashboardPage } from '../../../pages/Dashboard';
+import { ToolbarPage } from '../../../pages/Dashboard/common/Toolbar';
 import { GridPage } from '../../../pages/Dashboard/Grid';
 import setup, { unsetup } from '../../../setup';
-import { ToolbarPage } from '../../../pages/Dashboard/common/Toolbar';
-import { Api } from 'nocodb-sdk';
+
 let api: Api<any>;
 const addRecordUsingAPI = async (context: any, tableId: string, rowAttributes: any) => {
   try {
@@ -244,6 +247,8 @@ test.describe('Multi select - filters', () => {
       options: ['foo', 'bar', 'baz'],
     });
 
+    const selectOptions = ['', 'foo', 'bar', 'baz', 'foo,bar', 'foo,bar,baz'];
+
     try {
       const tables = await api.dbTable.list(context.base.id);
       const rowAttributes = [];
@@ -251,6 +256,7 @@ test.describe('Multi select - filters', () => {
         const row = {
           Id: i + 1,
           Title: `${i + 1}`,
+          MultiSelect: selectOptions[i],
         };
         rowAttributes.push(row);
       }
@@ -263,15 +269,6 @@ test.describe('Multi select - filters', () => {
 
     // page reload
     await page.reload();
-
-    await grid.cell.selectOption.select({ index: 1, columnHeader: 'MultiSelect', option: 'foo', multiSelect: true });
-    await grid.cell.selectOption.select({ index: 2, columnHeader: 'MultiSelect', option: 'bar', multiSelect: true });
-    await grid.cell.selectOption.select({ index: 3, columnHeader: 'MultiSelect', option: 'baz', multiSelect: true });
-    await grid.cell.selectOption.select({ index: 4, columnHeader: 'MultiSelect', option: 'foo', multiSelect: true });
-    await grid.cell.selectOption.select({ index: 4, columnHeader: 'MultiSelect', option: 'bar', multiSelect: true });
-    await grid.cell.selectOption.select({ index: 5, columnHeader: 'MultiSelect', option: 'foo', multiSelect: true });
-    await grid.cell.selectOption.select({ index: 5, columnHeader: 'MultiSelect', option: 'bar', multiSelect: true });
-    await grid.cell.selectOption.select({ index: 5, columnHeader: 'MultiSelect', option: 'baz', multiSelect: true });
   });
 
   test.afterEach(async () => {

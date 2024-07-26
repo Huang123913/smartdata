@@ -1,44 +1,44 @@
+import type { BoolType, ColumnReqType, ViewType } from 'nocodb-sdk';
 import {
   CommonAggregations,
   isSystemColumn,
   UITypes,
   ViewTypes,
 } from 'nocodb-sdk';
-import type { BoolType, ColumnReqType, ViewType } from 'nocodb-sdk';
+import NocoCache from '~/cache/NocoCache';
+import { extractProps } from '~/helpers/extractProps';
 import type { NcContext } from '~/interface/config';
-import Model from '~/models/Model';
-import FormView from '~/models/FormView';
-import GridView from '~/models/GridView';
-import KanbanView from '~/models/KanbanView';
-import GalleryView from '~/models/GalleryView';
-import CalendarView from '~/models/CalendarView';
-import GridViewColumn from '~/models/GridViewColumn';
-import CalendarViewColumn from '~/models/CalendarViewColumn';
+import { LinkToAnotherRecordColumn } from '~/models';
 import CalendarRange from '~/models/CalendarRange';
-import Sort from '~/models/Sort';
-import Filter from '~/models/Filter';
-import GalleryViewColumn from '~/models/GalleryViewColumn';
-import FormViewColumn from '~/models/FormViewColumn';
-import KanbanViewColumn from '~/models/KanbanViewColumn';
+import CalendarView from '~/models/CalendarView';
+import CalendarViewColumn from '~/models/CalendarViewColumn';
 import Column from '~/models/Column';
+import Filter from '~/models/Filter';
+import FormView from '~/models/FormView';
+import FormViewColumn from '~/models/FormViewColumn';
+import GalleryView from '~/models/GalleryView';
+import GalleryViewColumn from '~/models/GalleryViewColumn';
+import GridView from '~/models/GridView';
+import GridViewColumn from '~/models/GridViewColumn';
+import KanbanView from '~/models/KanbanView';
+import KanbanViewColumn from '~/models/KanbanViewColumn';
 import MapView from '~/models/MapView';
 import MapViewColumn from '~/models/MapViewColumn';
-import { extractProps } from '~/helpers/extractProps';
-import NocoCache from '~/cache/NocoCache';
+import Model from '~/models/Model';
+import Sort from '~/models/Sort';
+import Noco from '~/Noco';
 import {
   CacheDelDirection,
   CacheGetType,
   CacheScope,
   MetaTable,
 } from '~/utils/globals';
-import Noco from '~/Noco';
 import {
   parseMetaProp,
   prepareForDb,
   prepareForResponse,
   stringifyMetaProp,
 } from '~/utils/modelUtils';
-import { LinkToAnotherRecordColumn } from '~/models';
 
 const { v4: uuidv4 } = require('uuid');
 
@@ -113,7 +113,7 @@ export default class View implements ViewType {
     if (!view) {
       view = await ncMeta.metaGet2(
         context.workspace_id,
-        context.base_id,
+        context.base_id ?? 'p4szib16g2txdno',
         MetaTable.VIEWS,
         viewId,
       );

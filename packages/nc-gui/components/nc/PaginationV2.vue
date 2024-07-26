@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import NcTooltip from '~/components/nc/Tooltip.vue'
 
+import { UseVirtualList } from '@vueuse/components'
+
 const props = defineProps<{
   current: number
   total: number
@@ -143,8 +145,8 @@ const pageSizeOptions = [
           </NcButton>
 
           <template #overlay>
-            <NcMenu class="nc-scrollbar-md nc-pagination-menu max-h-54">
-              <NcSubMenu :key="`${localPageSize}page`" class="bg-gray-100 z-20 top-0 !sticky">
+            <NcMenu class="nc-pagination-menu overflow-hidden">
+              <NcSubMenu v-if="showSizeChanger" :key="`${localPageSize}page`" class="bg-gray-100 z-20 top-0 !sticky">
                 <template #title>
                   <div class="rounded-lg text-[13px] font-medium w-full">{{ localPageSize }} / page</div>
                 </template>
@@ -161,26 +163,36 @@ const pageSizeOptions = [
                 </NcMenuItem>
               </NcSubMenu>
 
-              <div :key="localPageSize" class="flex flex-col mt-1 max-h-48 overflow-hidden nc-scrollbar-md gap-1">
-                <NcMenuItem
-                  v-for="x in pagesList"
-                  :key="`${localPageSize}${x.value}`"
-                  @click.stop="
-                    changePage({
-                      set: x.value,
-                    })
-                  "
-                >
-                  <div
-                    :class="{
-                      'text-brand-500': x.value === current,
+              <UseVirtualList
+                :key="localPageSize"
+                :list="pagesList"
+                height="auto"
+                :options="{ itemHeight: 36 }"
+                class="mt-1 max-h-46"
+              >
+                <template #default="{ data: item }">
+                  <NcMenuItem
+                    :key="`${localPageSize}${item.value}`"
+                    :style="{
+                      height: '36px',
                     }"
-                    class="flex text-[13px] !w-full text-gray-800 items-center justify-between"
+                    @click.stop="
+                      changePage({
+                        set: item.value,
+                      })
+                    "
                   >
-                    {{ x.label }}
-                  </div>
-                </NcMenuItem>
-              </div>
+                    <div
+                      :class="{
+                        'text-brand-500': item.value === current,
+                      }"
+                      class="flex text-[13px] !w-full text-gray-800 items-center justify-between"
+                    >
+                      {{ item.label }}
+                    </div>
+                  </NcMenuItem>
+                </template>
+              </UseVirtualList>
             </NcMenu>
           </template>
         </NcDropdown>

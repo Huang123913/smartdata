@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { InputPassword } from 'ant-design-vue'
+import type { InputPassword } from 'ant-design-vue';
 
-import type { VNodeRef } from '@vue/runtime-core'
+import type { VNodeRef } from '@vue/runtime-core';
 
 definePageMeta({
   public: true,

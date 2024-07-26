@@ -1,7 +1,8 @@
 import { expect } from '@playwright/test';
+
+import { getTextExcludeIconText } from '../../../../tests/utils/general';
 import BasePage from '../../../Base';
 import { ToolbarPage } from './index';
-import { getTextExcludeIconText } from '../../../../tests/utils/general';
 
 export class ToolbarGroupByPage extends BasePage {
   readonly toolbar: ToolbarPage;
@@ -91,7 +92,7 @@ export class ToolbarGroupByPage extends BasePage {
     }
 
     if (isGroupByListOpen) {
-      await this.get().locator('button:has-text("New subgroup")').click();
+      await this.get().locator('button:has-text("New Subgroup")').click();
     }
 
     const regexTitle = new RegExp(`^${title}`);

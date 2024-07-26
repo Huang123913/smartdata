@@ -1,4 +1,30 @@
 import {
+  ProjectStatus,
+  readonlyMetaAllowedTypes,
+} from 'nocodb-sdk';
+import { TenantContext } from '~/decorators/tenant-context.decorator';
+import { GlobalGuard } from '~/guards/global/global.guard';
+import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
+import { NcError } from '~/helpers/catchError';
+import { generateUniqueName } from '~/helpers/exportImportHelpers';
+import {
+  NcContext,
+  NcRequest,
+} from '~/interface/config';
+import { JobTypes } from '~/interface/Jobs';
+import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
+import {
+  Base,
+  Column,
+  Model,
+  Source,
+} from '~/models';
+import { IJobsService } from '~/modules/jobs/jobs-service.interface';
+import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
+import { BasesService } from '~/services/bases.service';
+import { RootScopes } from '~/utils/globals';
+
+import {
   Body,
   Controller,
   HttpCode,
@@ -9,24 +35,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import {
-  ProjectStatus,
-  readonlyMetaAllowedTypes,
-} from 'nocodb-sdk';
-import { GlobalGuard } from '~/guards/global/global.guard';
-import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
-import { BasesService } from '~/services/bases.service';
-import { Base, Column, Model, Source } from '~/models';
-import { generateUniqueName } from '~/helpers/exportImportHelpers';
-import { JobTypes } from '~/interface/Jobs';
-import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
-import { IJobsService } from '~/modules/jobs/jobs-service.interface';
-import { TenantContext } from '~/decorators/tenant-context.decorator';
-import { NcContext, NcRequest } from '~/interface/config';
-import { RootScopes } from '~/utils/globals';
-import { NcError } from '~/helpers/catchError';
-
-import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
 
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
@@ -98,6 +106,7 @@ export class DuplicateController {
         workspace_id: base.fk_workspace_id,
         base_id: base.id,
       },
+      user: req.user,
       baseId: base.id,
       sourceId: source.id,
       dupProjectId: dupProject.id,
@@ -171,6 +180,7 @@ export class DuplicateController {
 
     const job = await this.jobsService.add(JobTypes.DuplicateBase, {
       context,
+      user: req.user,
       baseId: base.id,
       sourceId: source.id,
       dupProjectId: dupProject.id,
@@ -237,6 +247,7 @@ export class DuplicateController {
 
     const job = await this.jobsService.add(JobTypes.DuplicateModel, {
       context,
+      user: req.user,
       baseId: base.id,
       sourceId: source.id,
       modelId: model.id,
@@ -307,6 +318,7 @@ export class DuplicateController {
 
     const job = await this.jobsService.add(JobTypes.DuplicateColumn, {
       context,
+      user: req.user,
       baseId: base.id,
       sourceId: column.source_id,
       modelId: model.id,

@@ -1,4 +1,5 @@
 import type { Knex } from 'knex';
+import { replaceLongBaseIds } from '~/meta/migrations/v2/nc_054_id_length';
 import { MetaTable } from '~/utils/globals';
 
 /*
@@ -180,6 +181,9 @@ const listIndexesOnColumn = async (
 
 const up = async (knex: Knex) => {
   log('Migration started');
+
+  // Replace long base_ids before adding new columns to avoid value too long error
+  await replaceLongBaseIds(knex);
 
   log('Adding missing base_id columns');
 
@@ -406,4 +410,4 @@ const down = async (knex: Knex) => {
   });
 };
 
-export { up, down };
+export { down, up };

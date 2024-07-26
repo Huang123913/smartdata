@@ -1,7 +1,6 @@
-import { defineStore } from 'pinia'
+import { type CancelTokenSource } from 'axios'
 import type { NotificationType } from 'nocodb-sdk'
-import axios, { type CancelTokenSource } from 'axios'
-import { CancelToken } from 'axios'
+import { defineStore } from 'pinia'
 
 export const useNotification = defineStore('notificationStore', () => {
   const readNotifications = ref<NotificationType[]>([])
@@ -25,31 +24,26 @@ export const useNotification = defineStore('notificationStore', () => {
   let cancelTokenSource: CancelTokenSource | null
 
   const pollNotifications = async () => {
-    try {
-      if (!token.value) return
-
-      // set up cancel token for polling to cancel when token changes/token is removed
-      cancelTokenSource = CancelToken.source()
-
-      const res = await api.notification.poll({
-        cancelToken: cancelTokenSource.token,
-      })
-
-      if (res.status === 'success') {
-        if (notificationTab.value === 'unread') {
-          unreadNotifications.value = [JSON.parse(res.data), ...unreadNotifications.value]
-        }
-
-        unreadCount.value = unreadCount.value + 1
-      }
-
-      timeOutId = setTimeout(pollNotifications, 0)
-    } catch (e) {
-      // If request is cancelled, do nothing
-      if (axios.isCancel(e)) return
-      // If network error, retry after 2 seconds
-      timeOutId = setTimeout(pollNotifications, 2000)
-    }
+    // try {
+    //   if (!token.value) return
+    //   // set up cancel token for polling to cancel when token changes/token is removed
+    //   cancelTokenSource = CancelToken.source()
+    //   const res = await api.notification.poll({
+    //     cancelToken: cancelTokenSource.token,
+    //   })
+    //   if (res.status === 'success') {
+    //     if (notificationTab.value === 'unread') {
+    //       unreadNotifications.value = [JSON.parse(res.data), ...unreadNotifications.value]
+    //     }
+    //     unreadCount.value = unreadCount.value + 1
+    //   }
+    //   timeOutId = setTimeout(pollNotifications, 0)
+    // } catch (e) {
+    //   // If request is cancelled, do nothing
+    //   if (axios.isCancel(e)) return
+    //   // If network error, retry after 2 seconds
+    //   timeOutId = setTimeout(pollNotifications, 2000)
+    // }
   }
 
   const loadReadNotifications = async (loadMore?: boolean) => {

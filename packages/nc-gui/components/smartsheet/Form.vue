@@ -1,20 +1,23 @@
 <script setup lang="ts">
-import 'splitpanes/dist/splitpanes.css'
+import 'splitpanes/dist/splitpanes.css';
 
 import {
   type AttachmentResType,
+  getSystemColumns,
+  isLinksOrLTAR,
+  isVirtualCol,
   ProjectRoles,
   RelationTypes,
   UITypes,
   ViewTypes,
-  getSystemColumns,
-  isLinksOrLTAR,
-  isVirtualCol,
-} from 'nocodb-sdk'
-import { Pane, Splitpanes } from 'splitpanes'
-import tinycolor from 'tinycolor2'
-import Draggable from 'vuedraggable'
-import type { ImageCropperConfig } from '~/lib/types'
+} from 'nocodb-sdk';
+import {
+  Pane,
+  Splitpanes,
+} from 'splitpanes';
+import tinycolor from 'tinycolor2';
+import Draggable from 'vuedraggable';
+import type { ImageCropperConfig } from '~/lib/types';
 
 provide(IsFormInj, ref(true))
 provide(IsGalleryInj, ref(false))
@@ -236,7 +239,7 @@ function isDbRequired(column: Record<string, any>) {
       // column required / not null
       column.rqd &&
       // column default value
-      !column.cdf &&
+      !isValidValue(column?.cdf) &&
       // confirm it's not foreign key
       !columns.value.some(
         (c: Record<string, any>) =>
@@ -1239,14 +1242,16 @@ useEventListener(
                           {{ $t('general.edit') }} {{ $t('objects.field') }}
                         </NcButton>
                         <template #overlay>
-                          <SmartsheetColumnEditOrAddProvider
-                            v-if="dropdownStates.showEditColumn"
-                            :column="activeColumn"
-                            @submit="editColumnCallback"
-                            @cancel="dropdownStates.showEditColumn = false"
-                            @click.stop
-                            @keydown.stop
-                          />
+                          <div class="nc-edit-or-add-provider-wrapper">
+                            <LazySmartsheetColumnEditOrAddProvider
+                              v-if="dropdownStates.showEditColumn"
+                              :column="activeColumn"
+                              @submit="editColumnCallback"
+                              @cancel="dropdownStates.showEditColumn = false"
+                              @click.stop
+                              @keydown.stop
+                            />
+                          </div>
                         </template>
                       </a-dropdown>
                       <SmartsheetFormFieldMenu
@@ -1325,13 +1330,15 @@ useEventListener(
                           </NcButton>
 
                           <template #overlay>
-                            <SmartsheetColumnEditOrAddProvider
-                              v-if="dropdownStates.showAddColumn"
-                              @submit="addColumnCallback"
-                              @cancel="dropdownStates.showAddColumn = false"
-                              @click.stop
-                              @keydown.stop
-                            />
+                            <div class="nc-edit-or-add-provider-wrapper">
+                              <LazySmartsheetColumnEditOrAddProvider
+                                v-if="dropdownStates.showAddColumn"
+                                @submit="addColumnCallback"
+                                @cancel="dropdownStates.showAddColumn = false"
+                                @click.stop
+                                @keydown.stop
+                              />
+                            </div>
                           </template>
                         </a-dropdown>
                       </div>

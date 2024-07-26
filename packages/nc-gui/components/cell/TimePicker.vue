@@ -31,11 +31,11 @@ const isExpandedForm = inject(IsExpandedFormOpenInj, ref(false))
 
 const column = inject(ColumnInj)!
 
-const datePickerRef = ref<HTMLInputElement>()
-
 const isClearedInputMode = ref<boolean>(false)
 
 const isTimeInvalid = ref(false)
+
+const datePickerRef = ref<HTMLInputElement>()
 
 const { t } = useI18n()
 
@@ -229,7 +229,7 @@ useEventListener(document, 'keydown', (e: KeyboardEvent) => {
     !isGrid.value ||
     isExpandedForm.value ||
     isEditColumn.value ||
-    isExpandedFormOpen()
+    isExpandedFormOpenExist()
   ) {
     return
   }

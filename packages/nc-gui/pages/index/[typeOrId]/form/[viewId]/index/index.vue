@@ -1,8 +1,13 @@
 <script lang="ts" setup>
-import type { ColumnType } from 'nocodb-sdk'
-import { RelationTypes, UITypes, isVirtualCol } from 'nocodb-sdk'
-import { ref } from 'vue'
-import { StreamBarcodeReader } from 'vue-barcode-reader'
+import { ref } from 'vue';
+
+import type { ColumnType } from 'nocodb-sdk';
+import {
+  isVirtualCol,
+  RelationTypes,
+  UITypes,
+} from 'nocodb-sdk';
+import { StreamBarcodeReader } from 'vue-barcode-reader';
 
 const {
   sharedFormView,

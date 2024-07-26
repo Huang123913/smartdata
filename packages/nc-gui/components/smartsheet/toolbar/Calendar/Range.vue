@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { type CalendarRangeType, UITypes, isSystemColumn } from 'nocodb-sdk'
 import type { SelectProps } from 'ant-design-vue'
+import { type CalendarRangeType, FormulaDataTypes, isSystemColumn, UITypes } from 'nocodb-sdk'
 
 const meta = inject(MetaInj, ref())
 
@@ -28,6 +28,32 @@ const hideWeekends = computed({
       },
     })
   },
+})
+
+const dateFieldOptions = computed<SelectProps['options']>(() => {
+  return (
+    meta.value?.columns
+      ?.filter(
+        (c) =>
+          [UITypes.DateTime, UITypes.Date, UITypes.CreatedTime, UITypes.LastModifiedTime].includes(c.uidt) ||
+          (c.uidt === UITypes.Formula && (c.colOptions as any)?.parsed_tree?.dataType === FormulaDataTypes.DATE),
+      )
+      .map((c) => ({
+        label: c.title,
+        value: c.id,
+        uidt: c.uidt,
+      })) ?? []
+  ).sort((a, b) => {
+    const priority = {
+      [UITypes.DateTime]: 1,
+      [UITypes.Date]: 2,
+      [UITypes.Formula]: 3,
+      [UITypes.CreatedTime]: 4,
+      [UITypes.LastModifiedTime]: 5,
+    }
+
+    return (priority[a.uidt] || 6) - (priority[b.uidt] || 6)
+  })
 })
 
 watch(

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { NavigateDir } from '#imports'
-import type { ColumnType } from 'nocodb-sdk'
-import { isSystemColumn } from 'nocodb-sdk'
+import { NavigateDir } from '#imports';
+import type { ColumnType } from 'nocodb-sdk';
+import { isSystemColumn } from 'nocodb-sdk';
 
 interface Props {
   column: ColumnType

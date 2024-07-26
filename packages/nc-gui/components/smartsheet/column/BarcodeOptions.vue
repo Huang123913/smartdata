@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { AllowedColumnTypesForQrAndBarcodes, type ColumnType, UITypes, isVirtualCol } from 'nocodb-sdk'
+import {
+  AllowedColumnTypesForQrAndBarcodes,
+  type ColumnType,
+  isVirtualCol,
+  UITypes,
+} from 'nocodb-sdk';
 
 const props = defineProps<{
   modelValue: any
@@ -36,7 +41,7 @@ onMounted(() => {
   }
   vModel.value.fk_barcode_value_column_id =
     (column?.value?.colOptions as Record<string, any>)?.fk_barcode_value_column_id ||
-    (!isEdit ? columnsAllowedAsBarcodeValue.value?.[0]?.id : null)
+    (!isEdit.value ? columnsAllowedAsBarcodeValue.value?.[0]?.id : null)
 })
 
 watch(columnsAllowedAsBarcodeValue, (newColumnsAllowedAsBarcodeValue) => {

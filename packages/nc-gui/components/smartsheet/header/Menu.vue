@@ -352,9 +352,11 @@ const isFilterSupported = computed(
     !!(meta.value?.columns || []).find((f) => f.id === column?.value?.id && ![UITypes.QrCode, UITypes.Barcode].includes(f.uidt)),
 )
 
-const { getPlanLimit } = useWorkspace()
-
 const isGroupedByThisField = computed(() => !!gridViewCols.value[column?.value?.id]?.group_by)
+
+const isGroupBySupported = computed(() => !!(fieldsToGroupBy.value || []).find((f) => f.id === column?.value?.id))
+
+const { getPlanLimit } = useWorkspace()
 
 const isGroupByLimitExceeded = computed(() => {
   const groupBy = Object.values(gridViewCols.value).filter((c) => c.group_by)
@@ -387,8 +389,6 @@ const isFilterLimitExceeded = computed(
   () =>
     allFilters.value.filter((f) => !(f.is_group || f.status === 'delete')).length >= getPlanLimit(PlanLimitTypes.FILTER_LIMIT),
 )
-
-const isGroupBySupported = computed(() => !!(fieldsToGroupBy.value || []).find((f) => f.id === column?.value?.id))
 
 const isMarking = ref(false)
 const markSemanticsSearch = async () => {

@@ -1,6 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import {
+  pluralize,
+  singularize,
+} from 'inflection';
+import type {
+  ColumnReqType,
+  LinkToAnotherColumnReqType,
+  LinkToAnotherRecordType,
+  UserType,
+} from 'nocodb-sdk';
 import {
   AppEvents,
+  FormulaDataTypes,
   isCreatedOrLastModifiedByCol,
   isCreatedOrLastModifiedTimeCol,
   isLinksOrLTAR,
@@ -13,33 +23,13 @@ import {
   UITypes,
   validateFormulaAndExtractTreeWithType,
 } from 'nocodb-sdk';
-import { pluralize, singularize } from 'inflection';
 import hash from 'object-hash';
-import type {
-  ColumnReqType,
-  LinkToAnotherColumnReqType,
-  LinkToAnotherRecordType,
-  UserType,
-} from 'nocodb-sdk';
-import type SqlMgrv2 from '~/db/sql-mgr/v2/SqlMgrv2';
-import type { Base, LinkToAnotherRecordColumn } from '~/models';
-import type CustomKnex from '~/db/CustomKnex';
-import type SqlClient from '~/db/sql-client/lib/SqlClient';
 import type { BaseModelSqlv2 } from '~/db/BaseModelSqlv2';
-import type { NcContext, NcRequest } from '~/interface/config';
-import {
-  BaseUser,
-  CalendarRange,
-  Column,
-  FormulaColumn,
-  KanbanView,
-  Model,
-  Source,
-  View,
-} from '~/models';
-import { AppHooksService } from '~/services/app-hooks/app-hooks.service';
+import type CustomKnex from '~/db/CustomKnex';
 import formulaQueryBuilderv2 from '~/db/formulav2/formulaQueryBuilderv2';
+import type SqlClient from '~/db/sql-client/lib/SqlClient';
 import ProjectMgrv2 from '~/db/sql-mgr/v2/ProjectMgrv2';
+import type SqlMgrv2 from '~/db/sql-mgr/v2/SqlMgrv2';
 import {
   createHmAndBtColumn,
   createOOColumn,
@@ -59,10 +49,31 @@ import {
 } from '~/helpers/getUniqueName';
 import mapDefaultDisplayValue from '~/helpers/mapDefaultDisplayValue';
 import validateParams from '~/helpers/validateParams';
+import type {
+  NcContext,
+  NcRequest,
+} from '~/interface/config';
+import { MetaService } from '~/meta/meta.service';
+import type {
+  Base,
+  LinkToAnotherRecordColumn,
+} from '~/models';
+import {
+  BaseUser,
+  CalendarRange,
+  Column,
+  FormulaColumn,
+  KanbanView,
+  Model,
+  Source,
+  View,
+} from '~/models';
 import Noco from '~/Noco';
+import { AppHooksService } from '~/services/app-hooks/app-hooks.service';
 import NcConnectionMgrv2 from '~/utils/common/NcConnectionMgrv2';
 import { MetaTable } from '~/utils/globals';
-import { MetaService } from '~/meta/meta.service';
+
+import { Injectable } from '@nestjs/common';
 
 // todo: move
 export enum Altered {
@@ -1648,12 +1659,16 @@ export class ColumnsService {
         break;
 
       case UITypes.QrCode:
+        validateParams(['fk_qr_value_column_id'], param.column);
+
         await Column.insert(context, {
           ...colBody,
           fk_model_id: table.id,
         });
         break;
       case UITypes.Barcode:
+        validateParams(['fk_barcode_value_column_id'], param.column);
+
         await Column.insert(context, {
           ...colBody,
           fk_model_id: table.id,
@@ -2110,12 +2125,44 @@ export class ColumnsService {
       case UITypes.Rollup:
       case UITypes.QrCode:
       case UITypes.Barcode:
+        await Column.delete(context, param.columnId, ncMeta);
+        break;
+
       case UITypes.Formula:
+        if (!column.colOptions) await column.getColOptions(context, ncMeta);
+        if (column.colOptions.parsed_tree?.dataType === FormulaDataTypes.DATE) {
+          if (
+            await CalendarRange.IsColumnBeingUsedAsRange(
+              context,
+              column.id,
+              ncMeta,
+            )
+          ) {
+            NcError.badRequest(
+              `The column '${column.column_name}' is being used in Calendar View. Please delete Calendar View first.`,
+            );
+          }
+        }
+
         await Column.delete(context, param.columnId, ncMeta);
         break;
       // on deleting created/last modified columns, keep the column in table and delete the column from meta
       case UITypes.CreatedTime:
       case UITypes.LastModifiedTime:
+        if (
+          [UITypes.DateTime, UITypes.Date].includes(column.uidt) &&
+          (await CalendarRange.IsColumnBeingUsedAsRange(
+            context,
+            column.id,
+            ncMeta,
+          ))
+        ) {
+          NcError.badRequest(
+            `The column '${column.column_name}' is being used in Calendar View. Please delete Calendar View first.`,
+          );
+        }
+        await Column.delete(context, param.columnId, ncMeta);
+        break;
       case UITypes.CreatedBy:
       case UITypes.LastModifiedBy: {
         await Column.delete(context, param.columnId, ncMeta);

@@ -1,8 +1,10 @@
 import type { FilterType, SortType, ViewType, ViewTypes } from 'nocodb-sdk'
+import { ViewTypes as _ViewTypes } from 'nocodb-sdk'
 import { acceptHMRUpdate, defineStore } from 'pinia'
-import { useTitle } from '@vueuse/core'
-import type { ViewPageType } from '~/lib/types'
 import { getFormattedViewTabTitle } from '~/helpers/parsers/parserHelpers'
+import type { ViewPageType } from '~/lib/types'
+
+import { useTitle } from '@vueuse/core'
 
 export const useViewsStore = defineStore('viewsStore', () => {
   const { $api } = useNuxtApp()
@@ -379,6 +381,41 @@ export const useViewsStore = defineStore('viewsStore', () => {
     )
   }
 
+  const updateViewCoverImageColumnId = ({ columnIds, metaId }: { columnIds: Set<string>; metaId: string }) => {
+    if (!viewsByTable.value.get(metaId)) return
+
+    let isColumnUsedAsCoverImage = false
+
+    for (const view of viewsByTable.value.get(metaId) || []) {
+      if (
+        [_ViewTypes.GALLERY, _ViewTypes.KANBAN].includes(view.type) &&
+        view.view?.fk_cover_image_col_id &&
+        columnIds.has(view.view?.fk_cover_image_col_id)
+      ) {
+        isColumnUsedAsCoverImage = true
+        break
+      }
+    }
+
+    if (!isColumnUsedAsCoverImage) return
+
+    viewsByTable.value.set(
+      metaId,
+      (viewsByTable.value.get(metaId) || [])
+        .map((view) => {
+          if (
+            [_ViewTypes.GALLERY, _ViewTypes.KANBAN].includes(view.type) &&
+            view.view?.fk_cover_image_col_id &&
+            columnIds.has(view.view?.fk_cover_image_col_id)
+          ) {
+            view.view.fk_cover_image_col_id = null
+          }
+          return view
+        })
+        .sort((a, b) => a.order! - b.order!),
+    )
+  }
+
   refreshViewTabTitle.on(() => {
     updateTabTitle()
   })
@@ -419,6 +456,7 @@ export const useViewsStore = defineStore('viewsStore', () => {
     refreshViewTabTitle: refreshViewTabTitle.trigger,
     showTableDatas,
     setShowTableDatas,
+    updateViewCoverImageColumnId,
   }
 })
 

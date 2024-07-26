@@ -1,7 +1,15 @@
 <script setup lang="ts">
-import { Empty } from 'ant-design-vue'
-import type { AuditType, UserType, WorkspaceUserType } from 'nocodb-sdk'
-import { auditOperationSubTypeLabels, auditOperationTypeLabels, timeAgo } from 'nocodb-sdk'
+import { Empty } from 'ant-design-vue';
+import type {
+  AuditType,
+  UserType,
+  WorkspaceUserType,
+} from 'nocodb-sdk';
+import {
+  auditOperationSubTypeLabels,
+  auditOperationTypeLabels,
+  timeAgo,
+} from 'nocodb-sdk';
 
 interface Props {
   workspaceId?: string
@@ -437,9 +445,9 @@ useEventListener(tableWrapper, 'scroll', () => {
         </div>
         <div
           v-if="!isLoading && !audits?.length"
-          class="flex items-center justify-center absolute left-0 top-[54px] w-full h-[calc(100%_-_54px)] pb-10 flex items-center justify-center text-gray-500"
+          class="flex items-center justify-center absolute left-0 top-0 w-full h-full pb-10 flex items-center justify-center text-gray-500"
         >
-          <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$t('labels.noData')" />
+          <a-empty :image="Empty.PRESENTED_IMAGE_SIMPLE" :description="$t('labels.noData')" class="!my-0" />
         </div>
         <div
           v-if="totalRows"
@@ -689,5 +697,8 @@ useEventListener(tableWrapper, 'scroll', () => {
   :deep(.ant-picker-input > input) {
     @apply !px-2;
   }
+}
+:deep(.ant-empty-description) {
+  @apply mb-0;
 }
 </style>

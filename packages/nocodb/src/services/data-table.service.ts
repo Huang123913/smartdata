@@ -1,19 +1,29 @@
-import { Injectable } from '@nestjs/common';
-import { isLinksOrLTAR, RelationTypes, ViewTypes } from 'nocodb-sdk';
 import { nocoExecute } from 'nc-help';
+import {
+  isLinksOrLTAR,
+  RelationTypes,
+  ViewTypes,
+} from 'nocodb-sdk';
 import { validatePayload } from 'src/helpers';
-import type { LinkToAnotherRecordColumn } from '~/models';
-import type { NcContext } from '~/interface/config';
-import { Column, Model, Source, View } from '~/models';
-import { DatasService } from '~/services/datas.service';
 import { NcError } from '~/helpers/catchError';
 import getAst from '~/helpers/getAst';
 import { PagedResponseImpl } from '~/helpers/PagedResponse';
+import type { NcContext } from '~/interface/config';
+import type { LinkToAnotherRecordColumn } from '~/models';
+import {
+  Column,
+  Model,
+  Source,
+  View,
+} from '~/models';
+import { DatasService } from '~/services/datas.service';
 import NcConnectionMgrv2 from '~/utils/common/NcConnectionMgrv2';
+
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class DataTableService {
-  constructor(private datasService: DatasService) {}
+  constructor(protected datasService: DatasService) {}
 
   async dataList(
     context: NcContext,
@@ -233,7 +243,7 @@ export class DataTableService {
     return { count };
   }
 
-  private async getModelAndView(
+  protected async getModelAndView(
     context: NcContext,
     param: {
       baseId?: string;

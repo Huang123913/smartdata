@@ -44,6 +44,7 @@ const props = defineProps<{
   ) => Promise<void>
   headerOnly?: boolean
   hideHeader?: boolean
+  hideCheckbox?: boolean
   pagination?: {
     fixedSize?: number
     hideSidebars?: boolean
@@ -148,6 +149,8 @@ const { paste } = usePaste()
 
 const { addLTARRef, syncLTARRefs, clearLTARCell, cleaMMCell } = useSmartsheetLtarHelpersOrThrow()
 
+const { loadViewAggregate } = useViewAggregateOrThrow()
+
 // #Refs
 
 const smartTable = ref(null)
@@ -168,9 +171,8 @@ const resizingColumn = ref(false)
 
 const semanticsSearchedFields = ref([])
 
-// #Permissions
-const { isUIAllowed } = useRoles()
-const hasEditPermission = computed(() => true)
+const { isUIAllowed, isDataReadOnly } = useRoles()
+const hasEditPermission = computed(() => isUIAllowed('dataEdit'))
 const isAddingColumnAllowed = computed(() => !readOnly.value && !isLocked.value && isUIAllowed('fieldAdd') && !isSqlView.value)
 
 const { onDrag, onDragStart, onDragEnd, draggedCol, dragColPlaceholderDomRef, toBeDroppedColId } = useColumnDrag({
@@ -212,7 +214,10 @@ const isGridCellMouseDown = ref(false)
 // #Context Menu
 const _contextMenu = ref(false)
 const contextMenu = computed({
-  get: () => _contextMenu.value,
+  get: () => {
+    if (props.data?.some((r) => r.rowMeta.selected) && isDataReadOnly.value) return false
+    return _contextMenu.value
+  },
   set: (val) => {
     _contextMenu.value = val
   },
@@ -259,7 +264,16 @@ const getAllSemanticsSearchedFields = async () => {
 }
 
 async function clearCell(ctx: { row: number; col: number } | null, skipUpdate = false) {
-  if (!ctx || !hasEditPermission.value || (!isLinksOrLTAR(fields.value[ctx.col]) && isVirtualCol(fields.value[ctx.col]))) return
+  if (
+    isDataReadOnly.value ||
+    !ctx ||
+    !hasEditPermission.value ||
+    (!isLinksOrLTAR(fields.value[ctx.col]) && isVirtualCol(fields.value[ctx.col]))
+  )
+    return
+
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  if (colMeta.value[ctx.col].isReadonly) return
 
   const rowObj = dataRef.value[ctx.row]
   const columnObj = fields.value[ctx.col]
@@ -435,12 +449,11 @@ const dummyRowDataForLoading = computed(() => {
   return Array.from({ length: 40 }).map(() => ({}))
 })
 
-const showSkeleton = computed(() => {
-  return (
+const showSkeleton = computed(
+  () =>
     (disableSkeleton.value !== true && (isViewDataLoading.value || isPaginationLoading.value || isViewColumnsLoading.value)) ||
-    !meta.value
-  )
-})
+    !meta.value,
+)
 
 const cellMeta = computed(() => {
   return dataRef.value.map((row) => {
@@ -452,15 +465,23 @@ const cellMeta = computed(() => {
   })
 })
 
+const isReadonly = (col: ColumnType) => {
+  return (
+    isSystemColumn(col) ||
+    isLookup(col) ||
+    isRollup(col) ||
+    isFormula(col) ||
+    isVirtualCol(col) ||
+    isCreatedOrLastModifiedTimeCol(col) ||
+    isCreatedOrLastModifiedByCol(col)
+  )
+}
+
 const colMeta = computed(() => {
   return fields.value.map((col) => {
     return {
-      isLookup: isLookup(col),
-      isRollup: isRollup(col),
-      isFormula: isFormula(col),
-      isCreatedOrLastModifiedTimeCol: isCreatedOrLastModifiedTimeCol(col),
-      isCreatedOrLastModifiedByCol: isCreatedOrLastModifiedByCol(col),
       isVirtualCol: isVirtualCol(col),
+      isReadonly: isReadonly(col),
     }
   })
 })
@@ -468,7 +489,8 @@ const colMeta = computed(() => {
 // #Grid
 
 function openColumnCreate(data: any) {
-  tableHeadEl.value?.querySelector('th:last-child')?.scrollIntoView({ behavior: 'smooth' })
+  scrollToAddNewColumnHeader('smooth')
+
   setTimeout(() => {
     addColumnDropdown.value = true
     preloadColumn.value = data
@@ -481,11 +503,7 @@ const closeAddColumnDropdown = (scrollToLastCol = false) => {
   preloadColumn.value = {}
   if (scrollToLastCol) {
     setTimeout(() => {
-      const lastAddNewRowHeader =
-        tableHeadEl.value?.querySelector('.nc-grid-add-edit-column') ?? tableHeadEl.value?.querySelector('th:last-child')
-      if (lastAddNewRowHeader) {
-        lastAddNewRowHeader.scrollIntoView({ behavior: 'smooth' })
-      }
+      scrollToAddNewColumnHeader('smooth')
     }, 200)
   }
 }
@@ -741,7 +759,11 @@ const {
           // ALT + C
           if (isAddingColumnAllowed.value) {
             $e('c:shortcut', { key: 'ALT + C' })
-            addColumnDropdown.value = true
+            scrollToAddNewColumnHeader(undefined)
+
+            setTimeout(() => {
+              addColumnDropdown.value = true
+            }, 250)
           }
           break
         }
@@ -932,7 +954,7 @@ const onNavigate = (dir: NavigateDir) => {
 // #Cell - 2
 
 async function clearSelectedRangeOfCells() {
-  if (!hasEditPermission.value) return
+  if (!hasEditPermission.value || isDataReadOnly.value) return
 
   const start = selectedRange.start
   const end = selectedRange.end
@@ -960,6 +982,9 @@ async function clearSelectedRangeOfCells() {
         continue
       }
 
+      // skip readonly columns
+      if (isReadonly(col)) continue
+
       row.row[col.title] = null
       props.push(col.title)
     }
@@ -984,6 +1009,8 @@ const colPositions = computed(() => {
 })
 
 const scrollWrapper = computed(() => scrollParent.value || gridWrapper.value)
+
+const scrollLeft = ref()
 
 function scrollToCell(row?: number | null, col?: number | null) {
   row = row ?? activeCell.row
@@ -1132,12 +1159,12 @@ const maxGridWidth = computed(() => {
   // 64 for the row number column
   // count first column twice because it's sticky
   // 100 for add new column
-  return colPositions.value[colPositions.value.length - 1] + colPositions.value[1] + 64 + 100
+  return colPositions.value[colPositions.value.length - 1] + 64
 })
 
 const maxGridHeight = computed(() => {
   // 2 extra rows for the add new row and the sticky header
-  return dataRef.value.length * rowHeightInPx[`${props.rowHeight}`] + 2 * rowHeightInPx[`${props.rowHeight}`]
+  return dataRef.value.length * rowHeightInPx[`${props.rowHeight}`]
 })
 
 const colSlice = ref({
@@ -1279,24 +1306,29 @@ const refreshFillHandle = () => {
   })
 }
 
+const selectedReadonly = computed(
+  () =>
+    // if all the selected columns are not readonly
+    (selectedRange.isEmpty() && activeCell.col && colMeta.value[activeCell.col].isReadonly) ||
+    (!selectedRange.isEmpty() &&
+      Array.from({ length: selectedRange.end.col - selectedRange.start.col + 1 }).every(
+        (_, i) => colMeta.value[selectedRange.start.col + i].isReadonly,
+      )),
+)
+
 const showFillHandle = computed(
   () =>
+    !isDataReadOnly.value &&
     !readOnly.value &&
     !editEnabled.value &&
     (!selectedRange.isEmpty() || (activeCell.row !== null && activeCell.col !== null)) &&
     !dataRef.value[(isNaN(selectedRange.end.row) ? activeCell.row : selectedRange.end.row) ?? -1]?.rowMeta?.new &&
     activeCell.col !== null &&
     fields.value[activeCell.col] &&
-    !(
-      isLookup(fields.value[activeCell.col]) ||
-      isRollup(fields.value[activeCell.col]) ||
-      isFormula(fields.value[activeCell.col]) ||
-      isCreatedOrLastModifiedTimeCol(fields.value[activeCell.col]) ||
-      isCreatedOrLastModifiedByCol(fields.value[activeCell.col])
-    ) &&
     !isViewDataLoading.value &&
     !isPaginationLoading.value &&
-    dataRef.value.length,
+    dataRef.value.length &&
+    !selectedReadonly.value,
 )
 
 watch(
@@ -1366,7 +1398,8 @@ async function reloadViewDataHandler(params: void | { shouldShowLoading?: boolea
 
 let frame: number | null = null
 
-useEventListener(scrollWrapper, 'scroll', () => {
+useEventListener(scrollWrapper, 'scroll', (e) => {
+  scrollLeft.value = e.target.scrollLeft
   if (frame) {
     cancelAnimationFrame(frame)
   }
@@ -1518,7 +1551,11 @@ watch(
         }
         isViewDataLoading.value = true
         try {
-          await loadData?.()
+          if (isGroupBy.value) {
+            await loadData?.()
+          } else {
+            await Promise.allSettled([loadData?.(), loadViewAggregate()])
+          }
           calculateSlices()
         } catch (e) {
           if (!axios.isCancel(e)) {
@@ -1586,6 +1623,16 @@ const loaderText = computed(() => {
   }
 })
 
+function scrollToAddNewColumnHeader(behavior: ScrollOptions['behavior']) {
+  if (scrollWrapper.value) {
+    scrollWrapper.value?.scrollTo({
+      top: scrollWrapper.value.scrollTop,
+      left: scrollWrapper.value.scrollWidth,
+      behavior,
+    })
+  }
+}
+
 // Keyboard shortcuts for pagination
 onKeyStroke('ArrowLeft', onLeft)
 onKeyStroke('ArrowRight', onRight)
@@ -1616,9 +1663,9 @@ onKeyStroke('ArrowDown', onDown)
     <div ref="gridWrapper" class="nc-grid-wrapper min-h-0 flex-1 relative" :class="gridWrapperClass">
       <div
         v-show="isPaginationLoading && !headerOnly"
-        class="flex items-center justify-center absolute l-0 t-0 w-full h-full z-10 pb-10 pointer-events-none"
+        class="flex items-center justify-center bg-white/80 absolute l-0 t-0 w-full h-full z-10 pb-10 pointer-events-none"
       >
-        <div class="flex flex-col justify-center gap-2">
+        <div class="flex flex-col items-center justify-center gap-2">
           <GeneralLoader size="xlarge" />
           <span class="text-center" v-html="loaderText"></span>
         </div>
@@ -1668,7 +1715,7 @@ onKeyStroke('ArrowDown', onDown)
                   }"
                 >
                   <div class="w-full h-full flex pl-2 pr-1 items-center" data-testid="nc-check-all">
-                    <template v-if="!readOnly">
+                    <template v-if="!readOnly && !hideCheckbox">
                       <div class="nc-no-label text-gray-500" :class="{ hidden: vSelectedAllRecords }">#</div>
                       <div
                         :class="{
@@ -1688,7 +1735,7 @@ onKeyStroke('ArrowDown', onDown)
                   </div>
                 </th>
                 <th
-                  v-if="fields[0]"
+                  v-if="fields[0] && fields[0].id"
                   v-xc-ver-resize
                   :data-col="fields[0].id"
                   :data-title="fields[0].title"
@@ -1767,7 +1814,7 @@ onKeyStroke('ArrowDown', onDown)
                       :semanticsSearchedFields="semanticsSearchedFields"
                       v-else
                       :column="col"
-                      :hide-menu="readOnly || isMobileMode"
+                      :hide-menu="readOnly || !!isMobileMode"
                     />
                   </div>
                 </th>
@@ -1875,25 +1922,44 @@ onKeyStroke('ArrowDown', onDown)
                         </NcMenu>
                       </template>
                       <template v-else #overlay>
-                        <SmartsheetColumnEditOrAddProvider
-                          v-if="addColumnDropdown"
-                          :preload="preloadColumn"
-                          :column-position="columnOrder"
-                          :class="{ hidden: isJsonExpand }"
-                          @submit="closeAddColumnDropdown(true)"
-                          @cancel="closeAddColumnDropdown()"
-                          @click.stop
-                          @keydown.stop
-                          @mounted="preloadColumn = undefined"
-                        />
+                        <div class="nc-edit-or-add-provider-wrapper">
+                          <LazySmartsheetColumnEditOrAddProvider
+                            v-if="addColumnDropdown"
+                            :preload="preloadColumn"
+                            :column-position="columnOrder"
+                            :class="{ hidden: isJsonExpand }"
+                            @submit="closeAddColumnDropdown(true)"
+                            @cancel="closeAddColumnDropdown()"
+                            @click.stop
+                            @keydown.stop
+                            @mounted="preloadColumn = undefined"
+                          />
+                        </div>
                       </template>
                     </a-dropdown>
+                  </div>
+                </th>
+                <th
+                  class="!border-0 relative !xs:hidden"
+                  :style="{
+                    borderWidth: '0px !important',
+                  }"
+                >
+                  <div
+                    class="absolute top-0 w-[40px]"
+                    :class="{
+                      'left-[60px]': isAddingColumnAllowed,
+                      'left-0': !isAddingColumnAllowed,
+                    }"
+                  >
+                    &nbsp;
                   </div>
                 </th>
               </tr>
             </thead>
           </table>
           <div
+            v-if="!showSkeleton"
             class="table-overlay"
             :class="{ 'nc-grid-skeleton-loader': showSkeleton }"
             :style="{
@@ -1907,8 +1973,8 @@ onKeyStroke('ArrowDown', onDown)
               :class="{
                 'mobile': isMobileMode,
                 'desktop': !isMobileMode,
-                'pr-60 pb-12': !headerOnly,
                 'w-full': dataRef.length === 0,
+                'pr-60 pb-12': !headerOnly && !isGroupBy,
               }"
               :style="{
                 transform: `translateY(${topOffset}px) translateX(${leftOffset}px)`,
@@ -1968,7 +2034,6 @@ onKeyStroke('ArrowDown', onDown)
                           <span class="flex-1" />
 
                           <div
-                            v-if="isUIAllowed('expandedForm')"
                             class="nc-expand"
                             :data-testid="`nc-expand-${rowIndex}`"
                             :class="{ 'nc-comment': row.rowMeta?.commentCount }"
@@ -1982,10 +2047,7 @@ onKeyStroke('ArrowDown', onDown)
                             <span
                               v-if="row.rowMeta?.commentCount && expandForm"
                               v-e="['c:expanded-form:open']"
-                              class="py-1 px-1 rounded-full text-xs cursor-pointer select-none transform hover:(scale-110)"
-                              :style="{
-                                backgroundColor: getEnumColorByIndex(row.rowMeta.commentCount || 0),
-                              }"
+                              class="px-1 rounded-md rounded-bl-none transition-all border-1 border-brand-200 text-xs cursor-pointer font-sembold select-none leading-5 text-brand-500 bg-brand-50"
                               @click="expandAndLooseFocus(row, state)"
                             >
                               {{ row.rowMeta.commentCount }}
@@ -2018,14 +2080,7 @@ onKeyStroke('ArrowDown', onDown)
                           'align-middle': !rowHeight || rowHeight === 1,
                           'align-top': rowHeight && rowHeight !== 1,
                           'filling': fillRangeMap[`${rowIndex}-0`],
-                          'readonly':
-                            (colMeta[0].isLookup ||
-                              colMeta[0].isRollup ||
-                              colMeta[0].isFormula ||
-                              colMeta[0].isCreatedOrLastModifiedTimeCol ||
-                              colMeta[0].isCreatedOrLastModifiedByCol) &&
-                            hasEditPermission &&
-                            selectRangeMap[`${rowIndex}-0`],
+                          'readonly': colMeta[0].isReadonly && hasEditPermission && selectRangeMap[`${rowIndex}-0`],
                           '!border-r-blue-400 !border-r-3': toBeDroppedColId === fields[0].id,
                         }"
                         :style="{
@@ -2093,13 +2148,7 @@ onKeyStroke('ArrowDown', onDown)
                           'align-top': rowHeight && rowHeight !== 1,
                           'filling': fillRangeMap[`${rowIndex}-${colIndex}`],
                           'readonly':
-                            (colMeta[colIndex].isLookup ||
-                              colMeta[colIndex].isRollup ||
-                              colMeta[colIndex].isFormula ||
-                              colMeta[colIndex].isCreatedOrLastModifiedTimeCol ||
-                              colMeta[colIndex].isCreatedOrLastModifiedByCol) &&
-                            hasEditPermission &&
-                            selectRangeMap[`${rowIndex}-${colIndex}`],
+                            colMeta[colIndex].isReadonly && hasEditPermission && selectRangeMap[`${rowIndex}-${colIndex}`],
                           '!border-r-blue-400 !border-r-3': toBeDroppedColId === columnObj.id,
                         }"
                         :style="{
@@ -2201,7 +2250,9 @@ onKeyStroke('ArrowDown', onDown)
         <template #overlay>
           <NcMenu class="!rounded !py-0" @click="contextMenu = false">
             <NcMenuItem
-              v-if="isEeUI && !contextMenuClosing && !contextMenuTarget && data.some((r) => r.rowMeta.selected)"
+              v-if="
+                isEeUI && !contextMenuClosing && !contextMenuTarget && data.some((r) => r.rowMeta.selected) && !isDataReadOnly
+              "
               @click="emits('bulkUpdateDlg')"
             >
               <div v-e="['a:row:update-bulk']" class="flex gap-2 items-center">
@@ -2211,7 +2262,7 @@ onKeyStroke('ArrowDown', onDown)
             </NcMenuItem>
 
             <NcMenuItem
-              v-if="!contextMenuClosing && !contextMenuTarget && data.some((r) => r.rowMeta.selected)"
+              v-if="!contextMenuClosing && !contextMenuTarget && data.some((r) => r.rowMeta.selected) && !isDataReadOnly"
               class="nc-base-menu-item !text-red-600 !hover:bg-red-50"
               data-testid="nc-delete-row"
               @click="deleteSelectedRows"
@@ -2258,10 +2309,10 @@ onKeyStroke('ArrowDown', onDown)
             </NcMenuItem>
 
             <NcMenuItem
-              v-if="contextMenuTarget && hasEditPermission"
+              v-if="contextMenuTarget && hasEditPermission && !isDataReadOnly"
               class="nc-base-menu-item"
               data-testid="context-menu-item-paste"
-              :disabled="isSystemColumn(fields[contextMenuTarget.col])"
+              :disabled="selectedReadonly"
               @click="paste"
             >
               <div v-e="['a:row:paste']" class="flex gap-2 items-center">
@@ -2277,10 +2328,11 @@ onKeyStroke('ArrowDown', onDown)
                 contextMenuTarget &&
                 hasEditPermission &&
                 selectedRange.isSingleCell() &&
-                (isLinksOrLTAR(fields[contextMenuTarget.col]) || !cellMeta[0]?.[contextMenuTarget.col].isVirtualCol)
+                (isLinksOrLTAR(fields[contextMenuTarget.col]) || !cellMeta[0]?.[contextMenuTarget.col].isVirtualCol) &&
+                !isDataReadOnly
               "
               class="nc-base-menu-item"
-              :disabled="isSystemColumn(fields[contextMenuTarget.col])"
+              :disabled="selectedReadonly"
               data-testid="context-menu-item-clear"
               @click="clearCell(contextMenuTarget)"
             >
@@ -2292,9 +2344,9 @@ onKeyStroke('ArrowDown', onDown)
 
             <!-- Clear cell -->
             <NcMenuItem
-              v-else-if="contextMenuTarget && hasEditPermission"
+              v-else-if="contextMenuTarget && hasEditPermission && !isDataReadOnly"
               class="nc-base-menu-item"
-              :disabled="isSystemColumn(fields[contextMenuTarget.col])"
+              :disabled="selectedReadonly"
               data-testid="context-menu-item-clear"
               @click="clearSelectedRangeOfCells()"
             >
@@ -2314,7 +2366,7 @@ onKeyStroke('ArrowDown', onDown)
               </NcMenuItem>
             </template> -->
 
-            <template v-if="hasEditPermission">
+            <template v-if="hasEditPermission && !isDataReadOnly">
               <NcDivider v-if="!(!contextMenuClosing && !contextMenuTarget && data.some((r) => r.rowMeta.selected))" />
               <NcMenuItem
                 v-if="contextMenuTarget && (selectedRange.isSingleCell() || selectedRange.isSingleRow())"
@@ -2515,7 +2567,18 @@ onKeyStroke('ArrowDown', onDown)
       overflow: hidden;
       @apply flex h-auto;
     }
+    &.active-cell {
+      :deep(.nc-cell) {
+        a.nc-cell-field-link {
+          @apply !text-brand-500;
 
+          &:hover,
+          .nc-cell-field {
+            @apply !text-brand-500;
+          }
+        }
+      }
+    }
     :deep(.nc-cell),
     :deep(.nc-virtual-cell) {
       @apply !text-small;
@@ -2543,6 +2606,13 @@ onKeyStroke('ArrowDown', onDown)
       input,
       textarea {
         @apply !p-0 m-0;
+      }
+
+      a.nc-cell-field-link {
+        @apply !text-current;
+        &:hover {
+          @apply !text-current;
+        }
       }
 
       &.nc-cell-longtext {
@@ -2791,6 +2861,10 @@ onKeyStroke('ArrowDown', onDown)
   @apply rounded text-gray-100 !bg-gray-100 !bg-opacity-65;
   animation: slow-show-1 5s ease 5s forwards;
 }
-</style>
 
-<style lang="scss"></style>
+.nc-grid-add-new-row {
+  :deep(.ant-btn.ant-dropdown-trigger.ant-btn-icon-only) {
+    @apply !flex items-center justify-center;
+  }
+}
+</style>

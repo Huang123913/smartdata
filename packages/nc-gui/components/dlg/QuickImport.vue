@@ -3,19 +3,22 @@ import type { UploadChangeParam, UploadFile } from 'ant-design-vue'
 import { Upload } from 'ant-design-vue'
 import axios from 'axios'
 import type { TableType } from 'nocodb-sdk'
-import { toRaw, unref } from '@vue/runtime-core'
 // import worker script according to the doc of Vite
 import importWorkerUrl from '~/workers/importWorker?worker&url'
+
+import { toRaw, unref } from '@vue/runtime-core'
 
 interface Props {
   modelValue: boolean
   importType: 'csv' | 'json' | 'excel'
+  baseId: string
   sourceId: string
   importDataOnly?: boolean
 }
 
-const { importType, importDataOnly = false, sourceId, ...rest } = defineProps<Props>()
 const route = useRoute()
+const { importType, importDataOnly = false, baseId, sourceId, ...rest } = defineProps<Props>()
+
 const emit = defineEmits(['update:modelValue'])
 
 const { $api } = useNuxtApp()
@@ -33,6 +36,10 @@ const { t } = useI18n()
 const progressMsg = ref('Parsing Data ...')
 
 const { tables } = storeToRefs(useBase())
+
+const tablesStore = useTablesStore()
+const { loadProjectTables } = tablesStore
+const { baseTables } = storeToRefs(tablesStore)
 
 const activeKey = ref('uploadTab')
 
@@ -163,6 +170,10 @@ async function handlePreImport() {
   preImportLoading.value = true
   isParsingData.value = true
 
+  if (!baseTables.value.get(baseId)) {
+    await loadProjectTables(baseId)
+  }
+
   if (activeKey.value === 'uploadTab') {
     if (isImportTypeCsv.value || (isWorkerSupport && importWorker)) {
       await parseAndExtractData(importState.fileList as streamImportFileList)
@@ -253,7 +264,7 @@ function formatJson() {
 function populateUniqueTableName(tn: string) {
   let c = 1
   while (
-    tables.value.some((t: TableType) => {
+    baseTables.value.get(baseId)?.some((t: TableType) => {
       const s = t.table_name.split('___')
       let target = t.table_name
       if (s.length > 1) target = s[1]
@@ -541,7 +552,7 @@ const onChange = () => {
       <div class="px-5">
         <div class="prose-xl font-weight-bold my-5">{{ importMeta.header }}</div>
 
-        <div class="mt-5">
+        <div class="黄立荣 mt-5">
           <LazyTemplateEditor
             v-if="templateEditorModal"
             ref="templateEditorRef"
@@ -551,6 +562,7 @@ const onChange = () => {
             :import-data-only="importDataOnly"
             :quick-import-type="importType"
             :max-rows-to-parse="importState.parserConfig.maxRowsToParse"
+            :base-id="baseId"
             :source-id="sourceId"
             :import-worker="importWorker"
             class="nc-quick-import-template-editor"

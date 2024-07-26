@@ -3,10 +3,15 @@ import { TenantContext } from '~/decorators/tenant-context.decorator';
 import { DataApiLimiterGuard } from '~/guards/data-api-limiter.guard';
 import { GlobalGuard } from '~/guards/global/global.guard';
 import { parseHrtimeToMilliSeconds } from '~/helpers';
-import { NcContext, NcRequest } from '~/interface/config';
+import {
+  NcContext,
+  NcRequest,
+} from '~/interface/config';
 import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
 import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
-import { MCDMJsonRewrite } from '~/modules/smartdata/interceptors/MCDMJsonInterceptor';
+import {
+  MCDMJsonRewrite,
+} from '~/modules/smartdata/interceptors/MCDMJsonInterceptor';
 import { DatasService } from '~/services/datas.service';
 
 import {

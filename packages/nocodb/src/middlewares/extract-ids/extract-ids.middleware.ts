@@ -7,7 +7,12 @@ import {
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
 import { NcError } from '~/helpers/catchError';
-import { Base, Model, Source, View } from '~/models';
+import {
+  Base,
+  Model,
+  Source,
+  View,
+} from '~/models';
 import rolePermissions, { sourceRestrictions } from '~/utils/acl';
 import { RootScopes } from '~/utils/globals';
 
@@ -18,7 +23,11 @@ import type {
   NestInterceptor,
   NestMiddleware,
 } from '@nestjs/common';
-import { Injectable, SetMetadata, UseInterceptors } from '@nestjs/common';
+import {
+  Injectable,
+  SetMetadata,
+  UseInterceptors,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
 export const rolesLabel = {

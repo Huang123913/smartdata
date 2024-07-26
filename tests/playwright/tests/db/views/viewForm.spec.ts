@@ -1,13 +1,15 @@
-import { test } from '@playwright/test';
-import { DashboardPage } from '../../../pages/Dashboard';
-import setup, { unsetup } from '../../../setup';
-import { FormPage } from '../../../pages/Dashboard/Form';
-import { SharedFormPage } from '../../../pages/SharedForm';
 import { Api, StringValidationType, UITypes } from 'nocodb-sdk';
-import { LoginPage } from '../../../pages/LoginPage';
-import { getDefaultPwd } from '../../../tests/utils/general';
-import { enableQuickRun, isEE } from '../../../setup/db';
+
+import { test } from '@playwright/test';
+
+import { DashboardPage } from '../../../pages/Dashboard';
+import { FormPage } from '../../../pages/Dashboard/Form';
 import { SurveyFormPage } from '../../../pages/Dashboard/SurveyForm';
+import { LoginPage } from '../../../pages/LoginPage';
+import { SharedFormPage } from '../../../pages/SharedForm';
+import setup, { unsetup } from '../../../setup';
+import { enableQuickRun, isEE } from '../../../setup/db';
+import { getDefaultPwd } from '../../../tests/utils/general';
 
 // todo: Move most of the ui actions to page object and await on the api response
 test.describe('Form view', () => {
@@ -933,6 +935,9 @@ test.describe('Form view: field validation', () => {
     await dashboard.form.configureSubmitMessage({
       message: 'Thank you for submitting the form',
     });
+
+    // wait to ensure configured message is saved
+    await dashboard.rootPage.waitForTimeout(1000);
 
     await dashboard.rootPage.goto(surveyLink);
     // fix me! kludge@hub; page wasn't getting loaded from previous step

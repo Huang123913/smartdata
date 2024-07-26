@@ -2,14 +2,17 @@
 import {
   type CertTypes,
   ClientType,
+  clientTypes as _clientTypes,
   type DefaultConnection,
   type ProjectCreateForm,
   type SQLiteConnection,
   SSLUsage,
-  clientTypes as _clientTypes,
-} from '#imports'
-import { Form, message } from 'ant-design-vue'
-import type { SelectHandler } from 'ant-design-vue/es/vc-select/Select'
+} from '#imports';
+import {
+  Form,
+  message,
+} from 'ant-design-vue';
+import type { SelectHandler } from 'ant-design-vue/es/vc-select/Select';
 
 const props = defineProps<{ open: boolean; connectionType?: ClientType }>()
 

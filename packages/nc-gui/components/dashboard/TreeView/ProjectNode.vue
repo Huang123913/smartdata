@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import { nextTick } from '@vue/runtime-core'
 import { message } from 'ant-design-vue'
-import { stringifyRolesObj } from 'nocodb-sdk'
 import type { BaseType, SourceType, TableType } from 'nocodb-sdk'
+import { stringifyRolesObj } from 'nocodb-sdk'
+
 import { LoadingOutlined } from '@ant-design/icons-vue'
+import { nextTick } from '@vue/runtime-core'
 
 const indicator = h(LoadingOutlined, {
   class: '!text-gray-400',
@@ -28,6 +29,8 @@ const basesStore = useBases()
 const { isMobileMode } = useGlobal()
 
 const { api } = useApi()
+
+const { auditLogsQuery, auditCurrentPage } = storeToRefs(useWorkspace())
 
 const { createProject: _createProject, updateProject, getProjectMetaInfo, loadProject } = basesStore
 
@@ -69,7 +72,7 @@ const { t } = useI18n()
 
 const input = ref<HTMLInputElement>()
 
-const baseRole = inject(ProjectRoleInj)
+const baseRole = computed(() => base.value.project_role || base.value.workspace_role)
 
 const { activeProjectId } = storeToRefs(useBases())
 
@@ -100,9 +103,9 @@ const baseViewOpen = computed(() => {
   return routeNameAfterProjectView.split('-').length === 2 || routeNameAfterProjectView.split('-').length === 1
 })
 
-const showBaseOption = computed(() => {
-  return ['airtableImport', 'csvImport', 'jsonImport', 'excelImport'].some((permission) => isUIAllowed(permission))
-})
+const showBaseOption = (source: SourceType) => {
+  return ['airtableImport', 'csvImport', 'jsonImport', 'excelImport'].some((permission) => isUIAllowed(permission, { source }))
+}
 
 const enableEditMode = () => {
   editMode.value = true
@@ -449,6 +452,39 @@ const isLoadingModel = ref(false)
 
 const setIsLoadingModel = (value: boolean) => {
   isLoadingModel.value = value
+}
+const getSource = (sourceId: string) => {
+  return base.value.sources?.find((s) => s.id === sourceId)
+}
+
+async function openAudit(source: SourceType) {
+  $e('c:project:audit')
+
+  auditCurrentPage.value = 1
+
+  auditLogsQuery.value = {
+    ...auditLogsQuery.value,
+    orderBy: {
+      created_at: 'desc',
+      user: undefined,
+    },
+  }
+
+  const isOpen = ref(true)
+
+  const { close } = useDialog(resolveComponent('DlgProjectAudit'), {
+    'modelValue': isOpen,
+    'sourceId': source!.id,
+    'onUpdate:modelValue': () => closeDialog(),
+    'baseId': base.value!.id,
+    'bordered': true,
+  })
+
+  function closeDialog() {
+    isOpen.value = false
+
+    close(1000)
+  }
 }
 </script>
 
@@ -837,13 +873,17 @@ const setIsLoadingModel = (value: boolean) => {
                                     </div>
                                   </NcMenuItem>
 
-                                  <DashboardTreeViewBaseOptions v-if="showBaseOption" v-model:base="base" :source="source" />
+                                  <DashboardTreeViewBaseOptions
+                                    v-if="showBaseOption(source)"
+                                    v-model:base="base"
+                                    :source="source"
+                                  />
                                 </NcMenu>
                               </template>
                             </NcDropdown>
 
                             <NcButton
-                              v-if="isUIAllowed('tableCreate', { roles: baseRole })"
+                              v-if="isUIAllowed('tableCreate', { roles: baseRole, source })"
                               v-e="['c:source:add-table']"
                               type="text"
                               size="xxsmall"
@@ -947,7 +987,7 @@ const setIsLoadingModel = (value: boolean) => {
   <DlgProjectDuplicate v-if="selectedProjectToDuplicate" v-model="isDuplicateDlgOpen" :base="selectedProjectToDuplicate" />
   <GeneralModal v-model:visible="isErdModalOpen" size="large">
     <div class="h-[80vh]">
-      <LazyDashboardSettingsErd :source-id="activeBaseId" />
+      <LazyDashboardSettingsErd :base-id="base?.id" :source-id="activeBaseId" />
     </div>
   </GeneralModal>
 </template>

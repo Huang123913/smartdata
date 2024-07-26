@@ -1,19 +1,26 @@
 <script setup lang="ts">
-import { message } from 'ant-design-vue'
-import { diff } from 'deep-object-diff'
-import type { ColumnType, FilterType, SelectOptionsType } from 'nocodb-sdk'
+import { message } from 'ant-design-vue';
+import { diff } from 'deep-object-diff';
+import type {
+  ColumnType,
+  FilterType,
+  SelectOptionsType,
+} from 'nocodb-sdk';
 import {
-  UITypes,
   isLinksOrLTAR,
   isSystemColumn,
   isVirtualCol,
   partialUpdateAllowedTypes,
   readonlyMetaAllowedTypes,
-} from 'nocodb-sdk'
-import Draggable from 'vuedraggable'
-import { generateUniqueColumnName } from '~/helpers/parsers/parserHelpers'
+  UITypes,
+} from 'nocodb-sdk';
+import Draggable from 'vuedraggable';
+import { generateUniqueColumnName } from '~/helpers/parsers/parserHelpers';
 
-import { onKeyDown, useMagicKeys } from '@vueuse/core'
+import {
+  onKeyDown,
+  useMagicKeys,
+} from '@vueuse/core';
 
 interface TableExplorerColumn extends ColumnType {
   id?: string
@@ -52,7 +59,11 @@ const { meta, view } = useSmartsheetStoreOrThrow()
 
 const isLocked = inject(IsLockedInj, ref(false))
 
-const { openedViewsTab } = storeToRefs(useViewsStore())
+const viewsStore = useViewsStore()
+
+const { openedViewsTab } = storeToRefs(viewsStore)
+
+const localMetaColumns = ref<ColumnType[] | undefined>([])
 
 const localMetaColumns = ref<ColumnType[] | undefined>([])
 
@@ -692,14 +703,24 @@ const saveChanges = async () => {
       }
     }
 
+    const deletedOrUpdatedColumnIds: Set<string> = new Set()
+
     for (const op of ops.value) {
       if (op.op === 'add') {
         if (activeField.value && compareCols(activeField.value, op.column)) {
           changeField()
         }
       } else if (op.op === 'delete') {
+        deletedOrUpdatedColumnIds.add(op.column.id as string)
+
         if (activeField.value && compareCols(activeField.value, op.column)) {
           changeField()
+        }
+      } else if (op.op === 'update') {
+        const originalColumn = meta.value?.columns?.find((c) => c.id === op.column.id) as ColumnType
+
+        if (originalColumn?.uidt === UITypes.Attachment && originalColumn?.uidt !== op.column.uidt) {
+          deletedOrUpdatedColumnIds.add(op.column.id as string)
         }
       }
     }
@@ -737,9 +758,19 @@ const saveChanges = async () => {
       moveOps.value = []
     }
 
+    for (const op of ops.value) {
+      // remove column id from deletedColumnIds if operation was failed
+      if (deletedOrUpdatedColumnIds.has(op.column.id as string) && (op.op === 'delete' || op.op === 'update')) {
+        deletedOrUpdatedColumnIds.delete(op.column.id as string)
+      }
+    }
+
     await getMeta(meta.value.id, true)
 
     metaToLocal()
+
+    // Update views if column is used as cover image
+    viewsStore.updateViewCoverImageColumnId({ metaId: meta.value.id as string, columnIds: deletedOrUpdatedColumnIds })
 
     columnsHash.value = (await $api.dbTableColumn.hash(meta.value?.id)).hash
 
@@ -1373,7 +1404,12 @@ watch(
             </Draggable>
           </div>
           <Transition name="slide-fade">
-            <div v-if="!changingField" class="border-gray-200 border-l-1 nc-scrollbar-md nc-fields-height !overflow-y-auto">
+            <div
+              v-if="!changingField"
+              class="border-gray-200 border-l-1 nc-scrollbar-md nc-fields-height !overflow-y-auto"
+              @keydown.up.stop
+              @keydown.down.stop
+            >
               <SmartsheetColumnEditOrAddProvider
                 v-if="activeField"
                 class="p-4 w-[25rem]"

@@ -1,3 +1,21 @@
+import isDocker from 'is-docker';
+import type { BaseType } from 'nocodb-sdk';
+import { ProjectReqType } from 'nocodb-sdk';
+import { TenantContext } from '~/decorators/tenant-context.decorator';
+import { GlobalGuard } from '~/guards/global/global.guard';
+import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
+import { PagedResponseImpl } from '~/helpers/PagedResponse';
+import {
+  NcContext,
+  NcRequest,
+} from '~/interface/config';
+import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
+import { Filter } from '~/models';
+import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
+import Noco from '~/Noco';
+import { BasesService } from '~/services/bases.service';
+import { packageVersion } from '~/utils/packageVersion';
+
 import {
   Body,
   Controller,
@@ -10,23 +28,8 @@ import {
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import isDocker from 'is-docker';
-import { ProjectReqType } from 'nocodb-sdk';
-import type { BaseType } from 'nocodb-sdk';
-import { GlobalGuard } from '~/guards/global/global.guard';
-import { PagedResponseImpl } from '~/helpers/PagedResponse';
-import Noco from '~/Noco';
-import { packageVersion } from '~/utils/packageVersion';
-import { BasesService } from '~/services/bases.service';
-import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
-import { Filter } from '~/models';
-import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
-import { TenantContext } from '~/decorators/tenant-context.decorator';
-import { NcContext, NcRequest } from '~/interface/config';
-
-import { UseInterceptors } from '@nestjs/common';
-import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
 
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)
 @Controller()

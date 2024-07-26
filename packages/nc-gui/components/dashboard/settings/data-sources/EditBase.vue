@@ -2,20 +2,20 @@
 import {
   type CertTypes,
   ClientType,
+  clientTypes as _clientTypes,
   type DatabricksConnection,
   type DefaultConnection,
   type ProjectCreateForm,
+  type SnowflakeConnection,
   type SQLiteConnection,
   SSLUsage,
-  type SnowflakeConnection,
-  clientTypes as _clientTypes,
-} from '#imports'
+} from '#imports';
 import {
   Form,
   message,
-} from 'ant-design-vue'
-import type { SelectHandler } from 'ant-design-vue/es/vc-select/Select'
-import type { SourceType } from 'nocodb-sdk'
+} from 'ant-design-vue';
+import type { SelectHandler } from 'ant-design-vue/es/vc-select/Select';
+import type { SourceType } from 'nocodb-sdk';
 
 const props = defineProps<{
   sourceId: string

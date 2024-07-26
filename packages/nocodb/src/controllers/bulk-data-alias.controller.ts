@@ -1,3 +1,18 @@
+import { Response } from 'express';
+import { TenantContext } from '~/decorators/tenant-context.decorator';
+import { DataApiLimiterGuard } from '~/guards/data-api-limiter.guard';
+import { GlobalGuard } from '~/guards/global/global.guard';
+import {
+  NcContext,
+  NcRequest,
+} from '~/interface/config';
+import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
+import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
+import {
+  MCDMJsonRewrite,
+} from '~/modules/smartdata/interceptors/MCDMJsonInterceptor';
+import { BulkDataAliasService } from '~/services/bulk-data-alias.service';
+
 import {
   Body,
   Controller,
@@ -9,18 +24,8 @@ import {
   Req,
   Res,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { Response } from 'express';
-import { GlobalGuard } from '~/guards/global/global.guard';
-import { BulkDataAliasService } from '~/services/bulk-data-alias.service';
-import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
-import { DataApiLimiterGuard } from '~/guards/data-api-limiter.guard';
-import { TenantContext } from '~/decorators/tenant-context.decorator';
-import { NcContext, NcRequest } from '~/interface/config';
-
-import { UseInterceptors } from '@nestjs/common';
-import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
-import { MCDMJsonRewrite } from '~/modules/smartdata/interceptors/MCDMJsonInterceptor';
 
 @Controller()
 @UseGuards(DataApiLimiterGuard, GlobalGuard)

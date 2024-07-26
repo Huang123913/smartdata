@@ -1,7 +1,8 @@
-import type { ColumnType, LinkToAnotherRecordType, PaginatedType, RelationTypes, TableType, ViewType } from 'nocodb-sdk'
-import { UITypes, isCreatedOrLastModifiedByCol, isCreatedOrLastModifiedTimeCol } from 'nocodb-sdk'
 import type { ComputedRef, Ref } from 'vue'
+
 import type { CellRange } from '#imports'
+import type { ColumnType, LinkToAnotherRecordType, PaginatedType, RelationTypes, TableType, ViewType } from 'nocodb-sdk'
+import { isCreatedOrLastModifiedByCol, isCreatedOrLastModifiedTimeCol, UITypes } from 'nocodb-sdk'
 
 export function useData(args: {
   meta: Ref<TableType | undefined> | ComputedRef<TableType | undefined>
@@ -218,7 +219,7 @@ export function useData(args: {
         //   query: { ignoreWebhook: !saved }
         // }
       )
-      await reloadAggregate?.trigger({ field: [property] })
+      await reloadAggregate?.trigger({ fields: [{ title: property }] })
 
       if (!undo) {
         addUndo({
@@ -284,7 +285,7 @@ export function useData(args: {
                 col.uidt === UITypes.LastModifiedBy ||
                 col.uidt === UITypes.Lookup ||
                 col.au ||
-                (col.cdf && / on update /i.test(col.cdf)))
+                (isValidValue(col?.cdf) && / on update /i.test(col.cdf)))
             )
               acc[col.title!] = updatedRowData[col.title!]
             return acc
@@ -360,7 +361,7 @@ export function useData(args: {
     }
 
     await $api.dbTableRow.bulkUpdate(NOCO, metaValue?.base_id as string, metaValue?.id as string, updateArray)
-    await reloadAggregate?.trigger({ field: props })
+    await reloadAggregate?.trigger({ fields: props.map((p) => ({ title: p })) })
 
     if (!undo) {
       addUndo({

@@ -1,13 +1,13 @@
-// import type { CommentType } from 'nocodb-sdk';
+import type { CommentType } from 'nocodb-sdk';
+import { NcError } from '~/helpers/catchError';
+import { extractProps } from '~/helpers/extractProps';
 import type { NcContext } from '~/interface/config';
+import Model from '~/models/Model';
 import Noco from '~/Noco';
 import { MetaTable } from '~/utils/globals';
 import { prepareForDb } from '~/utils/modelUtils';
-import { extractProps } from '~/helpers/extractProps';
-import Model from '~/models/Model';
-import { NcError } from '~/helpers/catchError';
 
-export default class Comment {
+export default class Comment implements CommentType {
   id?: string;
   fk_model_id?: string;
   row_id?: string;

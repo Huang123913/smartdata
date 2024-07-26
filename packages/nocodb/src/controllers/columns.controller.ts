@@ -1,3 +1,22 @@
+import { ColumnReqType } from 'nocodb-sdk';
+import { TenantContext } from '~/decorators/tenant-context.decorator';
+import { GlobalGuard } from '~/guards/global/global.guard';
+import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
+import {
+  NcContext,
+  NcRequest,
+} from '~/interface/config';
+import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
+import type { Column } from '~/models';
+import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
+import {
+  CreateColumn,
+} from '~/modules/smartdata/interceptors/meta/DBTableColumn/CreateColumn';
+import {
+  UpdateColumn,
+} from '~/modules/smartdata/interceptors/meta/DBTableColumn/UpdateColumn';
+import { ColumnsService } from '~/services/columns.service';
+
 import {
   Body,
   Controller,
@@ -9,20 +28,8 @@ import {
   Post,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ColumnReqType } from 'nocodb-sdk';
-import type { Column } from '~/models';
-import { GlobalGuard } from '~/guards/global/global.guard';
-import { ColumnsService } from '~/services/columns.service';
-import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
-import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
-import { TenantContext } from '~/decorators/tenant-context.decorator';
-import { NcContext, NcRequest } from '~/interface/config';
-
-import { UseInterceptors } from '@nestjs/common';
-import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
-import { CreateColumn } from '~/modules/smartdata/interceptors/meta/DBTableColumn/CreateColumn';
-import { UpdateColumn } from '~/modules/smartdata/interceptors/meta/DBTableColumn/UpdateColumn';
 
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)

@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import type { BaseType, TableType } from 'nocodb-sdk'
-import { toRef } from '@vue/reactivity'
 import { message } from 'ant-design-vue'
+import type { BaseType, TableType } from 'nocodb-sdk'
 import { storeToRefs } from 'pinia'
-
 import type { SidebarTableNode } from '~/lib/types'
+
+import { toRef } from '@vue/reactivity'
 
 const props = withDefaults(
   defineProps<{

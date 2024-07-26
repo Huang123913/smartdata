@@ -1,6 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
-
 import type { AppEvents } from 'nocodb-sdk';
+import { IEventEmitter } from '~/modules/event-emitter/event-emitter.interface';
 import type {
   ApiCreatedEvent,
   ApiTokenCreateEvent,
@@ -39,7 +38,11 @@ import type {
   WebhookEvent,
   WelcomeEvent,
 } from '~/services/app-hooks/interfaces';
-import { IEventEmitter } from '~/modules/event-emitter/event-emitter.interface';
+
+import {
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 
 const ALL_EVENTS = '__nc_all_events__';
 
@@ -58,8 +61,7 @@ export class AppHooksService {
       | AppEvents.COMMENT_UPDATE
       | AppEvents.COMMENT_DELETE,
     listener: (data: RowCommentEvent) => void,
-  );
-
+  ): () => void;
   on(
     event: AppEvents.PROJECT_INVITE,
     listener: (data: ProjectInviteEvent) => void,

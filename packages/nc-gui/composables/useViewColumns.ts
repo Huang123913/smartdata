@@ -5,12 +5,12 @@ import {
   CommonAggregations,
   type GridColumnReqType,
   type GridColumnType,
+  isHiddenCol,
+  isSystemColumn,
   type MapType,
   type TableType,
   type ViewType,
   ViewTypes,
-  isHiddenCol,
-  isSystemColumn,
 } from 'nocodb-sdk'
 
 const [useProvideViewColumns, useViewColumns] = useInjectionState(

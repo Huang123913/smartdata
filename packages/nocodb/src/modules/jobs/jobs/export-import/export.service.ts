@@ -1,24 +1,44 @@
-import { Readable } from 'stream';
-import { isLinksOrLTAR, RelationTypes, UITypes, ViewTypes } from 'nocodb-sdk';
-import { unparse } from 'papaparse';
 import debug from 'debug';
-import { Injectable } from '@nestjs/common';
-import { elapsedTime, initTime } from '../../helpers';
+import {
+  isLinksOrLTAR,
+  RelationTypes,
+  UITypes,
+  ViewTypes,
+} from 'nocodb-sdk';
+import { unparse } from 'papaparse';
+import { Readable } from 'stream';
 import type { BaseModelSqlv2 } from '~/db/BaseModelSqlv2';
-import type { NcContext } from '~/interface/config';
-import type { LinkToAnotherRecordColumn } from '~/models';
-import { Base, Filter, Hook, Model, Source, View } from '~/models';
-import NcConnectionMgrv2 from '~/utils/common/NcConnectionMgrv2';
-import { getViewAndModelByAliasOrId } from '~/helpers/dataHelpers';
+import { NcError } from '~/helpers/catchError';
+import {
+  getViewAndModelByAliasOrId,
+  serializeCellValue,
+} from '~/helpers/dataHelpers';
 import {
   clearPrefix,
   generateBaseIdMap,
   getEntityIdentifier,
 } from '~/helpers/exportImportHelpers';
 import NcPluginMgrv2 from '~/helpers/NcPluginMgrv2';
-import { NcError } from '~/helpers/catchError';
+import type { NcContext } from '~/interface/config';
+import type { LinkToAnotherRecordColumn } from '~/models';
+import {
+  Base,
+  Filter,
+  Hook,
+  Model,
+  Source,
+  View,
+} from '~/models';
 import { DatasService } from '~/services/datas.service';
+import NcConnectionMgrv2 from '~/utils/common/NcConnectionMgrv2';
 import { parseMetaProp } from '~/utils/modelUtils';
+
+import { Injectable } from '@nestjs/common';
+
+import {
+  elapsedTime,
+  initTime,
+} from '../../helpers';
 
 @Injectable()
 export class ExportService {
@@ -447,9 +467,13 @@ export class ExportService {
       viewId?: string;
       handledMmList?: string[];
       _fieldIds?: string[];
+      ncSiteUrl?: string;
+      delimiter?: string;
     },
   ) {
     const { dataStream, linkStream, handledMmList } = param;
+
+    const dataExportMode = !linkStream;
 
     const { model, view } = await getViewAndModelByAliasOrId(context, {
       baseName: param.baseId,
@@ -463,32 +487,35 @@ export class ExportService {
 
     const btMap = new Map<string, string>();
 
-    for (const column of model.columns.filter(
-      (col) =>
-        col.uidt === UITypes.LinkToAnotherRecord &&
-        (col.colOptions?.type === RelationTypes.BELONGS_TO ||
-          (col.colOptions?.type === RelationTypes.ONE_TO_ONE && col.meta?.bt)),
-    )) {
-      await column.getColOptions(context);
-      const fkCol = model.columns.find(
-        (c) => c.id === column.colOptions?.fk_child_column_id,
-      );
-      if (fkCol) {
-        // replace bt column with fk column if it is in _fieldIds
-        if (param._fieldIds && param._fieldIds.includes(column.id)) {
-          param._fieldIds.push(fkCol.id);
-          const btIndex = param._fieldIds.indexOf(column.id);
-          param._fieldIds.splice(btIndex, 1);
-        }
-
-        btMap.set(
-          fkCol.id,
-          `${column.base_id}::${column.source_id}::${column.fk_model_id}::${column.id}`,
+    if (!dataExportMode) {
+      for (const column of model.columns.filter(
+        (col) =>
+          col.uidt === UITypes.LinkToAnotherRecord &&
+          (col.colOptions?.type === RelationTypes.BELONGS_TO ||
+            (col.colOptions?.type === RelationTypes.ONE_TO_ONE &&
+              col.meta?.bt)),
+      )) {
+        await column.getColOptions(context);
+        const fkCol = model.columns.find(
+          (c) => c.id === column.colOptions?.fk_child_column_id,
         );
+        if (fkCol) {
+          // replace bt column with fk column if it is in _fieldIds
+          if (param._fieldIds && param._fieldIds.includes(column.id)) {
+            param._fieldIds.push(fkCol.id);
+            const btIndex = param._fieldIds.indexOf(column.id);
+            param._fieldIds.splice(btIndex, 1);
+          }
+
+          btMap.set(
+            fkCol.id,
+            `${column.base_id}::${column.source_id}::${column.fk_model_id}::${column.id}`,
+          );
+        }
       }
     }
 
-    const fields = param._fieldIds
+    let fields = param._fieldIds
       ? model.columns
           .filter((c) => param._fieldIds?.includes(c.id))
           .map((c) => c.title)
@@ -498,6 +525,16 @@ export class ExportService {
           .map((c) => c.title)
           .join(',');
 
+    if (dataExportMode) {
+      const viewCols = await view.getColumns(context);
+
+      fields = viewCols
+        .sort((a, b) => a.order - b.order)
+        .filter((c) => c.show)
+        .map((vc) => model.columns.find((c) => c.id === vc.fk_column_id).title)
+        .join(',');
+    }
+
     const mmColumns = param._fieldIds
       ? model.columns
           .filter((c) => param._fieldIds?.includes(c.id))
@@ -506,7 +543,7 @@ export class ExportService {
           (col) => isLinksOrLTAR(col) && col.colOptions?.type === 'mm',
         );
 
-    const hasLink = mmColumns.length > 0;
+    const hasLink = !dataExportMode && mmColumns.length > 0;
 
     dataStream.setEncoding('utf8');
 
@@ -564,6 +601,22 @@ export class ExportService {
       return { data };
     };
 
+    const formatAndSerialize = async (data: any) => {
+      for (const row of data) {
+        for (const [k, v] of Object.entries(row)) {
+          const col = model.columns.find((c) => c.title === k);
+          if (col) {
+            row[k] = await serializeCellValue(context, {
+              value: v,
+              column: col,
+              siteUrl: param.ncSiteUrl,
+            });
+          }
+        }
+      }
+      return { data };
+    };
+
     const baseModel = await Model.getBaseModelSQL(context, {
       id: model.id,
       viewId: view?.id,
@@ -576,7 +629,7 @@ export class ExportService {
     try {
       await this.recursiveRead(
         context,
-        formatData,
+        dataExportMode ? formatAndSerialize : formatData,
         baseModel,
         dataStream,
         model,
@@ -585,6 +638,8 @@ export class ExportService {
         limit,
         fields,
         true,
+        param.delimiter,
+        dataExportMode,
       );
     } catch (e) {
       this.debugLog(e);
@@ -670,13 +725,13 @@ export class ExportService {
 
       linkStream.push(null);
     } else {
-      linkStream.push(null);
+      if (linkStream) linkStream.push(null);
     }
   }
 
   async recursiveRead(
     context: NcContext,
-    formatter: (data: any) => { data: any },
+    formatter: (data: any) => { data: any } | Promise<{ data: any }>,
     baseModel: BaseModelSqlv2,
     stream: Readable,
     model: Model,
@@ -685,6 +740,8 @@ export class ExportService {
     limit: number,
     fields: string,
     header = false,
+    delimiter = ',',
+    dataExportMode = false,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       this.datasService
@@ -693,7 +750,7 @@ export class ExportService {
           view,
           query: { limit, offset, fields },
           baseModel,
-          ignoreViewFilterAndSort: true,
+          ignoreViewFilterAndSort: !dataExportMode,
           limitOverride: limit,
         })
         .then((result) => {
@@ -701,25 +758,57 @@ export class ExportService {
             if (!header) {
               stream.push('\r\n');
             }
-            const { data } = formatter(result.list);
-            stream.push(unparse(data, { header }));
-            if (result.pageInfo.isLastPage) {
-              stream.push(null);
-              resolve();
+
+            // check if formatter is async
+            const formatterPromise = formatter(result.list);
+            if (formatterPromise instanceof Promise) {
+              formatterPromise.then(({ data }) => {
+                stream.push(unparse(data, { header, delimiter }));
+                if (result.pageInfo.isLastPage) {
+                  stream.push(null);
+                  resolve();
+                } else {
+                  this.recursiveRead(
+                    context,
+                    formatter,
+                    baseModel,
+                    stream,
+                    model,
+                    view,
+                    offset + limit,
+                    limit,
+                    fields,
+                    false,
+                    delimiter,
+                    dataExportMode,
+                  )
+                    .then(resolve)
+                    .catch(reject);
+                }
+              });
             } else {
-              this.recursiveRead(
-                context,
-                formatter,
-                baseModel,
-                stream,
-                model,
-                view,
-                offset + limit,
-                limit,
-                fields,
-              )
-                .then(resolve)
-                .catch(reject);
+              stream.push(unparse(formatterPromise.data, { header }));
+              if (result.pageInfo.isLastPage) {
+                stream.push(null);
+                resolve();
+              } else {
+                this.recursiveRead(
+                  context,
+                  formatter,
+                  baseModel,
+                  stream,
+                  model,
+                  view,
+                  offset + limit,
+                  limit,
+                  fields,
+                  false,
+                  delimiter,
+                  dataExportMode,
+                )
+                  .then(resolve)
+                  .catch(reject);
+              }
             }
           } catch (e) {
             reject(e);

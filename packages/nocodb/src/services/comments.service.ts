@@ -1,16 +1,24 @@
-import { Injectable } from '@nestjs/common';
-import { AppEvents } from 'nocodb-sdk';
-import { Base, Model } from '../models';
 import type {
   CommentReqType,
   CommentUpdateReqType,
   UserType,
 } from 'nocodb-sdk';
-import type { NcContext, NcRequest } from '~/interface/config';
-import { NcError } from '~/helpers/catchError';
+import { AppEvents } from 'nocodb-sdk';
 import { validatePayload } from '~/helpers';
-import { AppHooksService } from '~/services/app-hooks/app-hooks.service';
+import { NcError } from '~/helpers/catchError';
+import type {
+  NcContext,
+  NcRequest,
+} from '~/interface/config';
 import Comment from '~/models/Comment';
+import { AppHooksService } from '~/services/app-hooks/app-hooks.service';
+
+import { Injectable } from '@nestjs/common';
+
+import {
+  Base,
+  Model,
+} from '../models';
 
 @Injectable()
 export class CommentsService {
@@ -110,37 +118,37 @@ export class CommentsService {
       req: NcRequest;
     },
   ) {
-    // validatePayload(
-    //   'swagger.json#/components/schemas/CommentUpdateReq',
-    //   param.body,
-    // );
+    validatePayload(
+      'swagger.json#/components/schemas/CommentUpdateReq',
+      param.body,
+    );
 
-    // const comment = await Comment.get(context, param.commentId);
+    const comment = await Comment.get(context, param.commentId);
 
-    // if (comment.created_by !== param.user.id || comment.is_deleted) {
-    //   NcError.unauthorized('Unauthorized access');
-    // }
+    if (comment.created_by !== param.user.id || comment.is_deleted) {
+      NcError.unauthorized('Unauthorized access');
+    }
 
-    // const res = await Comment.update(context, param.commentId, {
-    //   comment: param.body.comment,
-    // });
+    const res = await Comment.update(context, param.commentId, {
+      comment: param.body.comment,
+    });
 
-    // const model = await Model.getByIdOrName(context, {
-    //   id: param.body.fk_model_id,
-    // });
+    const model = await Model.getByIdOrName(context, {
+      id: param.body.fk_model_id,
+    });
 
-    // this.appHooksService.emit(AppEvents.COMMENT_UPDATE, {
-    //   base: await Base.getByTitleOrId(context, model.base_id),
-    //   model: model,
-    //   user: param.user,
-    //   comment: {
-    //     ...comment,
-    //     comment: param.body.comment,
-    //   },
-    //   rowId: comment.row_id,
-    //   req: param.req,
-    // });
+    this.appHooksService.emit(AppEvents.COMMENT_UPDATE, {
+      base: await Base.getByTitleOrId(context, model.base_id),
+      model: model,
+      user: param.user,
+      comment: {
+        ...comment,
+        comment: param.body.comment,
+      },
+      rowId: comment.row_id,
+      req: param.req,
+    });
 
-    return null;
+    return res;
   }
 }

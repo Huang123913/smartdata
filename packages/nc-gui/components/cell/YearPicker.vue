@@ -27,7 +27,10 @@ const isGrid = inject(IsGridInj, ref(false))
 
 const isForm = inject(IsFormInj, ref(false))
 
+const isSurveyForm = inject(IsSurveyFormInj, ref(false))
+
 const isExpandedForm = inject(IsExpandedFormOpenInj, ref(false))
+
 const isYearInvalid = ref(false)
 
 const datePickerRef = ref<HTMLInputElement>()
@@ -211,7 +214,7 @@ useEventListener(document, 'keydown', (e: KeyboardEvent) => {
     !isGrid.value ||
     isExpandedForm.value ||
     isEditColumn.value ||
-    isExpandedFormOpen()
+    isExpandedFormOpenExist()
   ) {
     return
   }

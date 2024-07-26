@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { onKeyDown } from '@vueuse/core'
+import { onKeyDown } from '@vueuse/core';
 
-import { useSortable } from './sort'
-import { useProvideAttachmentCell } from './utils'
+import { useSortable } from './sort';
+import { useProvideAttachmentCell } from './utils';
 
 interface Props {
   modelValue?: string | Record<string, any>[] | null

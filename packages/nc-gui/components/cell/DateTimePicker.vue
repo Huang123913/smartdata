@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import dayjs from 'dayjs'
+import dayjs from 'dayjs';
 import {
   dateFormats,
   isSystemColumn,
   timeFormats,
-} from 'nocodb-sdk'
+} from 'nocodb-sdk';
 
 interface Props {
   modelValue?: string | null
@@ -305,7 +305,7 @@ useEventListener(document, 'keydown', (e: KeyboardEvent) => {
     !isGrid.value ||
     isExpandedForm.value ||
     isEditColumn.value ||
-    isExpandedFormOpen()
+    isExpandedFormOpenExist()
   ) {
     return
   }

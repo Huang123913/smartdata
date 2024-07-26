@@ -1,20 +1,27 @@
-import { Injectable, Logger } from '@nestjs/common';
+import type { Response } from 'express';
+import type { UserType } from 'nocodb-sdk';
 import { AppEvents } from 'nocodb-sdk';
+import { NcError } from '~/helpers/catchError';
+import { PagedResponseImpl } from '~/helpers/PagedResponse';
+import type { NcRequest } from '~/interface/config';
+import { Notification } from '~/models';
+import { PubSubRedis } from '~/redis/pubsub-redis';
+import { AppHooksService } from '~/services/app-hooks/app-hooks.service';
 import type {
   ProjectInviteEvent,
   WelcomeEvent,
 } from '~/services/app-hooks/interfaces';
-import type { OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import type { UserType } from 'nocodb-sdk';
-import type { NcRequest } from '~/interface/config';
-import type { Response } from 'express';
-import { AppHooksService } from '~/services/app-hooks/app-hooks.service';
-import { NcError } from '~/helpers/catchError';
-import { PagedResponseImpl } from '~/helpers/PagedResponse';
-import { Notification } from '~/models';
-
 import { getCircularReplacer } from '~/utils';
-import { PubSubRedis } from '~/redis/pubsub-redis';
+
+import type {
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+} from '@nestjs/common';
+
 @Injectable()
 export class NotificationsService implements OnModuleInit, OnModuleDestroy {
   protected logger: Logger = new Logger(NotificationsService.name);
@@ -242,6 +249,11 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
   }
 
   onModuleInit() {
-    this.appHooks.onAll(this.hookHandler.bind(this));
+    this.appHooks.on(AppEvents.PROJECT_INVITE, (data) =>
+      this.hookHandler({ event: AppEvents.PROJECT_INVITE, data }),
+    );
+    this.appHooks.on(AppEvents.WELCOME, (data) =>
+      this.hookHandler({ event: AppEvents.WELCOME, data }),
+    );
   }
 }

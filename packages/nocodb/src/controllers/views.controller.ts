@@ -1,3 +1,13 @@
+import { ViewUpdateReqType } from 'nocodb-sdk';
+import { TenantContext } from '~/decorators/tenant-context.decorator';
+import { GlobalGuard } from '~/guards/global/global.guard';
+import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
+import { PagedResponseImpl } from '~/helpers/PagedResponse';
+import { NcContext, NcRequest } from '~/interface/config';
+import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
+import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
+import { ViewsService } from '~/services/views.service';
+
 import {
   Body,
   Controller,
@@ -10,18 +20,8 @@ import {
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ViewUpdateReqType } from 'nocodb-sdk';
-import { PagedResponseImpl } from '~/helpers/PagedResponse';
-import { GlobalGuard } from '~/guards/global/global.guard';
-import { ViewsService } from '~/services/views.service';
-import { Acl } from '~/middlewares/extract-ids/extract-ids.middleware';
-import { MetaApiLimiterGuard } from '~/guards/meta-api-limiter.guard';
-import { TenantContext } from '~/decorators/tenant-context.decorator';
-import { NcContext, NcRequest } from '~/interface/config';
-
-import { UseInterceptors } from '@nestjs/common';
-import { MCDMRewrite } from '~/modules/smartdata/interceptors/MCDMInterceptor';
 
 @Controller()
 @UseGuards(MetaApiLimiterGuard, GlobalGuard)

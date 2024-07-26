@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { UITypes } from 'nocodb-sdk'
+import { UITypes } from 'nocodb-sdk';
 
 const props = defineProps<{
   value: any
@@ -33,7 +33,7 @@ const updateCdfValue = (cdf: string | null) => {
 }
 
 onMounted(() => {
-  updateCdfValue(vModel.value?.cdf ? vModel.value.cdf : null)
+  updateCdfValue(vModel.value?.cdf ?? null)
 })
 
 watch(

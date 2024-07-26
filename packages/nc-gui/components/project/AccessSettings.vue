@@ -1,6 +1,14 @@
 <script lang="ts" setup>
-import type { Roles, WorkspaceUserRoles } from 'nocodb-sdk'
-import { OrderedProjectRoles, OrgUserRoles, ProjectRoles, WorkspaceRolesToProjectRoles } from 'nocodb-sdk'
+import type {
+  Roles,
+  WorkspaceUserRoles,
+} from 'nocodb-sdk';
+import {
+  OrderedProjectRoles,
+  OrgUserRoles,
+  ProjectRoles,
+  WorkspaceRolesToProjectRoles,
+} from 'nocodb-sdk';
 
 const props = defineProps<{
   baseId?: string
@@ -8,7 +16,7 @@ const props = defineProps<{
 
 const basesStore = useBases()
 const { getBaseUsers, createProjectUser, updateProjectUser, removeProjectUser } = basesStore
-const { activeProjectId, bases } = storeToRefs(basesStore)
+const { activeProjectId, bases, basesUser } = storeToRefs(basesStore)
 
 const { orgRoles, baseRoles, loadRoles } = useRoles()
 
@@ -126,6 +134,19 @@ const updateCollaborator = async (collab: any, roles: ProjectRoles) => {
       currentCollaborator.roles = roles
       currentCollaborator.base_roles = roles
       await createProjectUser(currentBase.value.id!, currentCollaborator as unknown as User)
+    }
+
+    let currentBaseUsers = basesUser.value.get(currentBase.value.id)
+
+    if (currentBaseUsers?.length) {
+      currentBaseUsers = currentBaseUsers.map((user) => {
+        if (user.id === currentCollaborator.id) {
+          user.roles = currentCollaborator.roles as any
+        }
+        return user
+      })
+
+      basesUser.value.set(currentBase.value.id, currentBaseUsers)
     }
   } catch (e: any) {
     message.error(await extractSdkResponseErrorMsg(e))

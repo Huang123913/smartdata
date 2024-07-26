@@ -1,6 +1,6 @@
+import { pluralize } from 'inflection'
 import { type ColumnType, FieldNameFromUITypes, UITypes } from 'nocodb-sdk'
 import isURL from 'validator/lib/isURL'
-import { pluralize } from 'inflection'
 
 // This regex pattern matches email addresses by looking for sequences that start with characters before the "@" symbol, followed by the domain.
 // It's designed to capture most email formats, including those with periods and "+" symbols in the local part.

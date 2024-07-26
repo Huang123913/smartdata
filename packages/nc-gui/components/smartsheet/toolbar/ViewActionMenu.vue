@@ -45,7 +45,7 @@ const views = computed(() => viewsByTable.value.get(table.value.id!))
 
 const isViewIdCopied = ref(false)
 
-const currentBaseId = computed(() => table.value?.source_id)
+const currentSourceId = computed(() => table.value?.source_id)
 
 const onRenameMenuClick = () => {
   emits('rename')
@@ -375,14 +375,15 @@ const handleDataMigration = async () => {
         }}
       </NcMenuItem>
     </template>
-    <template v-if="currentBaseId">
+    <template v-if="table?.base_id && currentSourceId">
       <LazyDlgQuickImport
         v-for="tp in quickImportDialogTypes"
         :key="tp"
         v-model="quickImportDialogs[tp].value"
         :import-data-only="true"
         :import-type="tp"
-        :source-id="currentBaseId"
+        :base-id="table.base_id"
+        :source-id="currentSourceId"
       />
     </template>
   </NcMenu>

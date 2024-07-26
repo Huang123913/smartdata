@@ -2,12 +2,12 @@
 import {
   type ColumnType,
   type FilterType,
-  PlanLimitTypes,
-  UITypes,
   isCreatedOrLastModifiedTimeCol,
   isSystemColumn,
   isVirtualCol,
-} from 'nocodb-sdk'
+  PlanLimitTypes,
+  UITypes,
+} from 'nocodb-sdk';
 
 interface Props {
   nestedLevel?: number
