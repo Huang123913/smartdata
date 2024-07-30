@@ -591,14 +591,31 @@ export class LLMService {
   }
 
   //创建会话
-  async createSession(params: { entityId: string; datafiles: string }) {
-    let { entityId, datafiles } = params;
+  async createSession(params: {
+    entityId: string;
+    datafiles: string;
+    isUpdateSession?: boolean;
+  }) {
+    let { entityId, datafiles, isUpdateSession } = params;
     let submitdataRes = await this.submitdata('json', datafiles);
+    let updateId = '';
+    if (isUpdateSession) {
+      let entities = await this.mcdm.getEntity(entityId);
+      const entity = entities.length ? entities[0] : null;
+      const entityProps = entity ? entity?.props : null;
+      if (entityProps) {
+        let belongIntelligentImportSQLProp = entityProps.findLast(
+          (p) => p.code == 'belongConversationId',
+        );
+        updateId = belongIntelligentImportSQLProp.id;
+      }
+    }
     let saveDdlProps = [
       {
         id: entityId,
         props: [
           {
+            id: updateId ? updateId : null,
             name: 'belongConversationId',
             code: 'belongConversationId',
             value: submitdataRes.conversation_id,

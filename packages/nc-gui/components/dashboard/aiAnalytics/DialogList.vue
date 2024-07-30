@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { v4 as uuidv4 } from 'uuid'
+
 import { ArrowRightOutlined } from '@ant-design/icons-vue'
 
 const props = defineProps<{
@@ -6,7 +8,6 @@ const props = defineProps<{
   isSending: boolean
   rephrasequestion: (value: string, callback: () => void) => void
   deleteMessage: (item: any) => void
-  download: (item: any, isAll: boolean, index: number) => void
   dialogList: any[]
   contentWidth: number
 }>()
@@ -35,13 +36,55 @@ const onCopyToClipboard = async (text: string) => {
     message.error(e.message)
   }
 }
+
+//下载
+const download = (item: any, isAll: boolean, index: number) => {
+  console.log('item', item)
+  item.type === 'img' && downloadImage(item.data)
+  // let fileIds = 'ff80818190bfd6f90190bffc353f23ba'
+  // let isDownLoadFile = true
+  // const host = window.location.host
+  // const token = {
+  //   data: {
+  //     dataId: fileIds,
+  //     isMulti: false,
+  //   },
+  // }
+  // const url = `module-operation!executeOperation?operation=${isDownLoadFile ? 'FileDown' : 'PreviewFileIcon'}`
+  // const uploadURL = `${baseUrl.value}/${url}&token=${encodeURI(JSON.stringify(token))}`
+  // let link = document.createElement('a')
+  // link.download = 'fileName'
+  // link.href = uploadURL
+  // link.style.display = 'none'
+  // document.body.appendChild(link)
+  // link.click()
+  // link.remove()
+}
+
+const downloadImage = (base64Data: string[] | object[]) => {
+  base64Data.map((item) => {
+    let imgData = typeof item === 'string' ? item : item.content
+    // 提取图片类型
+    const fileType = imgData.split(';')[0].split('/')[1]
+    // 提取Base64数据部分
+    const base64 = imgData.split(',')[1]
+    // 创建一个 Blob 对象
+    const blob = new Blob([Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))], { type: `image/${fileType}` })
+    const link1 = document.createElement('a')
+    link1.href = URL.createObjectURL(blob)
+    link1.download = `${uuidv4()}.${fileType}`
+    link1.click()
+    // 清理 URL 对象
+    URL.revokeObjectURL(link1.href)
+  })
+}
 </script>
 
 <template>
   <div v-for="item in dialogList" class="dialog-list-item" :style="{ alignItems: item.isQuestion ? 'flex-end' : 'flex-start' }">
     <div v-if="item.isQuestion" class="question">{{ item.messages }}</div>
     <div v-else class="answer">
-      <DashboardAiAnalyticsImage v-if="item.type === 'img'" :item="item" :download="download" />
+      <DashboardAiAnalyticsImage v-if="item.type === 'img'" :item="item" :downloadImage="downloadImage" />
       <DashboardAiAnalyticsTable v-else-if="item.type === 'table'" :item="item" :contentWidth="contentWidth" />
       <DashboardAiAnalyticsText v-else-if="item.type === 'md'" :data="item.data" />
       <DashboardAiAnalyticsAnnex v-else :item="item" :download="download" />

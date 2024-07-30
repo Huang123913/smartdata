@@ -340,6 +340,7 @@ export class SmartDataController {
     data: {
       entityId: string;
       datafiles: string;
+      isUpdateSession?: boolean;
     },
   ) {
     return await this.llm.createSession(data);

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 const props = defineProps<{
   item: any
-  download: (item: any, isAll: boolean, index: number) => void
+  downloadImage: (base64data: string[]) => void
 }>()
 const locale = {
   Image: {
@@ -15,9 +15,9 @@ const locale = {
     <div class="img-item border-1 border-gray-200" v-for="(image, index) in item.data">
       <div class="left">
         <a-config-provider :locale="locale">
-          <a-image :width="80" :src="image.content" />
+          <a-image :width="80" :src="image?.content || image" />
         </a-config-provider>
-        <div class="name">
+        <div v-if="image?.name" class="name">
           <NcTooltip class="truncate max-w-full" show-on-truncate-only>
             <template #title>
               {{ image.name }}
@@ -35,7 +35,7 @@ const locale = {
           </NcTooltip>
         </div>
       </div>
-      <div class="right"><GeneralIcon icon="download" @click="download(item, false, index)" /></div>
+      <div class="right"><GeneralIcon icon="download" @click="downloadImage([image?.content || image])" /></div>
     </div>
   </div>
 </template>

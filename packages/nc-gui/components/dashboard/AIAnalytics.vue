@@ -80,7 +80,7 @@ const handleSend = async (searchValue: string, callback: () => void) => {
             type: 'md',
             id: uuidv4(),
             isQuestion: false,
-            data: res.response.text,
+            data: typeof res.response.text === 'object' ? `${res.response.text.value}` : `${res.response.text}`,
             questions: res.questions,
           },
         ],
@@ -138,28 +138,6 @@ const deleteMessage = (deleteItem: any) => {
   dialogList.value = { key: activeTableId.value, value: newDialogList }
 }
 
-//下载
-const download = (item: any, isAll: boolean, index: number) => {
-  let fileIds = 'ff80818190bfd6f90190bffc353f23ba'
-  let isDownLoadFile = true
-  const host = window.location.host
-  const token = {
-    data: {
-      dataId: fileIds,
-      isMulti: false,
-    },
-  }
-  const url = `module-operation!executeOperation?operation=${isDownLoadFile ? 'FileDown' : 'PreviewFileIcon'}`
-  const uploadURL = `${baseUrl.value}/${url}&token=${encodeURI(JSON.stringify(token))}`
-  let link = document.createElement('a')
-  link.download = 'fileName'
-  link.href = uploadURL
-  link.style.display = 'none'
-  document.body.appendChild(link)
-  link.click()
-  link.remove()
-}
-
 const scrollToBottom = (isAnimated: boolean = false) => {
   nextTick(() => {
     if (scrollContainer.value) {
@@ -177,16 +155,22 @@ const scrollToBottom = (isAnimated: boolean = false) => {
     }
   })
 }
+
+const clearAllSession = () => {
+  dialogList.value = {
+    key: activeTableId.value,
+    value: [],
+  }
+}
 </script>
 
 <template>
   <div class="ai-analytics">
     <div class="ai-analytics-content">
-      <DashboardAiAnalyticsHeader />
+      <DashboardAiAnalyticsHeader :clearAllSession="clearAllSession" />
       <div ref="scrollContainer" class="nc-scrollbar-x-lg dialog-list">
         <DashboardAiAnalyticsDialogList
           :dialogList="dialogList"
-          :download="download"
           :deleteMessage="deleteMessage"
           :handleSend="handleSend"
           :rephrasequestion="rephrasequestion"
