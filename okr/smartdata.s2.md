@@ -44,7 +44,7 @@
  - ⚪️ 数据向量化 (增量)
  - ⚪️ 语义化查询
 
-## 7.30
+## 7.31
    > 正式环境: http://smartdata.yindangu.com
    > 测试环境: http://smartdata-server.yindangu.com
 
@@ -67,7 +67,8 @@
       > 完成: /talktodata 图片、文本 数据结构更新
       > 进行中: 排查: 批量数据向量化会偶发报错、服务器无响应
    - 【进行中】docker 部署
-      > 进行中: 排查依赖下载问题
+      > 完成: 待发布到 docker hub
+      > 进行中: 代码部署到 release 分支时自动发布 docker hub
    - 【完成】合并 nocodb v0.251.1
    - 【完成】合并 nocodb v0.251.0
       > 先部署在测试库验证一段时间
