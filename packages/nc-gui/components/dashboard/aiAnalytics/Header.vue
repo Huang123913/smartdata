@@ -8,11 +8,10 @@ const props = defineProps<{
 }>()
 
 const { activeTable, activeTableId } = storeToRefs(useTablesStore())
-const { isIntelligentQuestionOpen, conversationId } = storeToRefs(useaiAnalyticsStore())
+const { isIntelligentQuestionOpen, conversationId, metaData } = storeToRefs(useaiAnalyticsStore())
 const clicked = ref(false)
 
 const { $api } = useNuxtApp()
-const { meta } = useSmartsheetStoreOrThrow()
 const { base } = storeToRefs(useBase())
 const isShowLoading = ref(false)
 const createNewSession = async () => {
@@ -23,7 +22,7 @@ const createNewSession = async () => {
     let fieldDescriptions: { [key: string]: any } = {}
     let response = await $api.dbViewRow.list('noco', base.value.id!, activeTableId.value!, activeTableId.value!)
     let tableDataRes = response?.list
-    let columns = (meta.value as TableType)?.columns?.filter((item) => !item?.system)
+    let columns = (metaData.value as TableType)?.columns?.filter((item) => !item?.system)
     columns?.map((item) => {
       fieldDescriptions[item.column_name!] = item.title
       tableData[item.column_name!] = []

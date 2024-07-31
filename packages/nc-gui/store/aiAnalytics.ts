@@ -62,6 +62,17 @@ export const useaiAnalyticsStore = defineStore('useaiAnalyticsStore', () => {
     baseUrl.value = await $api.smartData.getBaseUrl()
   }
 
+  const _meta = ref<any>(null)
+
+  const metaData = computed({
+    get() {
+      return _meta.value
+    },
+    set(value) {
+      _meta.value = value
+    },
+  })
+
   return {
     dialogList,
     intelligentQuestionWidth,
@@ -71,5 +82,6 @@ export const useaiAnalyticsStore = defineStore('useaiAnalyticsStore', () => {
     baseUrl,
     getBaseUrl,
     conversationId,
+    metaData,
   }
 })

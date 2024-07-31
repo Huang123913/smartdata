@@ -10,7 +10,7 @@ const { meta } = useSmartsheetStoreOrThrow()
 
 const { base } = storeToRefs(useBase())
 const store = useaiAnalyticsStore()
-const { isIntelligentQuestionOpen, baseUrl, conversationId } = storeToRefs(store)
+const { isIntelligentQuestionOpen, baseUrl, conversationId, metaData } = storeToRefs(store)
 const { getBaseUrl } = store
 const { activeTableId, activeTable } = storeToRefs(useTablesStore())
 
@@ -19,6 +19,7 @@ const isCreateing = ref(false)
 //智能分析
 const analysis = async () => {
   try {
+    metaData.value = meta.value
     if (isIntelligentQuestionOpen.value) return
     if (!baseUrl.value) getBaseUrl()
     if (conversationId.value[activeTableId.value!]) {
