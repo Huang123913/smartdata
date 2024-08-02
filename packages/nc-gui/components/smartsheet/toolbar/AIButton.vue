@@ -89,7 +89,7 @@ const createSession = async () => {
     <div class="flex items-center gap-1">
       <GeneralLoader v-if="isCreateing" />
       <component v-else :is="iconMap.magic" />
-      <span v-if="!isMobileMode" class="!text-xs font-weight-normal">智能分析55554</span>
+      <span v-if="!isMobileMode" class="!text-xs font-weight-normal">智能分析Release</span>
     </div>
   </NcButton>
   <!-- <NcTooltip placement="right">
