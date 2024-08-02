@@ -1,90 +1,90 @@
-# name: Build release and Push Docker Image
+name: Build release and Push Docker Image
 
-# on:
-#   push:
-#     branches:
-#       - "release"
-#     tags:
-#       - "*"
+on:
+  push:
+    branches:
+      - "release"
+    tags:
+      - "*"
 
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v3
-#         with:
-#           fetch-depth: 0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-#       - name: Install Node.js
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: 18.19.1
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.19.1
 
-#       - name: Setup pnpm
-#         uses: pnpm/action-setup@v2
-#         with:
-#           version: 8
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
-#       - name: Install dependencies and Build SDK
-#         run: pnpm run bootstrap
-#         working-directory: ./
+      - name: Install dependencies and Build SDK
+        run: pnpm run bootstrap
+        working-directory: ./
 
-#       - name: Install nc-gui
-#         run: |
-#           pnpm install --ignore-scripts --no-frozen-lockfile
-#           pnpm run build:copy
-#         working-directory: ./packages/nc-gui
+      - name: Install nc-gui
+        run: |
+          pnpm install --ignore-scripts --no-frozen-lockfile
+          pnpm run build:copy
+        working-directory: ./packages/nc-gui
 
-#       - name: Build nocodb and docker files
-#         run: |
-#           pnpm install --ignore-scripts --no-frozen-lockfile
-#           pnpm run docker:build
-#         working-directory: ./packages/nocodb
+      - name: Build nocodb and docker files
+        run: |
+          pnpm install --ignore-scripts --no-frozen-lockfile
+          pnpm run docker:build
+        working-directory: ./packages/nocodb
 
-#       - name: Set up QEMU
-#         uses: docker/setup-qemu-action@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
 
-#       - name: Set up Docker Buildx
-#         id: buildx
-#         uses: docker/setup-buildx-action@v2
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
 
-#       - name: Cache Docker layers
-#         uses: actions/cache@v3
-#         with:
-#           path: /tmp/.buildx-cache
-#           key: ${{ runner.os }}-buildx-${{ github.sha }}
-#           restore-keys: |
-#             ${{ runner.os }}-buildx-
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
 
-#       - name: Login to DockerHub
-#         uses: docker/login-action@v2
-#         with:
-#           username: ${{ secrets.DOCKER_USERNAME }}
-#           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-#       - name: Determine Docker Tag
-#         id: tag
-#         run: |
-#           if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
-#             echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-#           else
-#             echo "TAG=latest" >> $GITHUB_ENV
-#           fi
+      - name: Determine Docker Tag
+        id: tag
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+          else
+            echo "TAG=latest" >> $GITHUB_ENV
+          fi
 
-#       - name: Build and push
-#         uses: docker/build-push-action@v3
-#         with:
-#           context: ./packages
-#           platforms: linux/amd64,linux/arm64,linux/arm/v7
-#           cache-from: type=local,src=/tmp/.buildx-cache
-#           cache-to: type=local,dest=/tmp/.buildx-cache-new
-#           push: true
-#           tags: |
-#             huang123913/smartdata-release:${{ env.TAG }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: ./packages
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          push: true
+          tags: |
+            ${{ secrets.DOCKE_REPOSITORY }}:${{ env.TAG }}
 
-#       - name: Move cache
-#         run: |
-#           rm -rf /tmp/.buildx-cache
-#           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
