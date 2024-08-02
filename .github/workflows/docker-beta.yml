@@ -9,46 +9,46 @@ jobs:
   build:
     runs-on: ubuntu-latest #使用最新版本的Ubuntu进行构建
 
-    steps: 
-      - name: Checkout  #检出代码到工作目录
+    steps:
+      - name: Checkout #检出代码到工作目录
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0   #检出完整的Git历史记录
+          fetch-depth: 0 #检出完整的Git历史记录
 
-      - name: Install Node.js  #安装Node.js
+      - name: Install Node.js #安装Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18.19.1     
-      
-      - name: Setup pnpm   #安装Pnpm
+          node-version: 18.19.1
+
+      - name: Setup pnpm #安装Pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8
-    
-      - name: Install dependencies and Build sdk  #安装依赖、build sdk
+
+      - name: Install dependencies and Build sdk #安装依赖、build sdk
         run: pnpm run bootstrap
         working-directory: ./
 
-      - name: Install nc-gui  #nu-gui
+      - name: Install nc-gui #安装nc-gui
         run: |
           pnpm install --ignore-scripts --no-frozen-lockfile
           pnpm run build:copy
         working-directory: ./packages/nc-gui
-    
+
       - name: Build nocodb and docker files #nocodb
         run: |
           pnpm install --ignore-scripts --no-frozen-lockfile
           pnpm run docker:build
-        working-directory: ./packages/nocodb     
+        working-directory: ./packages/nocodb
 
-       - name: Set up QEMU   #设置 QEMU 以支持多架构构建。
+      - name: Set up QEMU #设置 QEMU 以支持多架构构建
         uses: docker/setup-qemu-action@v2.1.0
 
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v2.2.1
 
-      - name: Cache Docker layers   # 缓存 Docker 构建层，以加快构建速度
+      - name: Cache Docker layers #缓存 Docker 构建层，以加快构建速度
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
@@ -56,13 +56,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      - name: Login to DockerHub  #登录Docker hub
+      - name: Login to DockerHub #登录Docker hub
         uses: docker/login-action@v2.1.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      
-      - name: Build and push
+
+      - name: Build and push #构建并推送Docker镜像
         uses: docker/build-push-action@v3.2.0
         with:
           context: ./packages
@@ -74,11 +74,7 @@ jobs:
             huang123913/smartdata:beta
             huang123913/smartdata:${{ github.sha }}
 
-      - name: Move cache # 移动缓存文件以更新缓存
+      - name: Move cache #移动缓存文件以更新缓存
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-
-    
-
-    
