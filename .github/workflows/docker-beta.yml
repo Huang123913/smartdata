@@ -72,7 +72,6 @@ jobs:
           push: true
           tags: |
             huang123913/smartdata:beta
-            huang123913/smartdata:${{ github.sha }}
 
       - name: Move cache #移动缓存文件以更新缓存
         run: |
