@@ -17,6 +17,14 @@ jobs:
         with:
           fetch-depth: 0 # 检出完整的 Git 历史记录
 
+      - name: Check for changes in .github directory
+        id: changes
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^.github/'; then
+            echo "Changes only in .github directory, stopping the workflow."
+            exit 1
+          fi
+
       - name: Install Node.js # 安装 Node.js
         uses: actions/setup-node@v3
         with:
