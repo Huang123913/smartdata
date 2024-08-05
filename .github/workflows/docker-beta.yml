@@ -15,6 +15,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check for changes in .github directory
+        id: changes
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^.github/'; then
+            echo "Changes only in .github directory, stopping the workflow."
+            exit 1
+          fi
+
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
@@ -28,14 +36,6 @@ jobs:
       - name: Install dependencies and Build sdk
         run: pnpm run bootstrap
         working-directory: ./
-
-      - name: Setup swap
-        run: |
-          sudo fallocate -l 4G /swapfile
-          sudo chmod 600 /swapfile
-          sudo mkswap /swapfile
-          sudo swapon /swapfile
-        shell: bash
 
       - name: Install nc-gui
         run: |
@@ -80,7 +80,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache-new
           push: true
           tags: |
-            ${{ secrets.DOCKE_REPOSITORY }}:beta
+            ${{ secrets.DOCKER_REPOSITORY }}:beta
 
       - name: Move cache
         run: |
