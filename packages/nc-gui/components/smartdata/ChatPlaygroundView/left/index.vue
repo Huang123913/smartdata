@@ -49,6 +49,7 @@ onMounted(async () => {
   // } finally {
   //   isShowLoading.value = false
   // }
+
   if (!chataiData.value.isInit) initData()
 })
 
