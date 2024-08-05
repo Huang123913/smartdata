@@ -261,6 +261,10 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
 
   //移动模型
   const moveModel = (modelId: string, originalParentId: string, newParentId: string, prependToTableId: string) => {
+    let findCatalog = chataiData.modelData.find((item) => item.id === modelId)
+    if (findCatalog) {
+      findCatalog.parentId = newParentId
+    }
     let findModel = findNodeById(chataiData.modelTree, modelId)
     findModel.parentId = newParentId
     let originalParentIdCatlog = findNodeById(chataiData.modelTree, originalParentId)
