@@ -29,8 +29,17 @@ jobs:
         run: pnpm run bootstrap
         working-directory: ./
 
+      - name: Setup swap
+        run: |
+          sudo fallocate -l 4G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+        shell: bash
+
       - name: Install nc-gui
         run: |
+          export NODE_OPTIONS="--max-old-space-size=4096"
           pnpm install --ignore-scripts --no-frozen-lockfile
           pnpm run build:copy
         working-directory: ./packages/nc-gui
