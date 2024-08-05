@@ -17,6 +17,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check for changes in .github directory
+        id: changes
+        run: |
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^.github/'; then
+            echo "Changes only in .github directory, stopping the workflow."
+            exit 1
+          fi
+
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
@@ -33,6 +41,7 @@ jobs:
 
       - name: Install nc-gui
         run: |
+          export NODE_OPTIONS="--max-old-space-size=4096"
           pnpm install --ignore-scripts --no-frozen-lockfile
           pnpm run build:copy
         working-directory: ./packages/nc-gui
@@ -82,7 +91,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache-new
           push: true
           tags: |
-            ${{ secrets.DOCKE_REPOSITORY }}:${{ env.TAG }}
+            ${{ secrets.DOCKER_REPOSITORY }}:${{ env.TAG }}
 
       - name: Move cache
         run: |
