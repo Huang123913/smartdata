@@ -134,6 +134,7 @@ const handleSend = async () => {
       result?.sqlExeRes && console.error(result?.sqlExeRes)
     }
     let fields = result?.data?.fields ?? []
+
     if (fields.length) fields.map((item) => (item.id = uuidv4()))
     let datas = result?.data?.datas ?? []
     let newSessionItem = {
