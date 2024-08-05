@@ -71,7 +71,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache-new
           push: true
           tags: |
-            huang123913/smartdata:beta
+            ${{ secrets.DOCKER_REPOSITORY }}:beta
 
       - name: Move cache #移动缓存文件以更新缓存
         run: |
