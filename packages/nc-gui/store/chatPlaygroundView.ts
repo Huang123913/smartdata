@@ -29,6 +29,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     modelFields: {
       [key: string]: any
     }
+    isInit: boolean
   }>({
     modelData: [], //模型数据
     modelTree: [], //模型树
@@ -47,6 +48,7 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     }, //展示的会话信息
     modelFields: {}, //选择了的字段映射到对应模型
     isOpenModel: false,
+    isInit: false,
   })
 
   const eventBus = useEventBus<ChatPlaygroundViewStoreEvents>(Symbol('chatPlaygroundView'))
@@ -95,6 +97,18 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
       isShowEntityProps: false,
       isShowFieldProps: false,
     })
+  }
+
+  const initData = async () => {
+    try {
+      chataiData.isInit = false
+      await getCustomCatalogEntityTree()
+      await getAllModel()
+    } catch (error) {
+      console.error(error)
+    } finally {
+      chataiData.isInit = true
+    }
   }
 
   // 构建树
@@ -397,5 +411,6 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     moveModel,
     moveCatalog,
     getAllModel,
+    initData,
   }
 })

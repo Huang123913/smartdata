@@ -19,7 +19,7 @@ export interface SessionItem {
 const { $api } = useNuxtApp()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
-const { setSessionItem, getCustomCatalogEntityTree, setChataiDataIsOpenMode, getAllModel } = store
+const { setSessionItem, getCustomCatalogEntityTree, setChataiDataIsOpenMode, getAllModel, initData } = store
 
 const searchSessionText = ref<string>('') //搜索会话文本
 const isShowSearchSessionResult = ref<boolean>(false) //是否显示搜索的会话结果
@@ -40,15 +40,16 @@ const textAreaValue = ref<string>('') //查询内容
 onMounted(async () => {
   // 清空展示的会话信息
   clearSesstionItem()
-  try {
-    isShowLoading.value = true
-    if (!chataiData.value.modelData.length) await getCustomCatalogEntityTree()
-    if (!chataiData.value.allModel.length) await getAllModel()
-  } catch (e: any) {
-    message.error(e?.message)
-  } finally {
-    isShowLoading.value = false
-  }
+  // try {
+  //   isShowLoading.value = true
+  //   if (!chataiData.value.modelData.length) await getCustomCatalogEntityTree()
+  //   if (!chataiData.value.allModel.length) await getAllModel()
+  // } catch (e: any) {
+  //   message.error(e?.message)
+  // } finally {
+  //   isShowLoading.value = false
+  // }
+  if (!chataiData.value.isInit) initData()
 })
 
 //删除所有会话
@@ -102,9 +103,21 @@ const clearSesstionItem = () => {
 
 //发送按钮
 const handleSend = async () => {
+  if (!textAreaValue.value.trim()) return
+  isShowLoading.value = true
+  if (chataiData.value.isInit) {
+    send()
+  } else {
+    let timerId = setInterval(() => {
+      if (!chataiData.value.isInit) return
+      clearInterval(timerId)
+      send()
+    }, 200)
+  }
+}
+
+const send = async () => {
   try {
-    if (!textAreaValue.value.trim()) return
-    isShowLoading.value = true
     let selectedModel
     if (chataiData.value.checkedModelData.length) {
       let newSelectedModel = _.cloneDeep(chataiData.value.checkedModelData)
@@ -162,6 +175,20 @@ const handleSend = async () => {
     message.error(e?.message)
   } finally {
     isShowLoading.value = false
+  }
+}
+
+const handleSelect = () => {
+  if (chataiData.value.isInit) {
+    setChataiDataIsOpenMode(true)
+  } else {
+    isShowLoading.value = true
+    let timerId = setInterval(() => {
+      if (!chataiData.value.isInit) return
+      isShowLoading.value = false
+      clearInterval(timerId)
+      setChataiDataIsOpenMode(true)
+    }, 200)
   }
 }
 </script>
@@ -245,9 +272,7 @@ const handleSend = async () => {
       </template>
       <SmartdataChatPlaygroundViewLeftIndexPopover />
       <div class="btn-right">
-        <a-button type="primary" size="middle" class="select-btn send-btn" @click="setChataiDataIsOpenMode(true)">
-          选择范围
-        </a-button>
+        <a-button type="primary" size="middle" class="select-btn send-btn" @click="handleSelect()"> 选择范围 </a-button>
         <a-button type="primary" size="middle" class="send-btn" @click="handleSend()">
           发送
           <send-outlined />
