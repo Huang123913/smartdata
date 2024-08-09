@@ -341,6 +341,7 @@ export class SmartDataController {
       entityId: string;
       datafiles: string;
       isUpdateSession?: boolean;
+      isOnlySubmitdata?: boolean;
     },
   ) {
     return await this.llm.createSession(data);

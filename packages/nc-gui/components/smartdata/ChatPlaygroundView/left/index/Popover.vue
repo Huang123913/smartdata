@@ -5,15 +5,27 @@ import { CloseOutlined, DownOutlined } from '@ant-design/icons-vue'
 
 import { useChatPlaygroundViewStore } from '../../../../../store/chatPlaygroundView'
 
+const props = defineProps<{
+  isChatai?: boolean
+  isSending?: boolean
+}>()
+
+const chataiStore = useChataiStore()
+const { sessionTable } = storeToRefs(chataiStore)
+const { deleteCheckedTable, eventBusToChatai } = chataiStore
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
 const { deleteFile, deleteModel, eventBus } = store
-const visible = ref<boolean>(false)
 const clicked = ref<boolean>(false) //是否显示选择字段弹框
+const deleteSelectedTable = ref<string[]>([])
 // 删除模型
 const handleDeleteModelItem = (item: any) => {
-  deleteModel(item.id)
-  eventBus.emit(ChatPlaygroundViewStoreEvents.DELETE_MODE, item.id)
+  if (props?.isChatai) {
+    deleteSelectedTable.value.push(item.id)
+  } else {
+    deleteModel(item.id)
+    eventBus.emit(ChatPlaygroundViewStoreEvents.DELETE_MODE, item.id)
+  }
 }
 
 //删除字段
@@ -22,13 +34,22 @@ const handleDeleteFile = (deleteFile1: any, id: string) => {
 }
 
 const handleClickChange = (visible: boolean) => {
+  if (props.isSending) return
   clicked.value = visible
+  deleteSelectedTable.value = []
+}
+
+const handleConfirm = () => {
+  deleteCheckedTable(deleteSelectedTable.value)
+  eventBusToChatai.emit(ChataiStoreEvents.DELETE_CHECKED_TABLE, deleteSelectedTable.value)
+  clicked.value = false
+  deleteSelectedTable.value = []
 }
 </script>
 
 <template>
   <a-popover
-    v-if="chataiData.checkedModelData.length"
+    v-if="props.isChatai ? sessionTable.length : chataiData.checkedModelData.length"
     placement="top"
     color="white"
     trigger="click"
@@ -37,9 +58,12 @@ const handleClickChange = (visible: boolean) => {
     @visibleChange="handleClickChange"
   >
     <template #content>
-      <a-list size="small" class="model-selected-list" :data-source="chataiData.checkedModelData">
+      <a-list size="small" class="model-selected-list" :data-source="props.isChatai ? sessionTable : chataiData.checkedModelData">
         <template #renderItem="{ item, index }">
-          <a-list-item v-if="!item?.fields || item.fields.length === 0">
+          <a-list-item
+            :style="{ textDecoration: props.isChatai && deleteSelectedTable.includes(item.id) ? 'line-through' : 'none' }"
+            v-if="props.isChatai || !item?.fields || item.fields.length === 0"
+          >
             <div class="model-item">
               <span> {{ item.name_cn }}</span> <close-outlined class="colse-btn1" @click="handleDeleteModelItem(item)" />
             </div>
@@ -60,16 +84,21 @@ const handleClickChange = (visible: boolean) => {
           </a-popover>
         </template>
       </a-list>
+      <div v-if="props.isChatai" class="footer">
+        <a-button :disabled="!deleteSelectedTable.length" type="primary" size="small" class="confirm-btn" @click="handleConfirm"
+          >确定</a-button
+        >
+      </div>
     </template>
     <a class="ant-dropdown-link1" @click.prevent>
-      {{ `已选范围(${chataiData.checkedModelData.length})` }}
+      {{ `已选范围(${props.isChatai ? sessionTable.length : chataiData.checkedModelData.length})` }}
       <DownOutlined />
     </a>
   </a-popover>
 
   <a-dropdown v-else>
     <a class="ant-dropdown-link1" @click.prevent>
-      {{ `已选范围(${chataiData.checkedModelData.length})` }}
+      {{ `已选范围(${props.isChatai ? sessionTable.length : chataiData.checkedModelData.length})` }}
       <DownOutlined />
     </a>
   </a-dropdown>
@@ -108,6 +137,12 @@ const handleClickChange = (visible: boolean) => {
   span {
     vertical-align: 2px !important;
   }
+}
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+  padding: 0 8px;
 }
 </style>
 <style lang="scss">
@@ -186,7 +221,8 @@ const handleClickChange = (visible: boolean) => {
     padding: 14px 16px 0px 16px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
+    margin-bottom: 10px;
   }
   .ant-popover-inner-content {
     padding: 8px 0 !important;

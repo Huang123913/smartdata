@@ -595,36 +595,40 @@ export class LLMService {
     entityId: string;
     datafiles: string;
     isUpdateSession?: boolean;
+    isOnlySubmitdata?: boolean;
   }) {
-    let { entityId, datafiles, isUpdateSession } = params;
+    let { entityId, datafiles, isUpdateSession, isOnlySubmitdata } = params;
     let submitdataRes = await this.submitdata('json', datafiles);
-    let updateId = '';
-    if (isUpdateSession) {
-      let entities = await this.mcdm.getEntity(entityId);
-      const entity = entities.length ? entities[0] : null;
-      const entityProps = entity ? entity?.props : null;
-      if (entityProps) {
-        let belongIntelligentImportSQLProp = entityProps.findLast(
-          (p) => p.code == 'belongConversationId',
-        );
-        updateId = belongIntelligentImportSQLProp.id;
+    if (!isOnlySubmitdata) {
+      let updateId = '';
+      if (isUpdateSession) {
+        let entities = await this.mcdm.getEntity(entityId);
+        const entity = entities.length ? entities[0] : null;
+        const entityProps = entity ? entity?.props : null;
+        if (entityProps) {
+          let belongIntelligentImportSQLProp = entityProps.findLast(
+            (p) => p.code == 'belongConversationId',
+          );
+          updateId = belongIntelligentImportSQLProp.id;
+        }
       }
+      let saveDdlProps = [
+        {
+          id: entityId,
+          props: [
+            {
+              id: updateId ? updateId : null,
+              name: 'belongConversationId',
+              code: 'belongConversationId',
+              value: submitdataRes.conversation_id,
+            },
+          ],
+        },
+      ];
+      let res = await this.mcdm.saveModel({ entities: saveDdlProps });
+      return { ...res, ...submitdataRes };
     }
-    let saveDdlProps = [
-      {
-        id: entityId,
-        props: [
-          {
-            id: updateId ? updateId : null,
-            name: 'belongConversationId',
-            code: 'belongConversationId',
-            value: submitdataRes.conversation_id,
-          },
-        ],
-      },
-    ];
-    let res = await this.mcdm.saveModel({ entities: saveDdlProps });
-    return { ...res, ...submitdataRes };
+    return submitdataRes;
   }
 
   async submitdata(datatype: string, datafiles: string) {

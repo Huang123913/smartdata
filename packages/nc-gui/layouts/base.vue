@@ -26,6 +26,10 @@ hooks.hook('page:finish', () => {
     hasSider.value = sidebar.value?.children.length > 0
   }
 })
+
+onMounted(() => {
+  console.log('route', route)
+})
 </script>
 
 <template>
@@ -35,7 +39,10 @@ hooks.hook('page:finish', () => {
     </Transition>
 
     <a-layout class="!flex-col h-screen">
-      <a-layout-header v-if="!route.meta.public && signedIn && !route.meta.hideHeader" class="nc-navbar">
+      <a-layout-header
+        v-if="!route.meta.public && signedIn && !route.meta.hideHeader && route.name !== 'chat-ai'"
+        class="nc-navbar"
+      >
         <div
           v-if="!route.params.baseType"
           v-e="['c:navbar:home']"

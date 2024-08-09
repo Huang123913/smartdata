@@ -9,7 +9,7 @@ const props = defineProps<{
   rephrasequestion: (value: string, callback: () => void) => void
   deleteMessage: (item: any) => void
   dialogList: any[]
-  contentWidth: number
+  contentWidth?: number
 }>()
 
 const { t } = useI18n()
@@ -78,6 +78,10 @@ const downloadImage = (base64Data: string[] | object[]) => {
     URL.revokeObjectURL(link1.href)
   })
 }
+
+const saveRes = (item: any) => {
+  console.log('item', item)
+}
 </script>
 
 <template>
@@ -128,10 +132,15 @@ const downloadImage = (base64Data: string[] | object[]) => {
       <div v-if="!item.isQuestion && ['img', 'annex'].includes(item.type)" :style="{ marginRight: '10px' }">
         <GeneralIcon icon="download" @click="download(item, true, 1)" />
       </div>
-      <NcTooltip>
-        <template #title>删除</template>
-        <GeneralIcon icon="delete" @click="deleteMessage(item)" />
-      </NcTooltip>
+      <div v-if="!item.isQuestion" class="copy" @click="saveRes(item)">
+        <GeneralIcon icon="save" class="text-gray-700 saveicon" />
+        {{ '保存结果' }}
+      </div>
+
+      <div @click="deleteMessage(item)">
+        <GeneralIcon icon="delete" class="text-gray-700 deleteicon" />
+        {{ '删除' }}
+      </div>
     </div>
     <div class="recommend" v-if="item.questions">
       <div class="recommend-list" @click="handleSend(recommend, () => {})" v-for="recommend in item.questions">
@@ -179,6 +188,16 @@ const downloadImage = (base64Data: string[] | object[]) => {
       display: flex;
       align-items: center;
       margin-right: 20px;
+    }
+    .saveicon {
+      position: relative;
+      top: 3px;
+      margin-right: -2px;
+    }
+    .deleteicon {
+      position: relative;
+      top: -2px;
+      right: -2px;
     }
   }
   &:hover .action {

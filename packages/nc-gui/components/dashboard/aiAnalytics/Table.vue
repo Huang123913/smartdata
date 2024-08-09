@@ -3,7 +3,7 @@ import { Empty } from 'ant-design-vue'
 
 const props = defineProps<{
   item: any
-  contentWidth: number
+  contentWidth?: number
 }>()
 
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
@@ -16,16 +16,14 @@ const offsetY = ref(0) // 滚动偏移量
 const tdWidth = ref('180px')
 const columns = computed(() => {
   if (!props.item.data.columns.length) return []
-  let columnLength = props.item.data.columns.length
-  let calculativeWidth = props.contentWidth - 64
-  tdWidth.value =
-    calculativeWidth > 180 * columnLength
-      ? `${Math.floor(calculativeWidth / columnLength) - (columnLength > 1 ? 10 : 18)}px`
-      : '180px'
-  console.log('props.contentWidth', props.contentWidth)
-  console.log('columnLength', columnLength)
-  console.log('tdWidth1', tdWidth.value)
-
+  if (props.contentWidth) {
+    let columnLength = props.item.data.columns.length
+    let calculativeWidth = props.contentWidth - 64
+    tdWidth.value =
+      calculativeWidth > 180 * columnLength
+        ? `${Math.floor(calculativeWidth / columnLength) - (columnLength > 1 ? 10 : 18)}px`
+        : '180px'
+  }
   let newFileds = props.item.data.columns.map((item) => {
     return {
       title: item,

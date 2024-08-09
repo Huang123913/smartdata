@@ -167,7 +167,7 @@ const clearAllSession = () => {
 <template>
   <div class="ai-analytics">
     <div class="ai-analytics-content">
-      <DashboardAiAnalyticsHeader :clearAllSession="clearAllSession" />
+      <DashboardAiAnalyticsHeader :clearAllSession="clearAllSession" :isSending="isSending" />
       <div ref="scrollContainer" class="nc-scrollbar-x-lg dialog-list">
         <DashboardAiAnalyticsDialogList
           :dialogList="dialogList"

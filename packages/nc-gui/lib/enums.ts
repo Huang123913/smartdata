@@ -101,6 +101,10 @@ export enum ChatPlaygroundViewStoreEvents {
   OPEN_SET_MODEL_DATA_UPDATE_TIME_MODAL = 'open-set-model-data-update-time-modal',
 }
 
+export enum ChataiStoreEvents {
+  DELETE_CHECKED_TABLE = 'delete-checked-table',
+}
+
 export enum DataSourcesSubTab {
   New = 'New',
   Metadata = 'Metadata',

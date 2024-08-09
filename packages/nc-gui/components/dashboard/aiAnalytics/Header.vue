@@ -5,16 +5,28 @@ import { useaiAnalyticsStore } from '../../../store/aiAnalytics'
 
 const props = defineProps<{
   clearAllSession: () => void
+  isSending: boolean
 }>()
 
 const { activeTable, activeTableId } = storeToRefs(useTablesStore())
 const { isIntelligentQuestionOpen, conversationId, metaData } = storeToRefs(useaiAnalyticsStore())
 const clicked = ref(false)
+const { createNewSession } = useChataiStore()
 
 const { $api } = useNuxtApp()
 const { base } = storeToRefs(useBase())
 const isShowLoading = ref(false)
-const createNewSession = async () => {
+const route = useRoute()
+
+const newSessionHandle = () => {
+  if (route.name === 'chat-ai') {
+    createNewSession([])
+  } else {
+    createNewSessionInTable()
+  }
+}
+
+const createNewSessionInTable = async () => {
   try {
     isShowLoading.value = true
     clicked.value = false
@@ -54,16 +66,18 @@ const createNewSession = async () => {
     isShowLoading.value = false
   }
 }
+
 const handleClickChange = (visible: boolean) => {
+  if (props.isSending) return
   if (!visible) clicked.value = visible
 }
 </script>
 
 <template>
   <div class="ai-analytics-header border-b-1 border-gray-200 group flex items-center md:(px-2 py-1.2) xs:(px-1 py-1)">
-    <div class="table-name">{{ activeTable?.title }}</div>
+    <div class="table-name">{{ activeTable?.title || 'chatai' }}</div>
     <div class="right">
-      <NcDropdown :trigger="['click']" :visible="clicked" @visibleChange="handleClickChange">
+      <NcDropdown :placement="'bottomRight'" :trigger="['click']" :visible="clicked" @visibleChange="handleClickChange">
         <GeneralBaseIcon
           @click="
           (e:any) => {
@@ -94,10 +108,17 @@ const handleClickChange = (visible: boolean) => {
         </GeneralBaseIcon>
         <template #overlay>
           <NcMenu>
-            <NcMenuItem @click="createNewSession()">
+            <NcMenuItem @click="newSessionHandle()">
               <div class="flex gap-2 items-center">
                 <GeneralIcon icon="plus" class="text-gray-700" />
-                {{ '创建新会话' }}
+                {{ '新会话' }}
+              </div>
+            </NcMenuItem>
+
+            <NcMenuItem v-if="route.name === 'chat-ai'">
+              <div class="flex gap-2 items-center">
+                <GeneralIcon icon="list" class="text-gray-700" />
+                {{ '会话结果存储记录' }}
               </div>
             </NcMenuItem>
 
@@ -111,6 +132,7 @@ const handleClickChange = (visible: boolean) => {
         </template>
       </NcDropdown>
       <NcButton
+        v-if="activeTable?.title"
         type="text"
         size="small"
         class="nc-sidebar-left-toggle-icon !text-gray-700 !hover:text-gray-800 !xs:(h-10.5 max-h-10.5 max-w-10.5) !md:(hover:bg-gray-200)"

@@ -1,7 +1,11 @@
 <script lang="ts" setup>
 import Icon from '@ant-design/icons-vue'
 
+const store = useChataiStore()
+const { isOpenTableTree } = storeToRefs(store)
 const searchValue = ref('')
+
+const route = useRoute()
 
 const props = defineProps<{
   handleSend: (value: string, callback: () => void) => void
@@ -15,6 +19,10 @@ const setSearch = () => {
 const handleSend = () => {
   if (!props.isSending && searchValue.value.trim()) props.handleSend(searchValue.value, setSearch)
 }
+
+const handleSelect = () => {
+  isOpenTableTree.value = true
+}
 </script>
 
 <template>
@@ -23,7 +31,22 @@ const handleSend = () => {
       <template #title>
         <a-textarea :auto-size="{ minRows: 1 }" v-model:value="searchValue" :bordered="false" placeholder="请输入内容" />
       </template>
+      <SmartdataChatPlaygroundViewLeftIndexPopover
+        v-if="route.name === 'chat-ai'"
+        :isChatai="true"
+        :isSending="props.isSending"
+      />
       <div class="btn-right">
+        <a-button
+          v-if="route.name === 'chat-ai'"
+          :disabled="isSending"
+          type="primary"
+          size="middle"
+          class="select-btn"
+          @click="handleSelect()"
+        >
+          选择范围
+        </a-button>
         <NcTooltip>
           <template #title>发送</template>
           <icon
@@ -95,7 +118,19 @@ const handleSend = () => {
       display: flex;
       flex: 1;
       justify-content: flex-end;
+      align-items: center;
     }
+  }
+  .select-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #0b6bcb;
+    border-radius: 6px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: 20px;
   }
 }
 </style>
