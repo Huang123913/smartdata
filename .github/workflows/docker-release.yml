@@ -6,6 +6,13 @@ on:
       - "release"
     tags:
       - "*"
+    paths-ignore:
+      - ".github/**"
+      - "okr/**"
+      - "markdown/**"
+      - "charts/**"
+      - "docker-compose/**"
+      - "tests/**"
 
 jobs:
   build:
@@ -16,14 +23,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
-      - name: Check for changes in .github directory
-        id: changes
-        run: |
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -q '^.github/'; then
-            echo "Changes only in .github directory, stopping the workflow."
-            exit 1
-          fi
 
       - name: Install Node.js
         uses: actions/setup-node@v3
