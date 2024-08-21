@@ -129,8 +129,12 @@ const saveRes = (item: any) => {
         <GeneralIcon icon="duplicate" class="text-gray-700" />
         {{ $t('general.duplicate') }}
       </div>
-      <div v-if="!item.isQuestion && ['img', 'annex'].includes(item.type)" :style="{ marginRight: '10px' }">
+      <div
+        v-if="!item.isQuestion && ['img', 'annex'].includes(item.type)"
+        :style="{ marginRight: '20px', display: 'flex', alignItems: 'center' }"
+      >
         <GeneralIcon icon="download" @click="download(item, true, 1)" />
+        {{ '下载' }}
       </div>
       <div v-if="!item.isQuestion" class="copy" @click="saveRes(item)">
         <GeneralIcon icon="save" class="text-gray-700 saveicon" />

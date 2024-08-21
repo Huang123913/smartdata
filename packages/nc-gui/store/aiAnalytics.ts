@@ -7,7 +7,6 @@ export const useaiAnalyticsStore = defineStore('useaiAnalyticsStore', () => {
   const { width } = useWindowSize()
   const { isMobileMode } = useGlobal()
   const tablesStore = useTablesStore()
-  const { activeTableId } = storeToRefs(useTablesStore())
 
   //会话id
   const _conversationId = ref<{ [key: string]: any }>({})
@@ -48,15 +47,26 @@ export const useaiAnalyticsStore = defineStore('useaiAnalyticsStore', () => {
   const intelligentQuestionWidth = computed(() => (width.value * mobileNormalizedIntelligentQuestionSize.value) / 100)
 
   //对话列表
-  const _dialogList = ref<{ [key: string]: any }>({})
-  const dialogList = computed({
-    get() {
-      return _dialogList.value[activeTableId.value!] ? _dialogList.value[activeTableId.value!] : []
-    },
-    set(value) {
-      _dialogList.value[value.key as string] = value.value
-    },
-  })
+  const dialogList = ref<{ [key: string]: any }>({})
+  const setDialogList = (key: string, value: any) => {
+    if (dialogList.value[key]) dialogList.value[key].push(value)
+    else {
+      dialogList.value[key] = [value]
+    }
+  }
+  const deleteDialogList = (tableId: string, isCleanAll: boolean, deleteId: string) => {
+    if (isCleanAll) {
+      dialogList.value[tableId] = []
+      return
+    }
+    dialogList.value[tableId] = dialogList.value[tableId].filter((item) => item.id !== deleteId)
+  }
+
+  //正在发送请求的会话表格
+  const sendingTable = ref<{ [key: string]: any }>({})
+  const setSendingTable = (conversationId: string, tableId: string) => {
+    sendingTable.value[conversationId] = tableId
+  }
 
   const getBaseUrl = async () => {
     baseUrl.value = await $api.smartData.getBaseUrl()
@@ -83,5 +93,9 @@ export const useaiAnalyticsStore = defineStore('useaiAnalyticsStore', () => {
     getBaseUrl,
     conversationId,
     metaData,
+    sendingTable,
+    setSendingTable,
+    setDialogList,
+    deleteDialogList,
   }
 })

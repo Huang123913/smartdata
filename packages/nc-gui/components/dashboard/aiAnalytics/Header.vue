@@ -77,7 +77,28 @@ const handleClickChange = (visible: boolean) => {
   <div class="ai-analytics-header border-b-1 border-gray-200 group flex items-center md:(px-2 py-1.2) xs:(px-1 py-1)">
     <div class="table-name">{{ activeTable?.title || 'chatai' }}</div>
     <div class="right">
-      <NcDropdown :placement="'bottomRight'" :trigger="['click']" :visible="clicked" @visibleChange="handleClickChange">
+      <GeneralBaseIcon v-if="isSending" :style="{ marginRight: '8px', marginTop: '1px', cursor: 'not-allowed' }">
+        <svg
+          t="1722322194035"
+          class="icon"
+          viewBox="0 0 1024 1024"
+          version="1.1"
+          xmlns="http://www.w3.org/2000/svg"
+          p-id="3849"
+          width="20"
+          height="20"
+        >
+          <path
+            d="M419.037 287.953h413.124c17.673 0 32-14.327 32-32s-14.327-32-32-32H419.037c-17.673 0-32 14.327-32 32s14.327 32 32 32zM419.028 543.17h411.608c17.673 0 32-14.327 32-32s-14.327-32-32-32H419.028c-17.673 0-32 14.327-32 32s14.327 32 32 32zM832.161 735.802H419.037c-17.673 0-32 14.327-32 32s14.327 32 32 32h413.124c17.673 0 32-14.327 32-32s-14.327-32-32-32z"
+            fill="#707070"
+            p-id="3850"
+          ></path>
+          <path d="M256.037 255.953m-64 0a64 64 0 1 0 128 0 64 64 0 1 0-128 0Z" fill="#707070" p-id="3851"></path>
+          <path d="M256.037 510.787m-64 0a64 64 0 1 0 128 0 64 64 0 1 0-128 0Z" fill="#707070" p-id="3852"></path>
+          <path d="M256.037 767.621m-64 0a64 64 0 1 0 128 0 64 64 0 1 0-128 0Z" fill="#707070" p-id="3853"></path>
+        </svg>
+      </GeneralBaseIcon>
+      <NcDropdown v-else :placement="'bottomRight'" :trigger="['click']" :visible="clicked" @visibleChange="handleClickChange">
         <GeneralBaseIcon
           @click="
           (e:any) => {

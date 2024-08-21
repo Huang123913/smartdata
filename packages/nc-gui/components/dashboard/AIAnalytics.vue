@@ -9,9 +9,10 @@ const { $api } = useNuxtApp()
 const { activeTableId } = storeToRefs(useTablesStore())
 
 const store = useaiAnalyticsStore()
-const { dialogList, conversationId } = storeToRefs(store)
+const { dialogList, conversationId, sendingTable } = storeToRefs(store)
+const { setSendingTable, setDialogList, deleteDialogList } = store
 
-const isSending = ref(false)
+const isSending = ref<{ [key: string]: any }>({})
 const scrollContainer = ref(null)
 const contentWidth = ref(490)
 
@@ -31,23 +32,19 @@ const resizeObserver = new ResizeObserver((entries) => {
 
 //发送
 const handleSend = async (searchValue: string, callback: () => void) => {
+  let res = null
   try {
-    if (!searchValue.trim() || isSending.value) return
+    if (!searchValue.trim() || isSending.value[conversationId.value[activeTableId.value!]]) return
     callback()
-    isSending.value = true
-    dialogList.value = {
-      key: activeTableId.value,
-      value: [
-        ...dialogList.value,
-        {
-          id: uuidv4(),
-          isQuestion: true,
-          messages: searchValue,
-        },
-      ],
-    }
+    isSending.value[conversationId.value[activeTableId.value!]] = true
+    setDialogList(activeTableId.value!, {
+      id: uuidv4(),
+      isQuestion: true,
+      messages: searchValue,
+    })
     scrollToBottom()
-    let res = await $api.smartData.talktodata({
+    setSendingTable(conversationId.value[activeTableId.value!], activeTableId.value!)
+    res = await $api.smartData.talktodata({
       conversation_id: conversationId.value[activeTableId.value!],
       datatype: 'text',
       question: searchValue,
@@ -55,69 +52,57 @@ const handleSend = async (searchValue: string, callback: () => void) => {
     if (res?.errormsg) {
       message.warning(res.errormsg)
     } else if (res.response?.datasets) {
-      dialogList.value = {
-        key: activeTableId.value,
-        value: [
-          ...dialogList.value,
-          {
-            type: 'table',
-            id: uuidv4(),
-            isQuestion: false,
-            data: {
-              columns: res.response?.datasets[0].columns,
-              tabledata: res.response?.datasets[0].data,
-            },
-            questions: res?.questions,
-          },
-        ],
-      }
+      setDialogList(sendingTable.value[res.conversationId], {
+        type: 'table',
+        id: uuidv4(),
+        isQuestion: false,
+        data: {
+          columns: res.response?.datasets[0].columns,
+          tabledata: res.response?.datasets[0].data,
+        },
+        questions: res?.questions,
+      })
     } else if (res.response?.text) {
-      dialogList.value = {
-        key: activeTableId.value,
-        value: [
-          ...dialogList.value,
-          {
-            type: 'md',
-            id: uuidv4(),
-            isQuestion: false,
-            data: typeof res.response.text === 'object' ? `${res.response.text.value}` : `${res.response.text}`,
-            questions: res.questions,
-          },
-        ],
+      let data
+      if (typeof res.response.text === 'object') {
+        data = `${res.response.text.value}`
+      } else {
+        data = `${res.response.text}`
+        if (res.response.text.trim().startsWith('{') && res.response.text.trim().endsWith('}')) {
+          let obj = JSON.parse(res.response.text.replace(/'/g, '"'))
+          console.log('obj', obj)
+          data = `${obj.value}`
+        }
       }
+      setDialogList(sendingTable.value[res.conversationId], {
+        type: 'md',
+        id: uuidv4(),
+        isQuestion: false,
+        data,
+        questions: res.questions,
+      })
     } else if (res.response?.images) {
-      dialogList.value = {
-        key: activeTableId.value,
-        value: [
-          ...dialogList.value,
-          {
-            type: 'img',
-            id: uuidv4(),
-            isQuestion: false,
-            data: res.response.images,
-            questions: res.questions,
-          },
-        ],
-      }
+      setDialogList(sendingTable.value[res.conversationId], {
+        type: 'img',
+        id: uuidv4(),
+        isQuestion: false,
+        data: res.response.images,
+        questions: res.questions,
+      })
     } else if (res.response?.files) {
-      dialogList.value = {
-        key: activeTableId.value,
-        value: [
-          ...dialogList.value,
-          {
-            type: 'file',
-            id: uuidv4(),
-            isQuestion: false,
-            data: res.response.files,
-            questions: res.questions,
-          },
-        ],
-      }
+      setDialogList(sendingTable.value[res.conversationId], {
+        type: 'file',
+        id: uuidv4(),
+        isQuestion: false,
+        data: res.response.files,
+        questions: res.questions,
+      })
     }
   } catch (error) {
     console.error(error)
   } finally {
-    isSending.value = false
+    isSending.value[res.conversationId] = false
+    setSendingTable(res.conversationId, '')
   }
 }
 
@@ -133,9 +118,7 @@ const rephrasequestion = async (message: string, callback: () => void) => {
 
 //删除会话
 const deleteMessage = (deleteItem: any) => {
-  let newDialogList = _.cloneDeep(dialogList.value)
-  newDialogList = newDialogList.filter((item) => item.id !== deleteItem.id)
-  dialogList.value = { key: activeTableId.value, value: newDialogList }
+  deleteDialogList(activeTableId.value!, false, deleteItem.id)
 }
 
 const scrollToBottom = (isAnimated: boolean = false) => {
@@ -156,29 +139,27 @@ const scrollToBottom = (isAnimated: boolean = false) => {
   })
 }
 
+//清空会话
 const clearAllSession = () => {
-  dialogList.value = {
-    key: activeTableId.value,
-    value: [],
-  }
+  deleteDialogList(activeTableId.value!, true, '')
 }
 </script>
 
 <template>
   <div class="ai-analytics">
     <div class="ai-analytics-content">
-      <DashboardAiAnalyticsHeader :clearAllSession="clearAllSession" :isSending="isSending" />
+      <DashboardAiAnalyticsHeader :clearAllSession="clearAllSession" :isSending="isSending[conversationId[activeTableId!]]" />
       <div ref="scrollContainer" class="nc-scrollbar-x-lg dialog-list">
         <DashboardAiAnalyticsDialogList
-          :dialogList="dialogList"
+          :dialogList="dialogList[activeTableId!]"
           :deleteMessage="deleteMessage"
           :handleSend="handleSend"
           :rephrasequestion="rephrasequestion"
-          :isSending="isSending"
+          :isSending="isSending[conversationId[activeTableId!]]"
           :contentWidth="contentWidth"
         />
       </div>
-      <DashboardAiAnalyticsSearch :handleSend="handleSend" :isSending="isSending" />
+      <DashboardAiAnalyticsSearch :handleSend="handleSend" :isSending="isSending[conversationId[activeTableId!]]" />
     </div>
   </div>
 </template>

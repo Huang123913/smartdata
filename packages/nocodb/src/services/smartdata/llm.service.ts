@@ -668,7 +668,7 @@ export class LLMService {
       url: `/talktodata`,
       data: formData,
     }).then((r) => {
-      return r.data;
+      return { ...r.data, conversationId: conversation_id };
     });
   }
 
