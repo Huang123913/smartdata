@@ -38,6 +38,7 @@
 ### 前端
    - 问题修复
       > 进行中: 多项目增加表格bug
+   - 【进行中】配置一个门户卡片布局示例
    - 【进行中】多项目需要增加上下文参数的接口
       > 未对接: /webapi/ydg_vmcdm_custom_api/saveCustomCatalog
       > 未对接: /webapi/ydg_vmcdm_custom_api/getCustomCatalogEntityTree
