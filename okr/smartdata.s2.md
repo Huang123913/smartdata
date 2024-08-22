@@ -34,17 +34,18 @@
 
 -------------------------------------------------------------------------------
 
-## 8.21
+## 8.22
 ### 前端
    - 问题修复
       > 进行中: 多项目增加表格bug
-   - 【进行中】配置一个门户卡片布局示例
+   - 【进行中】卡片自适应布局
+      > 定位中: 自适应缩放导致卡片位移问题
+   - 【完成】配置一个门户卡片布局示例
    - 【进行中】多项目需要增加上下文参数的接口
       > 未对接: /webapi/ydg_vmcdm_custom_api/saveCustomCatalog
       > 未对接: /webapi/ydg_vmcdm_custom_api/getCustomCatalogEntityTree
       > 未对接: /webapi/innersysapi/VMcdmDataServiceWebApi/findAllBizCustomEntity
    - 【测试中】支持删除项目
-   - 【测试中】卡片自适应布局
    - 【测试中】卡片支持动态脚本
    - 【测试中】表格模型树变动(多项目)修改
    - 【测试中】卡片支持静态数据 (表格、图片、文本、附件)
