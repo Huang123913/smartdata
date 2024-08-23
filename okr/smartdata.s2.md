@@ -34,14 +34,11 @@
 
 -------------------------------------------------------------------------------
 
-## 8.22
+## 8.23
 ### 前端
-   - 问题修复
-      > 进行中: 多项目增加表格bug
-   - 【进行中】卡片自适应布局
-      > 定位中: 自适应缩放导致卡片位移问题
-   - 【完成】配置一个门户卡片布局示例
-   - 【进行中】多项目需要增加上下文参数的接口
+   - 【未开始】基座读取配置加载首页 (用于加载门户首页)
+   - 【修复中】卡片自适应布局问题
+   - 【测试中】多项目需要增加上下文参数的接口
       > 未对接: /webapi/ydg_vmcdm_custom_api/saveCustomCatalog
       > 未对接: /webapi/ydg_vmcdm_custom_api/getCustomCatalogEntityTree
       > 未对接: /webapi/innersysapi/VMcdmDataServiceWebApi/findAllBizCustomEntity
