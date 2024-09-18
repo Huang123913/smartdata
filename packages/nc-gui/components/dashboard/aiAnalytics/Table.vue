@@ -4,6 +4,7 @@ import { Empty } from 'ant-design-vue'
 const props = defineProps<{
   item: any
   contentWidth?: number
+  type?: string
 }>()
 
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
@@ -14,41 +15,92 @@ const buffer = 5 // 缓冲区行数
 const startIndex = ref(0) // 当前滚动的起始索引
 const offsetY = ref(0) // 滚动偏移量
 const tdWidth = ref('180px')
+//表头
 const columns = computed(() => {
-  if (!props.item.data.columns.length) return []
-  if (props.contentWidth) {
-    let columnLength = props.item.data.columns.length
-    let calculativeWidth = props.contentWidth - 64
-    tdWidth.value =
-      calculativeWidth > 180 * columnLength
-        ? `${Math.floor(calculativeWidth / columnLength) - (columnLength > 1 ? 10 : 18)}px`
-        : '180px'
-  }
-  let newFileds = props.item.data.columns.map((item) => {
-    return {
-      title: item,
-      name_en: item,
-      width: tdWidth.value,
-      value: item,
-      label: item,
-      name: item,
+  if (props.type === 'exe_result') {
+    if (!props.item.fields.length) return []
+    if (props.contentWidth) {
+      let columnLength = props.item.fields.length
+      let calculativeWidth = props.contentWidth - 64
+      tdWidth.value =
+        calculativeWidth > 180 * columnLength
+          ? `${Math.floor(calculativeWidth / columnLength) - (columnLength > 1 ? 10 : 18)}px`
+          : '180px'
     }
-  })
-  return newFileds
+    let returnFields = props.item.fields.map((item) => ({
+      title: item.name,
+      name_en: item.name,
+      width: tdWidth.value,
+      value: item.name,
+      label: item.name,
+      name: item.name,
+    }))
+    return returnFields
+  } else if (props.type === 'fields') {
+    console.log('props', props.item)
+    if (props.contentWidth) {
+      let columnLength = props.item.fields.length
+      let calculativeWidth = props.contentWidth - 64
+      tdWidth.value =
+        calculativeWidth > 180 * columnLength
+          ? `${Math.floor(calculativeWidth / columnLength) - (columnLength > 1 ? 10 : 18)}px`
+          : '180px'
+    }
+    let newFileds = props.item.fields.map((item) => {
+      return {
+        title: item,
+        name_en: item,
+        width: tdWidth.value,
+        value: item,
+        label: item,
+        name: item,
+      }
+    })
+    return newFileds
+  } else {
+    if (!props.item.data.columns.length) return []
+    if (props.contentWidth) {
+      let columnLength = props.item.data.columns.length
+      let calculativeWidth = props.contentWidth - 64
+      tdWidth.value =
+        calculativeWidth > 180 * columnLength
+          ? `${Math.floor(calculativeWidth / columnLength) - (columnLength > 1 ? 10 : 18)}px`
+          : '180px'
+    }
+    let newFileds = props.item.data.columns.map((item) => {
+      return {
+        title: item,
+        name_en: item,
+        width: tdWidth.value,
+        value: item,
+        label: item,
+        name: item,
+      }
+    })
+    return newFileds
+  }
 })
 
+//表数据
 const tableData = computed(() => {
-  if (!props.item.data.tabledata.length) return []
-  let fields = props.item.data.columns
-  let newDatas: any[] = []
-  props.item.data.tabledata.map((item: any, index: number) => {
-    let data = { index: index + 1 }
-    fields.map((field: string, index: number) => {
-      data[field] = item[index]
+  if (props.type === 'exe_result') {
+    let returnData = props.item.datas.map((item, index) => ({ ...item, index: index + 1 }))
+    return returnData
+  } else if (props.type === 'fields') {
+    return props.item.tableData.map((item, index) => ({ ...item, index: index + 1 }))
+  } else {
+    if (!props.item.data.tabledata.length) return []
+    let fields = props.item.data.columns
+    let newDatas: any[] = []
+    props.item.data.tabledata.map((item: any, index: number) => {
+      let data = { index: index + 1 }
+      fields.map((field: string, index: number) => {
+        data[field] = item[index]
+      })
+      newDatas.push(data)
     })
-    newDatas.push(data)
-  })
-  return newDatas
+    return newDatas
+  }
 })
 
 //可见行数
@@ -81,7 +133,7 @@ const onScroll = (event: any) => {
 
 <template>
   <div
-    :style="{ 'max-height': '400px', 'min-height': '76px' }"
+    :style="{ 'max-height': '400px', 'min-height': tableData.length ? '76px' : '200px' }"
     class="nc-grid-wrapper flex-1 relative nc-scrollbar-x-lg !overflow-auto"
     @scroll="onScroll"
   >
@@ -128,7 +180,11 @@ const onScroll = (event: any) => {
         </tr>
       </thead>
     </table>
+    <div v-if="tableData.length === 0" class="no-data no-data-to-chatai">
+      <a-empty :description="'暂无数据'" :image="simpleImage" />
+    </div>
     <div
+      v-else
       class="table-overlay"
       :style="{
         height: `${totalHeight}px`,
@@ -184,9 +240,6 @@ const onScroll = (event: any) => {
           </tr>
         </tbody>
       </table>
-    </div>
-    <div v-if="tableData.length === 0" class="no-data">
-      <a-empty :description="'暂无数据'" :image="simpleImage" />
     </div>
   </div>
 </template>
@@ -246,5 +299,10 @@ const onScroll = (event: any) => {
   top: 40%;
   left: 50%;
   transform: translateX(-50%);
+}
+.no-data-to-chatai {
+  ::v-deep .ant-empty-normal {
+    margin: 0 !important;
+  }
 }
 </style>

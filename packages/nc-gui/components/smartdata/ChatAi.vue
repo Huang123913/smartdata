@@ -134,7 +134,7 @@ const clearAllSession = () => {
   <div class="intelligent-chat">
     <div class="intelligent-chat-conetnt left" :style="{ width: isOpenTableTree ? '50%' : '100%' }">
       <DashboardAiAnalyticsHeader :clearAllSession="clearAllSession" :isSending="isSending" />
-      <div ref="scrollContainer" class="nc-scrollbar-x-lg dialog-list">
+      <div ref="scrollContainer" class="dialog-list">
         <DashboardAiAnalyticsDialogList
           :dialogList="dialogList"
           :deleteMessage="deleteMessage"

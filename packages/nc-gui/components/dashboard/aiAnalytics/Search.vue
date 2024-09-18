@@ -8,28 +8,49 @@ const searchValue = ref('')
 const route = useRoute()
 
 const props = defineProps<{
-  handleSend: (value: string, callback: () => void) => void
+  handleSend: (value: string, isAdd: boolean, callback: () => void) => void
   isSending: boolean
 }>()
+
+const show = ref(false)
 
 const setSearch = () => {
   searchValue.value = ''
 }
 
 const handleSend = () => {
-  if (!props.isSending && searchValue.value.trim()) props.handleSend(searchValue.value, setSearch)
+  if (!props.isSending && searchValue.value.trim()) props.handleSend(searchValue.value, true, setSearch)
 }
 
 const handleSelect = () => {
   isOpenTableTree.value = true
 }
+const handleSelectExistingModel = (item: any) => {
+  show.value = false
+  console.log('item', item)
+  const atIndex = searchValue.value.indexOf('@')
+  searchValue.value = searchValue.value.substring(0, atIndex) + item.name + searchValue.value.substring(atIndex + 1)
+}
+
+watch(searchValue, () => {
+  if (searchValue.value.includes('@')) {
+    show.value = true
+  } else {
+    show.value = false
+  }
+})
 </script>
 
 <template>
   <div class="search-content">
     <a-card style="width: 100%">
       <template #title>
-        <a-textarea :auto-size="{ minRows: 1 }" v-model:value="searchValue" :bordered="false" placeholder="请输入内容" />
+        <a-textarea
+          :auto-size="{ minRows: 1 }"
+          v-model:value="searchValue"
+          :bordered="false"
+          placeholder="发送消息、输入@选择表格"
+        />
       </template>
       <SmartdataChatPlaygroundViewLeftIndexPopover
         v-if="route.name === 'chat-ai'"
@@ -47,6 +68,7 @@ const handleSelect = () => {
         >
           选择范围
         </a-button>
+        <!-- <DashboardAiAnalyticsQuickPhraseList :handleSend="handleSend" /> -->
         <NcTooltip>
           <template #title>发送</template>
           <icon
@@ -78,12 +100,14 @@ const handleSelect = () => {
         </NcTooltip>
       </div>
     </a-card>
+    <DashboardAiAnalyticsQuickTableList :handleSelectExistingModel="handleSelectExistingModel" :show="show" />
   </div>
 </template>
 
 <style lang="scss" scoped>
 .search-content {
   padding: 16px;
+  position: relative;
   .ant-card {
     border-radius: 20px !important;
     border-color: rgb(205, 215, 225) !important;

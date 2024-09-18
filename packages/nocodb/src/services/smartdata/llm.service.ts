@@ -641,7 +641,7 @@ export class LLMService {
     formData.append('orgid', orgid);
     return await this.llm({
       method: 'POST',
-      url: `/submitdata`,
+      url: `/submitdata_new`,
       data: formData,
     }).then((r) => {
       return r.data;
@@ -665,7 +665,7 @@ export class LLMService {
     formData.append('orgid', orgid);
     return await this.llm({
       method: 'POST',
-      url: `/talktodata`,
+      url: `/talktodata_new`,
       data: formData,
     }).then((r) => {
       return { ...r.data, conversationId: conversation_id };

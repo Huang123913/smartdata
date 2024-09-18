@@ -62,6 +62,15 @@ export const useaiAnalyticsStore = defineStore('useaiAnalyticsStore', () => {
     dialogList.value[tableId] = dialogList.value[tableId].filter((item) => item.id !== deleteId)
   }
 
+  //对话列表
+  const tableNameList = ref<{ [key: string]: any }>({})
+  const setTableNameList = (key: string, value: any) => {
+    tableNameList.value[key] = value
+  }
+
+  // 历史记录
+  const historySessionRecords = ref<{ [key: string]: any }>({})
+
   //正在发送请求的会话表格
   const sendingTable = ref<{ [key: string]: any }>({})
   const setSendingTable = (conversationId: string, tableId: string) => {
@@ -97,5 +106,7 @@ export const useaiAnalyticsStore = defineStore('useaiAnalyticsStore', () => {
     setSendingTable,
     setDialogList,
     deleteDialogList,
+    setTableNameList,
+    tableNameList,
   }
 })

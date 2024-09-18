@@ -30,30 +30,35 @@ const createNewSessionInTable = async () => {
   try {
     isShowLoading.value = true
     clicked.value = false
-    let tableData: { [key: string]: any } = {}
-    let fieldDescriptions: { [key: string]: any } = {}
-    let response = await $api.dbViewRow.list('noco', base.value.id!, activeTableId.value!, activeTableId.value!)
-    let tableDataRes = response?.list
-    let columns = (metaData.value as TableType)?.columns?.filter((item) => !item?.system)
-    columns?.map((item) => {
-      fieldDescriptions[item.column_name!] = item.title
-      tableData[item.column_name!] = []
-    })
-    tableDataRes.map((item) => {
-      for (const key in tableData) {
-        tableData[key].push(item[fieldDescriptions[key]])
-      }
-    })
-    let datafiles = [
-      {
-        data: tableData,
-        field_descriptions: fieldDescriptions,
-        name: activeTable.value?.name,
-      },
-    ]
+    // let tableData: { [key: string]: any } = {}
+    // let fieldDescriptions: { [key: string]: any } = {}
+    // let response = await $api.dbViewRow.list('noco', base.value.id!, activeTableId.value!, activeTableId.value!)
+    // let tableDataRes = response?.list
+    // let columns = (metaData.value as TableType)?.columns?.filter((item) => !item?.system)
+    // columns?.map((item) => {
+    //   fieldDescriptions[item.column_name!] = item.title
+    //   tableData[item.column_name!] = []
+    // })
+    // tableDataRes.map((item) => {
+    //   for (const key in tableData) {
+    //     tableData[key].push(item[fieldDescriptions[key]])
+    //   }
+    // })
+    // let datafiles = [
+    //   {
+    //     data: tableData,
+    //     field_descriptions: fieldDescriptions,
+    //     name: activeTable.value?.name,
+    //   },
+    // ]
+    // let createSessionRes = await $api.smartData.createSession({
+    //   entityId: activeTableId.value,
+    //   datafiles: JSON.stringify(datafiles),
+    //   isUpdateSession: true,
+    // })
     let createSessionRes = await $api.smartData.createSession({
       entityId: activeTableId.value,
-      datafiles: JSON.stringify(datafiles),
+      datafiles: JSON.stringify([]),
       isUpdateSession: true,
     })
     if (createSessionRes?.conversation_id) {
