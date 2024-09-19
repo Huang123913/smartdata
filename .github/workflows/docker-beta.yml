@@ -32,6 +32,10 @@ jobs:
         with:
           version: 8
 
+      - name: pnpm install
+        run: pnpm install
+        working-direcopry: ./
+
       - name: Install dependencies and Build sdk
         run: pnpm run bootstrap
         working-directory: ./

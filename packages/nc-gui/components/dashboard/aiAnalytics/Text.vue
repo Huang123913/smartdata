@@ -19,6 +19,9 @@ const markdowmText = computed(() => {
   p {
     @apply !mb-1;
     white-space: pre-wrap; /* 保持换行格式 */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-all;
   }
 
   ul,
