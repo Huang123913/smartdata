@@ -5,7 +5,6 @@ on:
     branches:
       - develop-hlr
     paths-ignore:
-      # - ".github/**"
       - "okr/**"
       - "markdown/**"
       - "charts/**"
@@ -32,10 +31,13 @@ jobs:
         with:
           version: 8
 
-      - name: Install dependencies and Build sdk
+      - name: Clean node_modules and pnpm store
         run: |
-          pnpm install
-          pnpm run bootstrap
+          rm -rf node_modules
+          rm -rf ~/.pnpm-store
+
+      - name: Install dependencies and Build SDK
+        run: pnpm run bootstrap
         working-directory: ./
 
       - name: Install nc-gui
