@@ -33,9 +33,7 @@ jobs:
           version: 8
 
       - name: Install dependencies and Build sdk
-        run: |
-          pnpm install
-          pnpm run bootstrap
+        run: pnpm run bootstrap
         working-directory: ./
 
       - name: Install nc-gui
