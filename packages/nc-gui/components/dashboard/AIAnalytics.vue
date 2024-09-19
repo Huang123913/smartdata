@@ -88,7 +88,6 @@ const handleSend = async (searchValue: string, isAdd: boolean, callback: () => v
       if (!findErrorItem && findSqlItem) {
         hasSqlRes = true
         let exeRes = await exeSql(findSqlItem.content)
-        console.log('执行结果', exeRes)
         if (exeRes) {
           tableRes = {
             content: exeRes.success ? exeRes : exeRes.errorDetail,
