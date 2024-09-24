@@ -693,4 +693,16 @@ export class LLMService {
       return r.data;
     });
   }
+  async createQueryModel(params: { [key: string]: any }) {
+    let name_cn = params?.name_cn;
+    let translatedModel = await this.translate(name_cn);
+    translatedModel = translatedModel.replace(/\s/g, '');
+    let queryModel = {
+      name: translatedModel,
+      code: `query_model_${Date.now()}`,
+      ...params,
+    };
+    let result = await this.mcdm.generateQueryBizCustomModel(queryModel);
+    return result;
+  }
 }

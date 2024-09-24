@@ -1,15 +1,21 @@
 <script lang="ts" setup>
+import { Empty } from 'ant-design-vue'
 import { marked } from 'marked'
 
 import { CaretRightOutlined, EditOutlined } from '@ant-design/icons-vue'
 
+const { t } = useI18n()
 const props = defineProps<{
   item: any
   contentWidth?: number
+  runManualSql: (item: any) => void
 }>()
 const store = useaiAnalyticsStore()
 const { tableNameList } = storeToRefs(store)
 const { setTableNameList } = store
+const parameters = ref<{ [key: string]: any }>({})
+
+const { copy } = useCopy()
 
 const typeMap: any = {
   error: '错误',
@@ -24,6 +30,7 @@ const activeKey = ref(['0'])
 const tableName = ref<string>('Table')
 const customStyle = 'background: #fff;border: 0;overflow: hidden'
 const isEdited = ref<boolean>(false)
+const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 onMounted(() => {
   tableName.value = tableNameList[props.item.id] || 'Table'
 })
@@ -31,6 +38,50 @@ const handleEdit = (value: boolean) => {
   if (!tableName.value.trim()) tableName.value = 'Table'
   isEdited.value = value
   setTableNameList(props.item.id, tableName)
+}
+
+watch(
+  () => props.item,
+  (newVal, oldVal) => {
+    if (props.item.parametersObj) {
+      parameters.value = props.item.parametersObj
+    } else {
+      if (props.item.parameters.length) {
+        props.item.parameters.map((item: any) => {
+          if (item.type === 'VARCHAR') {
+            parameters.value[item.name as string] = ''
+          } else if (item.type === 'INT') {
+            parameters.value[item.name as string] = 0
+          } else if (item.type === 'BOOLEAN') {
+            parameters.value[item.name as string] = false
+          }
+        })
+      }
+    }
+  },
+)
+
+const handleSearch = () => {
+  let isChecked = true
+  for (let index = 0; index < props.item.parameters.length; index++) {
+    const element = props.item.parameters[index]
+    if (parameters.value[element.name] === '') {
+      message.warn(`${element.name}为必填项`)
+      return
+    }
+  }
+  if (!isChecked) return
+  props.runManualSql({ ...props.item, parametersObj: { ...parameters.value } })
+}
+
+//复制
+const onCopyToClipboard = async (text: string) => {
+  try {
+    await copy(text)
+    message.info(t('msg.info.copiedToClipboard'))
+  } catch (e: any) {
+    message.error(e.message)
+  }
 }
 </script>
 
@@ -54,7 +105,20 @@ const handleEdit = (value: boolean) => {
           <ul v-if="!['exe_result', 'data_meta'].includes(detailItem.type)">
             <li>
               <h4 class="title-type">{{ typeMap[detailItem.type] }}:</h4>
-              <span class="markdown-content" v-html="marked(detailItem.content)"></span>
+              <div class="sql-content" v-if="detailItem.type === 'sql'">
+                <div class="sql-header">
+                  <div class="copy" @click="onCopyToClipboard(detailItem.content)">
+                    <GeneralIcon icon="duplicate" class="text-gray-700" />
+                    {{ $t('general.duplicate') }}
+                  </div>
+                </div>
+                <div class="sql-text" v-highlight>
+                  <code class="sql">
+                    {{ detailItem.content }}
+                  </code>
+                </div>
+              </div>
+              <span v-else class="markdown-content" v-html="marked(detailItem.content)"></span>
             </li>
           </ul>
           <template v-else>
@@ -64,14 +128,47 @@ const handleEdit = (value: boolean) => {
                 <h5>字段</h5>
                 <DashboardAiAnalyticsTable :item="detailItem" :contentWidth="contentWidth" :type="'fields'" />
               </div>
+              <div
+                v-if="detailItem.content?.parameters && detailItem.content?.parameters.length"
+                :style="{
+                  margin: '15px 0',
+                }"
+              >
+                <h5>查询条件</h5>
+                <DashboardAiAnalyticsTable
+                  :item="{ fields: detailItem.parametersNew.fields, tableData: detailItem.parametersNew.tableData }"
+                  :contentWidth="contentWidth"
+                  :type="'fields'"
+                />
+              </div>
             </div>
           </template>
         </div>
       </a-collapse-panel>
     </a-collapse>
+    <div v-if="item?.parameters.length" class="search-condition">
+      <h4 class="additional-info">{{ '查询条件' }}:</h4>
+      <div v-for="parameterItem in item?.parameters" class="search-condition-item">
+        <span class="title">{{ parameterItem.name }}：</span>
+        <div class="value" v-if="parameterItem.type === 'VARCHAR'">
+          <a-input v-model:value="parameters[parameterItem.name]" />
+        </div>
+        <div v-if="parameterItem.type === 'INT'">
+          <a-input-number v-model:value="parameters[parameterItem.name]" :precision="0" :min="1" :max="10" />
+        </div>
+        <div v-if="parameterItem.type === 'BOOLEAN'">
+          <a-switch v-model:checked="parameters[parameterItem.name]" />
+        </div>
+      </div>
+      <div class="search-sql-btn" @click="handleSearch">
+        <NcButton type="primary">
+          {{ '查询' }}
+        </NcButton>
+      </div>
+    </div>
     <div v-if="item?.hasSqlRes">
       <h4 class="additional-info">{{ '查询结果' }}:</h4>
-      <a-typography-text v-if="item?.tableRes.isExeSuccess" class="list-item-left-content-textAreaValue">
+      <a-typography-text v-if="item?.isShowSaveBtn && item?.tableRes?.isExeSuccess" class="list-item-left-content-textAreaValue">
         <span v-if="!isEdited" class="edit-content edit-icon"
           ><span class="edit-text"> {{ tableName }}</span>
           <EditOutlined :title="isEdited ? '确认修改' : '修改表名'" class="edit-outlined" @click="handleEdit(true)"
@@ -82,13 +179,16 @@ const handleEdit = (value: boolean) => {
           </template>
         </a-input>
       </a-typography-text>
-      <DashboardAiAnalyticsTable
-        v-if="item?.tableRes.isExeSuccess"
-        :item="item.tableRes.content"
-        :contentWidth="contentWidth"
-        :type="'exe_result'"
-      />
-      <div class="markdown-content" v-else v-html="marked(item.tableRes.content)"></div>
+      <template v-if="item?.tableRes?.content">
+        <DashboardAiAnalyticsTable
+          v-if="item?.tableRes?.isExeSuccess"
+          :item="item.tableRes.content"
+          :contentWidth="contentWidth"
+          :type="'exe_result'"
+        />
+        <div class="markdown-content" v-else v-html="marked(item.tableRes.content)"></div>
+      </template>
+      <a-empty v-else description="输入查询条件进行查询" :image="simpleImage" />
     </div>
   </div>
 </template>
@@ -177,5 +277,54 @@ const handleEdit = (value: boolean) => {
       margin-bottom: 0;
     }
   }
+}
+.search-condition {
+  .search-condition-item {
+    width: 100%;
+    margin-top: 10px;
+    .title {
+      width: fit-content;
+      margin-right: 10px;
+      text-align: right;
+    }
+    .value {
+      .ant-input {
+        height: 36px;
+      }
+    }
+  }
+  .search-sql-btn {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+}
+.sql-content {
+  background: #171717;
+  border-radius: 10px;
+  overflow: hidden;
+  .sql-header {
+    height: 40px;
+    background: #2e343e;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px;
+  }
+  .sql-text {
+    padding: 0 3px 10px 10px;
+  }
+  .copy,
+  .nc-icon {
+    color: #a1a3a8 !important;
+  }
+}
+.hljs {
+  color: #fff !important;
+  background: #171717 !important;
+}
+.hljs-keyword,
+.hljs-selector-tag {
+  color: #ff7b72 !important;
 }
 </style>

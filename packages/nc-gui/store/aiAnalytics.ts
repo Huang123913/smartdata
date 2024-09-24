@@ -62,6 +62,14 @@ export const useaiAnalyticsStore = defineStore('useaiAnalyticsStore', () => {
     dialogList.value[tableId] = dialogList.value[tableId].filter((item) => item.id !== deleteId)
   }
 
+  const updateDialogListItem = (item: any, tableId: string) => {
+    let updateData = dialogList.value[tableId]
+    let findIndex = updateData.findIndex((findItem: any) => findItem.id === item.id)
+    dialogList.value[tableId].splice(findIndex, 1, item)
+    console.log('dialogList', dialogList.value)
+    console.log('updateData', updateData)
+  }
+
   //对话列表
   const tableNameList = ref<{ [key: string]: any }>({})
   const setTableNameList = (key: string, value: any) => {
@@ -108,5 +116,6 @@ export const useaiAnalyticsStore = defineStore('useaiAnalyticsStore', () => {
     deleteDialogList,
     setTableNameList,
     tableNameList,
+    updateDialogListItem,
   }
 })

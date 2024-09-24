@@ -657,4 +657,18 @@ export class MCDMService {
   async getBaseUrl() {
     return process.env.MCDM_URL;
   }
+
+  async generateQueryBizCustomModel(queryModel: object) {
+    return await this.mcdm({
+      method: 'POST',
+      url: `/webapi/innersysapi/VMcdmDataServiceWebApi/generateQueryBizCustomModel`,
+      data: {
+        queryModel,
+      },
+      responseType: 'arraybuffer',
+    }).then((r) => {
+      const fileContent = Buffer.from(r.data, 'binary').toString('utf-8');
+      return fileContent;
+    });
+  }
 }

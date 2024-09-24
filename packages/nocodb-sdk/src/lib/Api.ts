@@ -12608,5 +12608,22 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+     * @description createQueryModel LLM
+     *
+     * @tags SmartData
+     * @name CreateQueryModel
+     * @summary createQueryModel LLM
+     * @request POST:/api/v2/smartdata/createQueryModel
+     */
+    createQueryModel: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/createQueryModel`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
 }

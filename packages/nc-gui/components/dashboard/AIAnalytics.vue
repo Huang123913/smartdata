@@ -13,7 +13,7 @@ const { activeTableId } = storeToRefs(useTablesStore())
 
 const store = useaiAnalyticsStore()
 const { dialogList, conversationId, sendingTable, isIntelligentQuestionOpen } = storeToRefs(store)
-const { setSendingTable, setDialogList, deleteDialogList, setTableNameList } = store
+const { setSendingTable, setDialogList, deleteDialogList, setTableNameList, updateDialogListItem } = store
 
 const isSending = ref<{ [key: string]: any }>({})
 const scrollContainer = ref(null)
@@ -73,21 +73,30 @@ const handleSend = async (searchValue: string, isAdd: boolean, callback: () => v
       let hasSqlRes = false
       let isRepair = false
       let errText = ''
+      let parameters: any[] = []
+      let sql = ''
       let attachments = res.attachments.filter((item: any) => !filterType.includes(item.type))
       let findSqlItem = res.attachments.find((item: any) => item.type === 'sql')
       let findErrorItem = res.attachments.find((item: any) => item.type === 'error')
       let findDataMeta = res.attachments.find((item: any) => item.type === 'data_meta')
-      if (findDataMeta && !findSqlItem) {
+      if (findDataMeta) {
         findDataMeta.content = JSON.parse(findDataMeta.content)
         findDataMeta.fields = Object.keys(findDataMeta.content.fields[0])
         findDataMeta.tableData = findDataMeta.content.fields
+        if (findDataMeta.content?.parameters && findDataMeta.content?.parameters.length) {
+          findDataMeta['parametersNew'] = {}
+          findDataMeta['parametersNew']['fields'] = Object.keys(findDataMeta.content.parameters[0])
+          findDataMeta['parametersNew']['tableData'] = findDataMeta.content.parameters
+          parameters = findDataMeta.content.parameters
+        }
       }
       if (findErrorItem) {
         errText = findErrorItem.content
       }
-      if (!findErrorItem && findSqlItem) {
+      if (findSqlItem) {
         hasSqlRes = true
-        let exeRes = await exeSql(findSqlItem.content)
+        sql = findSqlItem.content.replace(/;$/, '')
+        let exeRes = (!findDataMeta.content?.parameters || !findDataMeta.content?.parameters.length) && (await exeSql(sql))
         if (exeRes) {
           tableRes = {
             content: exeRes.success ? exeRes : exeRes.errorDetail,
@@ -112,6 +121,8 @@ const handleSend = async (searchValue: string, isAdd: boolean, callback: () => v
         isRepair,
         errText,
         tableName,
+        parameters,
+        sql,
       })
       console.log('继续', dialogList.value[activeTableId.value!])
     }
@@ -230,6 +241,43 @@ const createNewSessionInTable = async () => {
     isShowLoading.value = false
   }
 }
+
+const replacePlaceholders = (sqlQuery: string, params: any) => {
+  return sqlQuery.replace(/:(\w+)/g, (match, key) => {
+    if (params[key] !== undefined) {
+      // 如果值是用于 LIKE 查询的，将其包裹在 '%' 中
+      if (sqlQuery.includes(`LIKE :${key}`)) {
+        return `'%${params[key]}%'`
+      }
+      // 其他值直接替换
+      return `'${params[key]}'`
+    }
+    return match
+  })
+}
+
+const runManualSql = async (item: any) => {
+  try {
+    isShowLoading.value = true
+    let newItem = { ...item }
+    let sql = replacePlaceholders(item.sql, item.parametersObj)
+    let exeRes = await exeSql(sql)
+    if (exeRes) {
+      newItem.tableRes = {
+        content: exeRes.success ? exeRes : exeRes.errorDetail,
+        isExeSuccess: exeRes.success,
+      }
+      newItem.isShowSaveBtn = exeRes.success
+      newItem.isRepair = exeRes.isRepair as boolean
+      if (exeRes.success) setTableNameList(newItem.id, newItem.tableName)
+    }
+    updateDialogListItem(newItem, activeTableId.value!)
+  } catch (error) {
+    console.error(error)
+  } finally {
+    isShowLoading.value = false
+  }
+}
 </script>
 
 <template>
@@ -244,6 +292,7 @@ const createNewSessionInTable = async () => {
           :rephrasequestion="rephrasequestion"
           :isSending="isSending[conversationId[activeTableId!]]"
           :contentWidth="contentWidth"
+          :runManualSql="runManualSql"
         />
       </div>
       <DashboardAiAnalyticsSearch :handleSend="handleSend" :isSending="isSending[conversationId[activeTableId!]]" />

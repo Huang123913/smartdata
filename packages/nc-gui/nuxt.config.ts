@@ -111,6 +111,7 @@ export default defineNuxtConfig({
     '~/assets/css/global.css',
     '~/assets/style.scss',
     '~/assets/css/typesense-docsearch.css',
+    'highlight.js/styles/dark.css',
   ],
 
   runtimeConfig: {

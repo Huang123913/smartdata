@@ -369,4 +369,12 @@ export class SmartDataController {
   ) {
     return await this.llm.rephrasequestion(data);
   }
+
+  @Post(['/api/v2/smartdata/createQueryModel'])
+  async createQueryModel(
+    @Body()
+    data: object,
+  ) {
+    return await this.llm.createQueryModel(data);
+  }
 }
