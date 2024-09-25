@@ -665,10 +665,8 @@ export class MCDMService {
       data: {
         queryModel,
       },
-      responseType: 'arraybuffer',
     }).then((r) => {
-      const fileContent = Buffer.from(r.data, 'binary').toString('utf-8');
-      return fileContent;
+      return r.data;
     });
   }
 }

@@ -406,25 +406,31 @@ export class LLMService {
     }
     // 生成ddl
     let generatedDDL = await this.mcdm.getDDL(entitieId);
+    let savePropsEntities = [
+      {
+        id: entitieId,
+        props: [],
+      },
+    ];
     if (generatedDDL) {
       let ddl = await this.trainByDDL(generatedDDL);
       // await this.llm.trainByPrompt(sql, question);
       if (ddl) {
-        let savePropsEntities = [
-          {
-            id: entitieId,
-            props: [
-              {
-                name: 'belongDdlId',
-                code: 'belongDdlId',
-                value: ddl.id,
-              },
-            ],
-          },
-        ];
-        await this.mcdm.saveModel({ entities: savePropsEntities });
+        savePropsEntities[0].props.push({
+          name: 'belongDdlId',
+          code: 'belongDdlId',
+          value: ddl.id,
+        });
       }
     }
+    params['savedSession'] &&
+      savePropsEntities[0].props.push({
+        name: 'belongSessionRecord',
+        code: 'belongSessionRecord',
+        jsonValue: params['savedSession'],
+      });
+    if (savePropsEntities[0].props.length)
+      await this.mcdm.saveModel({ entities: savePropsEntities });
     return { success: true };
   }
 
@@ -693,16 +699,48 @@ export class LLMService {
       return r.data;
     });
   }
+
+  //创建查询模型
   async createQueryModel(params: { [key: string]: any }) {
-    let name_cn = params?.name_cn;
+    let name_cn = params?.createQueryModel?.name_cn;
     let translatedModel = await this.translate(name_cn);
     translatedModel = translatedModel.replace(/\s/g, '');
     let queryModel = {
       name: translatedModel,
       code: `query_model_${Date.now()}`,
-      ...params,
+      ...params?.createQueryModel,
     };
-    let result = await this.mcdm.generateQueryBizCustomModel(queryModel);
+    let result: any = await this.mcdm.generateQueryBizCustomModel(queryModel);
+    if (result?.success && result?.data?.success) {
+      // 生成ddl
+      let tableInfo = result?.data?.tableInfo[0];
+      if (tableInfo) {
+        let savePropsEntities: any[] = [
+          {
+            id: tableInfo.belongEntityId,
+            props: [],
+          },
+        ];
+        let generatedDDL = await this.mcdm.getDDL(tableInfo.belongEntityId);
+        if (generatedDDL) {
+          let ddl = await this.trainByDDL(generatedDDL);
+          if (ddl) {
+            savePropsEntities[0].props.push({
+              name: 'belongDdlId',
+              code: 'belongDdlId',
+              value: ddl.id,
+            });
+          }
+        }
+        savePropsEntities[0].props.push({
+          name: 'belongSessionRecord',
+          code: 'belongSessionRecord',
+          jsonValue: params.savedSession,
+        });
+        await this.mcdm.saveModel({ entities: savePropsEntities });
+      }
+    }
+
     return result;
   }
 }

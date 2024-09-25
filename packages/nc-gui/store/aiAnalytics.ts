@@ -56,6 +56,7 @@ export const useaiAnalyticsStore = defineStore('useaiAnalyticsStore', () => {
   }
   const deleteDialogList = (tableId: string, isCleanAll: boolean, deleteId: string) => {
     if (isCleanAll) {
+      deleteSavedConversations(tableId, isCleanAll, deleteId)
       dialogList.value[tableId] = []
       return
     }
@@ -76,8 +77,22 @@ export const useaiAnalyticsStore = defineStore('useaiAnalyticsStore', () => {
     tableNameList.value[key] = value
   }
 
-  // 历史记录
-  const historySessionRecords = ref<{ [key: string]: any }>({})
+  // 需要保存的历史结果
+  const savedConversations = ref<{ [key: string]: any }>({})
+  const setSavedConversations = (key: string, value: any) => {
+    if (savedConversations.value[key]) savedConversations.value[key].push(value)
+    else {
+      savedConversations.value[key] = [value]
+    }
+  }
+  const deleteSavedConversations = (tableId: string, isCleanAll: boolean, deleteId: string) => {
+    if (isCleanAll) {
+      savedConversations.value[tableId] = []
+      console.log('savedConversations.value[tableId]', savedConversations.value[tableId])
+      return
+    }
+    // savedConversations.value[tableId] = savedConversations.value[tableId].filter((item) => item.id !== deleteId)
+  }
 
   //正在发送请求的会话表格
   const sendingTable = ref<{ [key: string]: any }>({})
@@ -117,5 +132,7 @@ export const useaiAnalyticsStore = defineStore('useaiAnalyticsStore', () => {
     setTableNameList,
     tableNameList,
     updateDialogListItem,
+    setSavedConversations,
+    savedConversations,
   }
 })

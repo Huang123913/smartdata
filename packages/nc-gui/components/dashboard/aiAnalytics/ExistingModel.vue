@@ -8,11 +8,12 @@ const props = defineProps<{
   item: any
   isShowLoading: boolean
 }>()
+const { activeTableId } = storeToRefs(useTablesStore())
 const emits = defineEmits(['update:isShowLoading'])
 const isShowLoading = useVModel(props, 'isShowLoading', emits)
 const { $api } = useNuxtApp()
 const store = useaiAnalyticsStore()
-const { tableNameList } = storeToRefs(store)
+const { tableNameList, savedConversations } = storeToRefs(store)
 const store1 = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store1)
 const isShowSelectCatalogModal = ref<boolean>(false) //是否显示选择目录弹框
@@ -120,6 +121,7 @@ const handleOk = async (selectedCatalog: object) => {
         belongCatalog: selectedCatalog.id,
         belongSQLDataRefreshPlan: belongSQLDataRefreshPlan.value,
         belongSQLDataType: belongSQLDataType.value,
+        savedSession: JSON.stringify(savedConversations.value[activeTableId.value!]),
       }
       exeRes = await $api.smartData.publicModelToCatalog(params)
     } else {

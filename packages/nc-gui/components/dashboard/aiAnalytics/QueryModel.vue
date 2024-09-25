@@ -9,6 +9,9 @@ const props = defineProps<{
   visible: boolean
   item: any
 }>()
+const store = useaiAnalyticsStore()
+const { savedConversations } = storeToRefs(store)
+const { activeTableId } = storeToRefs(useTablesStore())
 const { loadProjectTables } = useTablesStore()
 const { user } = useGlobal()
 const tableName = ref('')
@@ -100,19 +103,22 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
     }
 
     let queryModelParams = {
-      name_cn: tableName.value,
-      description: '',
-      description_cn: description.value,
-      belongCatalog: selectedCatalogParam.id,
-      customGroupId: '', //所属团体id，一般为企业ID
-      customGroupName: '', //所属团队名称，一般为企业名字
-      projectCode: base.value.id, //所属项目，一般为项目唯一标识
-      projectName: base.value.title, //所属项目名称，一般为项目名称
-      sql: props.item.sql,
-      fields,
-      queryParams,
-      customOwnerId: user.value?.id,
-      customOwnerName: user.value?.display_name ?? user.value?.email,
+      createQueryModel: {
+        name_cn: tableName.value,
+        description: '',
+        description_cn: description.value,
+        belongCatalog: selectedCatalogParam.id,
+        customGroupId: '', //所属团体id，一般为企业ID
+        customGroupName: '', //所属团队名称，一般为企业名字
+        projectCode: base.value.id, //所属项目，一般为项目唯一标识
+        projectName: base.value.title, //所属项目名称，一般为项目名称
+        sql: props.item.sql,
+        fields,
+        queryParams,
+        customOwnerId: user.value?.id,
+        customOwnerName: user.value?.display_name ?? user.value?.email,
+      },
+      savedSession: JSON.stringify(savedConversations.value[activeTableId.value!]),
     }
     console.log('queryModelParams', queryModelParams)
     let res = await $api.smartData.createQueryModel(queryModelParams)
@@ -128,6 +134,7 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
     isShowLoading.value = false
     tableName.value = ''
     description.value = ''
+    parameters.value = {}
   }
 }
 </script>

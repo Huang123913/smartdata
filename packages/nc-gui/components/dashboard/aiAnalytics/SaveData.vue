@@ -5,12 +5,14 @@ const props = defineProps<{
   item: any
   showAction: boolean
 }>()
+
+const { activeTableId } = storeToRefs(useTablesStore())
 const router = useRouter()
 const route = router.currentRoute
 const { $api } = useNuxtApp()
 const { loadProjectTables } = useTablesStore()
 const store = useaiAnalyticsStore()
-const { tableNameList } = storeToRefs(store)
+const { tableNameList, savedConversations } = storeToRefs(store)
 const isShowLoading = ref(false)
 const clicked = ref(false)
 const isShowSelectCatalogModal = ref<boolean>(false) //是否显示选择目录弹框
@@ -77,6 +79,7 @@ const handleOk = async (selectedCatalog: object) => {
         belongCatalog: selectedCatalog.id,
         belongSQLDataRefreshPlan: belongSQLDataRefreshPlan.value,
         belongSQLDataType: belongSQLDataType.value,
+        savedSession: JSON.stringify(savedConversations.value[activeTableId.value!]),
       }
       exeRes = await $api.smartData.publicModelToCatalog(params)
     } else {

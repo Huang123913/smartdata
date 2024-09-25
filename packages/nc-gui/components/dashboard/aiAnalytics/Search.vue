@@ -10,6 +10,8 @@ const route = useRoute()
 const props = defineProps<{
   handleSend: (value: string, isAdd: boolean, callback: () => void) => void
   isSending: boolean
+  isOverSession: boolean
+  clearAllSession: () => void
 }>()
 
 const show = ref(false)
@@ -43,6 +45,7 @@ watch(searchValue, () => {
 
 <template>
   <div class="search-content">
+    <DashboardAiAnalyticsCreateNewSession v-if="isOverSession" :clearAllSession="clearAllSession" />
     <a-card style="width: 100%">
       <template #title>
         <a-textarea

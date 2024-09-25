@@ -10,10 +10,10 @@ const filterType = ['error', 'confirmation_and_execution', 'SelectedGenerator', 
 const { $api } = useNuxtApp()
 
 const { activeTableId } = storeToRefs(useTablesStore())
-
+const isOverSession = ref(false)
 const store = useaiAnalyticsStore()
-const { dialogList, conversationId, sendingTable, isIntelligentQuestionOpen } = storeToRefs(store)
-const { setSendingTable, setDialogList, deleteDialogList, setTableNameList, updateDialogListItem } = store
+const { dialogList, conversationId, sendingTable, savedConversations } = storeToRefs(store)
+const { setSendingTable, setDialogList, deleteDialogList, setTableNameList, updateDialogListItem, setSavedConversations } = store
 
 const isSending = ref<{ [key: string]: any }>({})
 const scrollContainer = ref(null)
@@ -38,18 +38,28 @@ const resizeObserver = new ResizeObserver((entries) => {
 
 //发送
 const handleSend = async (searchValue: string, isAdd: boolean, callback: () => void) => {
+  if (conversationId.value[activeTableId.value!] === '') {
+    message.warning('会话已结束，请重新创建会话')
+    return
+  }
   let res: any = null
   let res1: any = conversationId.value[activeTableId.value!]
   try {
     if (!searchValue.trim() || isSending.value[conversationId.value[activeTableId.value!]]) return
     callback()
     isSending.value[conversationId.value[activeTableId.value!]] = true
+    let sendId = uuidv4()
     isAdd &&
       setDialogList(activeTableId.value!, {
-        id: uuidv4(),
+        id: sendId,
         isQuestion: true,
         messages: searchValue,
       })
+    setSavedConversations(activeTableId.value!, {
+      type: 'send',
+      id: sendId,
+      content: searchValue,
+    })
     scrollToBottom()
     setSendingTable(conversationId.value[activeTableId.value!], activeTableId.value!)
     res = await $api.smartData.talktodata({
@@ -57,7 +67,7 @@ const handleSend = async (searchValue: string, isAdd: boolean, callback: () => v
       datatype: 'text',
       question: searchValue,
     })
-
+    console.log('res', res)
     if (res?.errormsg) {
       message.warning(res.errormsg)
     } else if (res?.error && res?.conversationId) {
@@ -66,6 +76,7 @@ const handleSend = async (searchValue: string, isAdd: boolean, callback: () => v
     } else if (res?.error) {
       message.warning('没有找到会话，请重新创建')
     } else {
+      let isOverSession = false
       let id = uuidv4()
       let tableName = 'Table'
       let tableRes: any = null
@@ -79,6 +90,21 @@ const handleSend = async (searchValue: string, isAdd: boolean, callback: () => v
       let findSqlItem = res.attachments.find((item: any) => item.type === 'sql')
       let findErrorItem = res.attachments.find((item: any) => item.type === 'error')
       let findDataMeta = res.attachments.find((item: any) => item.type === 'data_meta')
+      let findInitPlay = res.attachments.find((item: any) => item.type === 'init_plan')
+      let findPlay = res.attachments.find((item: any) => item.type === 'plan')
+      let findCurrentPlay = res.attachments.find((item: any) => item.type === 'current_plan_step')
+
+      if (
+        res.attachments.length === 3 &&
+        findInitPlay &&
+        findPlay &&
+        findCurrentPlay &&
+        res.message.indexOf('会话') > -1 &&
+        res.message.indexOf('结束') > -1
+      ) {
+        isOverSession = true
+        isOverSession.value = true
+      }
       if (findDataMeta) {
         findDataMeta.content = JSON.parse(findDataMeta.content)
         findDataMeta.fields = Object.keys(findDataMeta.content.fields[0])
@@ -96,7 +122,8 @@ const handleSend = async (searchValue: string, isAdd: boolean, callback: () => v
       if (findSqlItem) {
         hasSqlRes = true
         sql = findSqlItem.content.replace(/;$/, '')
-        let exeRes = (!findDataMeta.content?.parameters || !findDataMeta.content?.parameters.length) && (await exeSql(sql))
+        let exeRes =
+          (!findDataMeta || !findDataMeta.content?.parameters || !findDataMeta.content?.parameters.length) && (await exeSql(sql))
         if (exeRes) {
           tableRes = {
             content: exeRes.success ? exeRes : exeRes.errorDetail,
@@ -123,8 +150,16 @@ const handleSend = async (searchValue: string, isAdd: boolean, callback: () => v
         tableName,
         parameters,
         sql,
+        isOverSession,
       })
+      setSavedConversations(activeTableId.value!, {
+        type: 'received',
+        id: id,
+        content: res,
+      })
+      if (isOverSession) conversationId.value = { key: activeTableId.value, value: '' }
       console.log('继续', dialogList.value[activeTableId.value!])
+      console.log('保存', savedConversations.value[activeTableId.value!])
     }
     // if (res?.errormsg) {
     //   message.warning(res.errormsg)
@@ -295,7 +330,12 @@ const runManualSql = async (item: any) => {
           :runManualSql="runManualSql"
         />
       </div>
-      <DashboardAiAnalyticsSearch :handleSend="handleSend" :isSending="isSending[conversationId[activeTableId!]]" />
+      <DashboardAiAnalyticsSearch
+        :isOverSession="isOverSession"
+        :handleSend="handleSend"
+        :isSending="isSending[conversationId[activeTableId!]]"
+        :clearAllSession="clearAllSession"
+      />
     </div>
   </div>
   <div class="analytics-tip-content" :class="{ anite: showNewCreateBtn }">
