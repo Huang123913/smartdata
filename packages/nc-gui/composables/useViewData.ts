@@ -2,8 +2,17 @@ import type { ComputedRef, Ref } from 'vue'
 
 import { NavigateDir } from '#imports'
 import axios from 'axios'
-import type { Api, ColumnType, FormColumnType, FormType, GalleryType, PaginatedType, TableType, ViewType } from 'nocodb-sdk'
-import { ViewTypes } from 'nocodb-sdk'
+import {
+  type Api,
+  type ColumnType,
+  type FormColumnType,
+  type FormType,
+  type GalleryType,
+  type PaginatedType,
+  type TableType,
+  type ViewType,
+  ViewTypes,
+} from 'nocodb-sdk'
 
 const formatData = (list: Record<string, any>[]) =>
   list.map((row) => ({
@@ -175,8 +184,23 @@ export function useViewData(
     let response
 
     try {
-      console.log('search', search.value)
-      if (search.value && search.value.selectedOption?.isSemanticRetrieval) {
+      if (search.value && search.value?.isQueryModelSearch) {
+        let { limit, offset } = queryParams.value
+        response = await $api.dbViewRow.filterData(
+          'noco',
+          base.value.id!,
+          metaId.value!,
+          viewMeta.value!.id!,
+          {
+            queryParams: search.value?.queryModelSearchParams,
+          },
+          { limit, offset },
+          {
+            cancelToken: controller.value.token,
+          },
+        )
+        search.value.isQueryModelSearch = false
+      } else if (search.value && search.value.selectedOption?.isSemanticRetrieval) {
         let { limit, offset } = queryParams.value
         if (search.value.query) {
           let res = await $api.smartData.semanticSearch({ text: search.value.query })
@@ -186,11 +210,13 @@ export function useViewData(
             metaId.value!,
             viewMeta.value!.id!,
             {
-              semanticConditionKey: {
-                embeddingKey: [{ id: search.value.selectedOption.id, columnId: search.value.selectedOption.columnId }],
-              },
-              semanticConditionValue: {
-                embeddingValue: res[0],
+              semanticCondition: {
+                semanticConditionKey: {
+                  embeddingKey: [{ id: search.value.selectedOption.id, columnId: search.value.selectedOption.columnId }],
+                },
+                semanticConditionValue: {
+                  embeddingValue: res[0],
+                },
               },
             },
             { limit, offset },
@@ -240,6 +266,7 @@ export function useViewData(
       console.error(error)
       return message.error(await extractSdkResponseErrorMsg(error))
     }
+    console.log('response', response)
     formattedData.value = formatData(response.list)
     paginationData.value = response.pageInfo || paginationData.value || {}
     setShowTableDatas(formattedData.value)

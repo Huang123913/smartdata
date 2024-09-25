@@ -31,6 +31,7 @@ const layoutLfetHeaderElem = ref<any>(null)
 const layoutLfetFooterElem = ref<any>(null)
 const { isLeftSidebarOpen } = storeToRefs(useSidebarStore())
 const scrollYHeight = ref(0)
+const { search } = useFieldQuery()
 const modelTreeData = computed(() => {
   if (modelTreeRef.value) resizeObserver.observe(modelTreeRef.value)
   if (!layoutLfetHeaderElem.value) layoutLfetHeaderElem.value = document.querySelector('.layout-left-header')
@@ -59,6 +60,7 @@ const resizeObserver = new ResizeObserver((entries) => {
 
 const onClickToTableView = (item: any) => {
   if (item.key.indexOf('Empty') > -1) return
+  search.value.queryModelSearchParams = []
   _openTable({
     ...item,
     base_id: props.base.id,

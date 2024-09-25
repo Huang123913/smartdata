@@ -237,6 +237,7 @@ const isJsonExpand = ref(false)
 provide(JsonExpandInj, isJsonExpand)
 
 const isKeyDown = ref(false)
+const { setTableViewInfo } = useViewsStore()
 
 // #Cell - 1
 
@@ -252,6 +253,14 @@ const getAllSemanticsSearchedFields = async () => {
       let props = tableInfo[0]?.props ? tableInfo[0]?.props : []
       if (props.length) {
         let findSemanticFetrievalProp = props.findLast((p) => p.code == 'belongSemanticFetrieval')
+        let findQueryModelParams = props.findLast((p) => p.code == 'queryModel_queryParams')
+        let queryModelParams: any[] = []
+        if (findQueryModelParams && findQueryModelParams?.jsonValue) {
+          queryModelParams = JSON.parse(findQueryModelParams.jsonValue).queryParams as any[]
+          setTableViewInfo({ isQuery: tableInfo[0].isQuery, queryModelParams })
+        } else {
+          setTableViewInfo({ isQuery: false, queryModelParams: [] })
+        }
         findSemanticFetrievalProp &&
           JSON.parse(findSemanticFetrievalProp.jsonValue).map((item) => {
             semanticsSearchedFields.value.push(item.columnId.join(';'))

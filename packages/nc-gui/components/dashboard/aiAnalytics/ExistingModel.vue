@@ -179,7 +179,7 @@ const onScroll = (event: any) => {
   <div>
     <!-- 搜索框 -->
     <div class="search-existing-model-to-ai">
-      <a-input placeholder="搜索表格" v-model:value="searchModel" @keyup.enter="handleSearchModel()">
+      <a-input placeholder="搜索模型" v-model:value="searchModel" @keyup.enter="handleSearchModel()">
         <template #suffix>
           <CloseOutlined @click="handleClickCleanBtn()" v-show="searchModel?.trim()" style="margin-right: 5px" />
           <search-outlined @click="handleSearchModel()" />

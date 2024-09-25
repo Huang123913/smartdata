@@ -149,13 +149,13 @@ const handleSelectTable = () => {
       <NcMenu>
         <NcMenuItem key="catalog" @click="handleSaveToCatalog">
           <div class="flex gap-2 items-center text-gray-700">
-            {{ '表格目录' }}
+            {{ '新模型' }}
           </div>
         </NcMenuItem>
         <NcSubMenu key="existingModel">
           <template #title>
             <div class="flex gap-2 items-center text-gray-700">
-              {{ '现有表格' }}
+              {{ '现有模型' }}
             </div>
           </template>
           <DashboardAiAnalyticsExistingModel

@@ -19,6 +19,7 @@ export const useViewsStore = defineStore('viewsStore', () => {
     workspaceId: string
     baseId: string
   }
+  const tableViewInfo = ref<any>(null)
   const showTableDatas = ref<any[]>([])
   const router = useRouter()
   // Store recent views from all Workspaces
@@ -431,6 +432,11 @@ export const useViewsStore = defineStore('viewsStore', () => {
     showTableDatas.value = datas
   }
 
+  const setTableViewInfo = (value: any) => {
+    tableViewInfo.value = value
+    console.log('tableViewInfo', tableViewInfo.value)
+  }
+
   return {
     isLockedView,
     isViewsLoading,
@@ -457,6 +463,8 @@ export const useViewsStore = defineStore('viewsStore', () => {
     showTableDatas,
     setShowTableDatas,
     updateViewCoverImageColumnId,
+    tableViewInfo,
+    setTableViewInfo,
   }
 })
 
