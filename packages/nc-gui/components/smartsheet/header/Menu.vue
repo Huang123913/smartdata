@@ -414,6 +414,7 @@ const markSemanticsSearch = async () => {
     isMarking.value = false
   }
 }
+const { tableViewInfo } = storeToRefs(useViewsStore())
 </script>
 
 <template>
@@ -439,7 +440,7 @@ const markSemanticsSearch = async () => {
         <GeneralSourceRestrictionTooltip message="Field properties cannot be edited." :enabled="!isColumnEditAllowed">
           <NcMenuItem
             v-if="isUIAllowed('fieldAlter')"
-            :disabled="column?.pk || isSystemColumn(column) || !isColumnEditAllowed"
+            :disabled="column?.pk || isSystemColumn(column) || !isColumnEditAllowed || tableViewInfo?.isQuery"
             @click="onEditPress"
           >
             <div class="nc-column-edit nc-header-menu-item">
@@ -473,6 +474,7 @@ const markSemanticsSearch = async () => {
           </div>
         </NcMenuItem>
         <NcMenuItem
+          :disabled="tableViewInfo?.isQuery"
           v-if="(!virtual || column?.uidt === UITypes.Formula) && !column?.pv && !isHiddenCol"
           @click="setAsDisplayValue"
         >
@@ -485,7 +487,7 @@ const markSemanticsSearch = async () => {
             {{ $t('activity.setDisplay') }}
           </div>
         </NcMenuItem>
-        <NcMenuItem @click="markSemanticsSearch">
+        <NcMenuItem @click="markSemanticsSearch" :disabled="tableViewInfo?.isQuery">
           <div class="nc-column-set-primary nc-header-menu-item item items-center flex">
             <GeneralLoader v-if="isMarking" class="menu-icon mt-0.5 !text-red-500" />
             <icon
@@ -610,14 +612,14 @@ const markSemanticsSearch = async () => {
               </div>
             </NcMenuItem>
           </GeneralSourceRestrictionTooltip>
-          <NcMenuItem @click="onInsertAfter">
+          <NcMenuItem @click="onInsertAfter" :disabled="tableViewInfo?.isQuery">
             <div v-e="['a:field:insert:after']" class="nc-column-insert-after nc-header-menu-item">
               <component :is="iconMap.colInsertAfter" class="text-gray-700 !w-4.5 !h-4.5" />
               <!-- Insert After -->
               {{ t('general.insertAfter') }}
             </div>
           </NcMenuItem>
-          <NcMenuItem v-if="!column?.pv" @click="onInsertBefore">
+          <NcMenuItem :disabled="tableViewInfo?.isQuery" v-if="!column?.pv" @click="onInsertBefore">
             <div v-e="['a:field:insert:before']" class="nc-column-insert-before nc-header-menu-item">
               <component :is="iconMap.colInsertBefore" class="text-gray-600 !w-4.5 !h-4.5" />
               <!-- Insert Before -->
@@ -629,7 +631,7 @@ const markSemanticsSearch = async () => {
         <GeneralSourceRestrictionTooltip message="Field cannot be deleted." :enabled="!isColumnUpdateAllowed">
           <NcMenuItem
             v-if="!column?.pv && isUIAllowed('fieldDelete')"
-            :disabled="!isDeleteAllowed || !isColumnUpdateAllowed"
+            :disabled="!isDeleteAllowed || !isColumnUpdateAllowed || tableViewInfo?.isQuery"
             class="!hover:bg-red-50"
             @click="handleDelete"
           >

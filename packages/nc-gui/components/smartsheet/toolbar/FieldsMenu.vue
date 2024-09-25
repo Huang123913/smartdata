@@ -421,6 +421,7 @@ watch(
 )
 
 useMenuCloseOnEsc(open)
+const { tableViewInfo } = storeToRefs(useViewsStore())
 </script>
 
 <template>
@@ -433,7 +434,7 @@ useMenuCloseOnEsc(open)
     <div :class="{ 'nc-active-btn': numberOfHiddenFields }">
       <NcButton
         v-e="['c:fields']"
-        :disabled="isLocked"
+        :disabled="isLocked || tableViewInfo?.isQuery"
         class="nc-fields-menu-btn nc-toolbar-btn !h-7 !border-0"
         size="small"
         type="secondary"

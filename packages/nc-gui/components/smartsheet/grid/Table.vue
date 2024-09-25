@@ -1647,6 +1647,7 @@ onKeyStroke('ArrowLeft', onLeft)
 onKeyStroke('ArrowRight', onRight)
 onKeyStroke('ArrowUp', onUp)
 onKeyStroke('ArrowDown', onDown)
+const { tableViewInfo } = storeToRefs(useViewsStore())
 </script>
 
 <template>
@@ -1724,7 +1725,7 @@ onKeyStroke('ArrowDown', onDown)
                   }"
                 >
                   <div class="w-full h-full flex pl-2 pr-1 items-center" data-testid="nc-check-all">
-                    <template v-if="!readOnly && !hideCheckbox">
+                    <template v-if="!readOnly && !hideCheckbox && !tableViewInfo?.isQuery">
                       <div class="nc-no-label text-gray-500" :class="{ hidden: vSelectedAllRecords }">#</div>
                       <div
                         :class="{
@@ -1828,7 +1829,7 @@ onKeyStroke('ArrowDown', onDown)
                   </div>
                 </th>
                 <th
-                  v-if="isAddingColumnAllowed"
+                  v-if="isAddingColumnAllowed && !tableViewInfo?.isQuery"
                   v-e="['c:column:add']"
                   class="cursor-pointer !border-0 relative !xs:hidden"
                   :style="{
@@ -2038,7 +2039,12 @@ onKeyStroke('ArrowDown', onDown)
                             }"
                             class="nc-row-expand-and-checkbox"
                           >
-                            <a-checkbox v-model:checked="row.rowMeta.selected" />
+                            <span v-if="tableViewInfo?.isQuery">
+                              {{
+                                ((paginationDataRef?.page ?? 1) - 1) * (paginationDataRef?.pageSize ?? 25) + rowIndex + 1
+                              }}</span
+                            >
+                            <a-checkbox v-else v-model:checked="row.rowMeta.selected" />
                           </div>
                           <span class="flex-1" />
 
@@ -2121,7 +2127,7 @@ onKeyStroke('ArrowDown', onDown)
                             :column="fields[0]"
                             :active="activeCell.col === 0 && activeCell.row === rowIndex"
                             :row="row"
-                            :read-only="!hasEditPermission"
+                            :read-only="!hasEditPermission || tableViewInfo?.isQuery"
                             @navigate="onNavigate"
                             @save="updateOrSaveRow?.(row, '', state)"
                           />
@@ -2135,7 +2141,7 @@ onKeyStroke('ArrowDown', onDown)
                             "
                             :row-index="rowIndex"
                             :active="activeCell.col === 0 && activeCell.row === rowIndex"
-                            :read-only="!hasEditPermission"
+                            :read-only="!hasEditPermission || tableViewInfo?.isQuery"
                             @update:edit-enabled="editEnabled = $event"
                             @save="updateOrSaveRow?.(row, fields[0].title, state)"
                             @navigate="onNavigate"
@@ -2184,7 +2190,7 @@ onKeyStroke('ArrowDown', onDown)
                             :column="columnObj"
                             :active="activeCell.col === colIndex && activeCell.row === rowIndex"
                             :row="row"
-                            :read-only="!hasEditPermission"
+                            :read-only="!hasEditPermission || tableViewInfo?.isQuery"
                             @navigate="onNavigate"
                             @save="updateOrSaveRow?.(row, '', state)"
                           />
@@ -2198,7 +2204,7 @@ onKeyStroke('ArrowDown', onDown)
                             "
                             :row-index="rowIndex"
                             :active="activeCell.col === colIndex && activeCell.row === rowIndex"
-                            :read-only="!hasEditPermission"
+                            :read-only="!hasEditPermission || tableViewInfo?.isQuery"
                             @update:edit-enabled="editEnabled = $event"
                             @save="updateOrSaveRow?.(row, columnObj.title, state)"
                             @navigate="onNavigate"
@@ -2321,7 +2327,7 @@ onKeyStroke('ArrowDown', onDown)
               v-if="contextMenuTarget && hasEditPermission && !isDataReadOnly"
               class="nc-base-menu-item"
               data-testid="context-menu-item-paste"
-              :disabled="selectedReadonly"
+              :disabled="selectedReadonly || tableViewInfo?.isQuery"
               @click="paste"
             >
               <div v-e="['a:row:paste']" class="flex gap-2 items-center">
@@ -2341,7 +2347,7 @@ onKeyStroke('ArrowDown', onDown)
                 !isDataReadOnly
               "
               class="nc-base-menu-item"
-              :disabled="selectedReadonly"
+              :disabled="selectedReadonly || tableViewInfo?.isQuery"
               data-testid="context-menu-item-clear"
               @click="clearCell(contextMenuTarget)"
             >
@@ -2378,6 +2384,7 @@ onKeyStroke('ArrowDown', onDown)
             <template v-if="hasEditPermission && !isDataReadOnly">
               <NcDivider v-if="!(!contextMenuClosing && !contextMenuTarget && data.some((r) => r.rowMeta.selected))" />
               <NcMenuItem
+                :disabled="tableViewInfo?.isQuery"
                 v-if="contextMenuTarget && (selectedRange.isSingleCell() || selectedRange.isSingleRow())"
                 class="nc-base-menu-item !text-red-600 !hover:bg-red-50"
                 @click="confirmDeleteRow(contextMenuTarget.row)"
@@ -2389,6 +2396,7 @@ onKeyStroke('ArrowDown', onDown)
                 </div>
               </NcMenuItem>
               <NcMenuItem
+                :disabled="tableViewInfo?.isQuery"
                 v-else-if="contextMenuTarget && deleteRangeOfRows"
                 class="nc-base-menu-item !text-red-600 !hover:bg-red-50"
                 @click="deleteSelectedRangeOfRows"
@@ -2435,7 +2443,7 @@ onKeyStroke('ArrowDown', onDown)
             v-e="[isAddNewRecordGridMode ? 'c:row:add:grid:toggle' : 'c:row:add:form:toggle']"
             class="nc-grid-add-new-row"
             placement="top"
-            :disabled="isPaginationLoading"
+            :disabled="isPaginationLoading || tableViewInfo?.isQuery"
             @click="isAddNewRecordGridMode ? addEmptyRow() : onNewRecordToFormClick()"
           >
             <div data-testid="nc-pagination-add-record" class="flex items-center px-2 text-gray-600 hover:text-black">

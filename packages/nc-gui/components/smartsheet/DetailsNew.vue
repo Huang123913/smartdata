@@ -8,6 +8,7 @@ const { isLeftSidebarOpen } = storeToRefs(useSidebarStore())
 const openedSubTab = ref('')
 const isShowLoading = ref(false)
 const isUpdateFrequency = ref(false)
+const { tableViewInfo } = storeToRefs(useViewsStore())
 onMounted(() => {
   init()
 })
@@ -104,7 +105,7 @@ const init = async () => {
         </template>
         <SmartsheetDetailsUpdateFrequency />
       </a-tab-pane>
-      <a-tab-pane key="semanticRetrieval">
+      <a-tab-pane :disabled="tableViewInfo?.isQuery" key="semanticRetrieval">
         <template #tab>
           <div class="tab" data-testid="nc-relations-tab">
             <icon class="tab-icon update-frequency-icon">
