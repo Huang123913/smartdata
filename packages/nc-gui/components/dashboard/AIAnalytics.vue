@@ -76,7 +76,7 @@ const handleSend = async (searchValue: string, isAdd: boolean, callback: () => v
     } else if (res?.error) {
       message.warning('没有找到会话，请重新创建')
     } else {
-      let isOverSession = false
+      let isOverSessionToItem = false
       let id = uuidv4()
       let tableName = 'Table'
       let tableRes: any = null
@@ -99,10 +99,10 @@ const handleSend = async (searchValue: string, isAdd: boolean, callback: () => v
         findInitPlay &&
         findPlay &&
         findCurrentPlay &&
-        res.message.indexOf('会话') > -1 &&
+        (res.message.indexOf('会话') > -1 || res.message.indexOf('对话') > -1) &&
         res.message.indexOf('结束') > -1
       ) {
-        isOverSession = true
+        isOverSessionToItem = true
         isOverSession.value = true
       }
       if (findDataMeta) {
@@ -150,14 +150,14 @@ const handleSend = async (searchValue: string, isAdd: boolean, callback: () => v
         tableName,
         parameters,
         sql,
-        isOverSession,
+        isOverSession: isOverSessionToItem,
       })
       setSavedConversations(activeTableId.value!, {
         type: 'received',
         id: id,
         content: res,
       })
-      if (isOverSession) conversationId.value = { key: activeTableId.value, value: '' }
+      if (isOverSessionToItem) conversationId.value = { key: activeTableId.value, value: '' }
       console.log('继续', dialogList.value[activeTableId.value!])
       console.log('保存', savedConversations.value[activeTableId.value!])
     }
@@ -253,8 +253,11 @@ const scrollToBottom = (isAnimated: boolean = false) => {
 }
 
 //清空会话
-const clearAllSession = () => {
+const clearAllSession = (isCreateNewSession = false) => {
   deleteDialogList(activeTableId.value!, true, '')
+  if (isCreateNewSession) {
+    isOverSession.value = false
+  }
 }
 
 const createNewSessionInTable = async () => {
@@ -269,7 +272,7 @@ const createNewSessionInTable = async () => {
     if (createSessionRes?.conversation_id) {
       conversationId.value = { key: activeTableId.value, value: createSessionRes.conversation_id }
     }
-    clearAllSession()
+    clearAllSession(true)
   } catch (error) {
     throw error
   } finally {

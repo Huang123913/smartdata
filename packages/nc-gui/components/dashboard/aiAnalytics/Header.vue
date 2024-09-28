@@ -4,7 +4,7 @@ import type { TableType } from 'nocodb-sdk'
 import { useaiAnalyticsStore } from '../../../store/aiAnalytics'
 
 const props = defineProps<{
-  clearAllSession: () => void
+  clearAllSession: (value: boolean) => void
   isSending: boolean
 }>()
 
@@ -64,7 +64,7 @@ const createNewSessionInTable = async () => {
     if (createSessionRes?.conversation_id) {
       conversationId.value = { key: activeTableId.value, value: createSessionRes.conversation_id }
     }
-    props.clearAllSession()
+    props.clearAllSession(true)
   } catch (error) {
     throw error
   } finally {
@@ -148,7 +148,7 @@ const handleClickChange = (visible: boolean) => {
               </div>
             </NcMenuItem>
 
-            <NcMenuItem @click="clearAllSession()">
+            <NcMenuItem @click="clearAllSession(false)">
               <div v-e="['c:table:duplicate']" class="flex gap-2 items-center">
                 <GeneralIcon icon="delete" class="text-gray-700" />
                 {{ '清空会话记录' }}

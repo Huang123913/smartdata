@@ -103,6 +103,13 @@ const handleCreateQueryModel = (item: any) => {
 const handleOk = (value: boolean) => {
   isCreateQueryModel.value = value
 }
+
+const isShowCorrectIcon = (item: any) => {
+  let result = item.data.indexOf('是否正确') > -1 || item.data.indexOf('确认是否') > -1
+  let result1 = item.data.indexOf('正确') > -1 || item.data.indexOf('?') > -1
+  let result2 = item.data.indexOf('对吗') > -1 || item.data.indexOf('?') > -1
+  return result || result1 || result2
+}
 </script>
 
 <template>
@@ -116,11 +123,7 @@ const handleOk = (value: boolean) => {
       <DashboardAiAnalyticsAnswer v-else :item="item" :contentWidth="contentWidth" :runManualSql="runManualSql" />
     </div>
     <div class="all-action">
-      <div
-        v-if="!item.isQuestion && (item.data.indexOf('是否正确') > -1 || item.data.indexOf('确认是否') > -1)"
-        class="confirm-results"
-        @click="handleConfirm(item)"
-      >
+      <div v-if="!item.isQuestion && isShowCorrectIcon(item)" class="confirm-results" @click="handleConfirm(item)">
         <NcTooltip>
           <template #title>确认回答信息</template>
           <GeneralBaseIcon>

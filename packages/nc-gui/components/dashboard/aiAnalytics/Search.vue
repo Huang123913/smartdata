@@ -11,7 +11,7 @@ const props = defineProps<{
   handleSend: (value: string, isAdd: boolean, callback: () => void) => void
   isSending: boolean
   isOverSession: boolean
-  clearAllSession: () => void
+  clearAllSession: (value: boolean) => void
 }>()
 
 const show = ref(false)

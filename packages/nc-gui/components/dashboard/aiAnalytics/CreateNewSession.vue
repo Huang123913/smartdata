@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 const props = defineProps<{
-  clearAllSession: () => void
+  clearAllSession: (value: boolean) => void
 }>()
 
 const { activeTableId } = storeToRefs(useTablesStore())
@@ -19,7 +19,7 @@ const handleClick = async () => {
     if (createSessionRes?.conversation_id) {
       conversationId.value = { key: activeTableId.value, value: createSessionRes.conversation_id }
     }
-    props.clearAllSession()
+    props.clearAllSession(true)
   } catch (error) {
     throw error
   } finally {
