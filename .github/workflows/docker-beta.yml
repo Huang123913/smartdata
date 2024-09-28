@@ -3,7 +3,7 @@ name: Build develop and Push Docker Image
 on:
   push:
     branches:
-      - develop
+      - developHuang
     paths-ignore:
       # - ".github/**"
       - "okr/**"
