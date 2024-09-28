@@ -202,7 +202,7 @@ const dropCatalog = async (info: any) => {
           >
             <div class="table-name">
               <div v-if="item.key.indexOf('Empty') === -1">
-                <template v-if="item?.code.indexOf('query_model') > -1">
+                <template v-if="item?.isQuery">
                   <GeneralBaseIcon :style="{ marginRight: '2px', position: 'relative', top: '-4px' }">
                     <svg
                       t="1726824143102"
