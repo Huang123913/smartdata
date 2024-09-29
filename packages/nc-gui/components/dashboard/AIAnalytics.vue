@@ -6,7 +6,15 @@ import Icon from '@ant-design/icons-vue'
 
 import { useaiAnalyticsStore } from '../../store/aiAnalytics'
 
-const filterType = ['error', 'confirmation_and_execution', 'SelectedGenerator', 'init_plan', 'plan', 'current_plan_step']
+const filterType = [
+  'information_gathering',
+  'error',
+  'confirmation_and_execution',
+  'SelectedGenerator',
+  'init_plan',
+  'plan',
+  'current_plan_step',
+]
 const { $api } = useNuxtApp()
 
 const { activeTableId } = storeToRefs(useTablesStore())
@@ -94,17 +102,17 @@ const handleSend = async (searchValue: string, isAdd: boolean, callback: () => v
       let findPlay = res.attachments.find((item: any) => item.type === 'plan')
       let findCurrentPlay = res.attachments.find((item: any) => item.type === 'current_plan_step')
 
-      if (
-        res.attachments.length === 3 &&
-        findInitPlay &&
-        findPlay &&
-        findCurrentPlay &&
-        (res.message.indexOf('会话') > -1 || res.message.indexOf('对话') > -1) &&
-        res.message.indexOf('结束') > -1
-      ) {
-        isOverSessionToItem = true
-        isOverSession.value = true
-      }
+      // if (
+      //   res.attachments.length === 3 &&
+      //   findInitPlay &&
+      //   findPlay &&
+      //   findCurrentPlay &&
+      //   (res.message.indexOf('会话') > -1 || res.message.indexOf('对话') > -1) &&
+      //   res.message.indexOf('结束') > -1
+      // ) {
+      //   isOverSessionToItem = true
+      //   isOverSession.value = true
+      // }
       if (findDataMeta) {
         findDataMeta.content = JSON.parse(findDataMeta.content)
         findDataMeta.fields = Object.keys(findDataMeta.content.fields[0])
@@ -152,14 +160,14 @@ const handleSend = async (searchValue: string, isAdd: boolean, callback: () => v
         sql,
         isOverSession: isOverSessionToItem,
       })
-      setSavedConversations(activeTableId.value!, {
+      setSavedConversations(sendingTable.value[res.conversationId], {
         type: 'received',
         id: id,
         content: res,
       })
       if (isOverSessionToItem) conversationId.value = { key: activeTableId.value, value: '' }
-      console.log('继续', dialogList.value[activeTableId.value!])
-      console.log('保存', savedConversations.value[activeTableId.value!])
+      console.log('继续', dialogList.value[sendingTable.value[res.conversationId]])
+      console.log('保存', savedConversations.value[sendingTable.value[res.conversationId]])
     }
     // if (res?.errormsg) {
     //   message.warning(res.errormsg)

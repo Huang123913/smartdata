@@ -55,7 +55,6 @@ const handleOk = (value: any) => {
     visible.value = false
     isShowSelectCatalogModel.value = true
   }
-  console.log('base.value', base.value)
 }
 
 const handleShowSelectCatalog = (value: boolean) => {
@@ -70,10 +69,6 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
   handleShowSelectCatalog(false)
   isShowLoading.value = true
   try {
-    console.log('selectedCatalogParam', selectedCatalogParam)
-    console.log('props', props.item)
-    console.log('parameters', parameters.value)
-
     let findDataMeta = props.item.detail.find((item: any) => item.type === 'data_meta')
     let fields = findDataMeta.tableData.map((item: any) => {
       return {
@@ -101,6 +96,13 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
         return returnObj
       })
     }
+    let savedSession: string = ''
+    if (savedConversations.value[activeTableId.value!].length) {
+      let findIndex = savedConversations.value[activeTableId.value!].findIndex((item: any) => item.id === props.item.id)
+      let saveSessionData = savedConversations.value[activeTableId.value!].slice(0, findIndex + 1)
+      console.log('saveSessionData', saveSessionData)
+      savedSession = JSON.stringify(saveSessionData)
+    }
 
     let queryModelParams = {
       createQueryModel: {
@@ -118,9 +120,8 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
         customOwnerId: user.value?.id,
         customOwnerName: user.value?.display_name ?? user.value?.email,
       },
-      savedSession: JSON.stringify(savedConversations.value[activeTableId.value!]),
+      savedSession,
     }
-    console.log('queryModelParams', queryModelParams)
     let res = await $api.smartData.createQueryModel(queryModelParams)
     if (res.success && res.data.success) {
       message.success('创建成功！')
