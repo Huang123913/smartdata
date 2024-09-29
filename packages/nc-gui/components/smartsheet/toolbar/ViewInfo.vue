@@ -32,8 +32,11 @@ const openedBaseUrl = computed(() => {
 })
 
 const activeTableParentCatalog = computed(() => {
-  if (activeTable.value) {
-    let findChildren = chataiData.value.modelData.find((item) => item.id === activeTable.value.id)
+  let findChildren =
+    activeTable.value && activeTable.value?.id
+      ? chataiData.value.modelData.find((item) => item.id === activeTable.value.id)
+      : null
+  if (activeTable.value && findChildren) {
     let findParentCatalog = chataiData.value.modelData.find((item) => item.id === findChildren.parentId)
     return findParentCatalog.name_cn
   } else {
