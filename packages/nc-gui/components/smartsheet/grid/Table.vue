@@ -259,7 +259,7 @@ const getAllSemanticsSearchedFields = async () => {
           queryModelParams = JSON.parse(findQueryModelParams.jsonValue).queryParams as any[]
           setTableViewInfo({ isQuery: tableInfo[0].isQuery, queryModelParams })
         } else {
-          setTableViewInfo({ isQuery: false, queryModelParams: [] })
+          setTableViewInfo({ isQuery: tableInfo[0].isQuery, queryModelParams: [] })
         }
         findSemanticFetrievalProp &&
           JSON.parse(findSemanticFetrievalProp.jsonValue).map((item) => {
