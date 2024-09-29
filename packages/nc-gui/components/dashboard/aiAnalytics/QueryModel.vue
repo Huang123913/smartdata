@@ -61,6 +61,25 @@ const handleShowSelectCatalog = (value: boolean) => {
   isShowSelectCatalogModel.value = value
 }
 
+// 字段类型：char文本/text长文本/number数值/boolean布尔/date日期/longDate长日期/integer整形/file文件
+const getType = (type: string) => {
+  if (type.indexOf('VARCHAR') > -1) {
+    return {
+      fieldSysDataType: 'char',
+    }
+  } else if (type.indexOf('NUMERIC') > -1 || type.indexOf('NUMBER') > -1) {
+    return {
+      scale: 6, //  小数位的精度
+      fieldPrecision: 15, //  字段的长度
+      fieldSysDataType: 'number',
+    }
+  } else if (type.indexOf('INT') > -1) {
+    return {
+      fieldSysDataType: 'integer',
+    }
+  }
+}
+
 const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
   if (!selectedCatalogParam) {
     message.warn('请选择目录!')
@@ -77,9 +96,10 @@ const handleSelectCatalogModalOk = async (selectedCatalogParam: any) => {
         fieldCode: uuidv4(),
         description: '',
         description_cn: item.description,
+        ...getType(item.type),
         // scale: 0, //  小数位的精度
         // fieldPrecision: 255, //  字段的长度
-        fieldSysDataType: fieldTypeMap[item.type], // 字段类型：char文本/text长文本/number数值/boolean布尔/date日期/longDate长日期/integer整形/file文件
+        // fieldSysDataType: fieldTypeMap[item.type], // 字段类型：char文本/text长文本/number数值/boolean布尔/date日期/longDate长日期/integer整形/file文件
       }
     })
     let queryParams = []
