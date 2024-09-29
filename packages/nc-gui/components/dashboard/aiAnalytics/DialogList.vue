@@ -106,7 +106,7 @@ const handleOk = (value: boolean) => {
 
 const isShowCorrectIcon = (item: any) => {
   let result =
-    item.data.indexOf('是否确认') ||
+    item.data.indexOf('是否确认') > -1 ||
     item.data.indexOf('是否正确') > -1 ||
     item.data.indexOf('确认是否') > -1 ||
     item.data.indexOf('是否准确') > -1
