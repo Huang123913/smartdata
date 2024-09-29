@@ -54,6 +54,8 @@ const handleOk = (value: any) => {
     }
     visible.value = false
     isShowSelectCatalogModel.value = true
+  } else {
+    visible.value = value
   }
 }
 

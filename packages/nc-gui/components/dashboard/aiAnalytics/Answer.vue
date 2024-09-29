@@ -32,7 +32,7 @@ const customStyle = 'background: #fff;border: 0;overflow: hidden'
 const isEdited = ref<boolean>(false)
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
 onMounted(() => {
-  tableName.value = tableNameList[props.item.id] || 'Table'
+  tableName.value = tableNameList.value[props.item.id] || 'Table'
 })
 const handleEdit = (value: boolean) => {
   if (!tableName.value.trim()) tableName.value = 'Table'
