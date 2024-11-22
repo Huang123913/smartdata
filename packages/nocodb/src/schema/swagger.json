@@ -18129,6 +18129,22 @@
         }
       ]
     },
+    "/api/v2/smartdata/getGroupList": {
+      "get": {
+        "summary": "getGroupList MCDM ",
+        "operationId": "getGroupList",
+        "description": "getGroupList MCDM",
+        "tags": ["SmartData"]
+      }
+    },
+    "/api/v2/smartdata/getProjects": {
+      "get": {
+        "summary": "getProjects MCDM ",
+        "operationId": "getProjects",
+        "description": "getProjects MCDM",
+        "tags": ["SmartData"]
+      }
+    },
     "/api/v2/smartdata/train": {
       "post": {
         "summary": "Train LLM",

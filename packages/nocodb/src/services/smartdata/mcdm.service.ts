@@ -87,6 +87,22 @@ export class MCDMService {
     return await this.mcdm(config).then((r) => r.data);
   }
 
+  async getProjects() {
+    return await this.mcdm({
+      url: `/restapi/bizentity/data/InternalBATable/BA_BizCustomProject/find`,
+    }).then((r) => {
+      return r.data.data.datas ?? [];
+    });
+  }
+
+  async getGroupList() {
+    return await this.mcdm({
+      url: `/restapi/bizentity/data/InternalBATable/BA_BizCustomGroup/find`,
+    }).then((r) => {
+      return r.data.data.datas ?? [];
+    });
+  }
+
   async getEntity(entityId: string) {
     return await this.mcdm({
       url: `/webapi/innersysapi/VMcdmDataServiceWebApi/findBizCustomEntity`,

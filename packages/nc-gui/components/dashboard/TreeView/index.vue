@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import Draggable from 'vuedraggable'
 import type { TableType } from 'nocodb-sdk'
+import Draggable from 'vuedraggable'
+
 import ProjectWrapper from './ProjectWrapper.vue'
 
 const { isUIAllowed } = useRoles()
@@ -242,7 +243,8 @@ watch(
     <div v-if="!isSharedBase" class="text-gray-500 font-medium pl-3.5 mb-1">{{ $t('objects.projects') }}</div>
     <div mode="inline" class="nc-treeview pb-0.5 flex-grow min-h-50 overflow-x-hidden">
       <div v-if="basesList?.length">
-        <Draggable
+        <DashboardTreeViewModelList />
+        <!-- <Draggable
           :model-value="basesList"
           :disabled="isMobileMode || !isUIAllowed('baseReorder') || basesList?.length < 2"
           item-key="id"
@@ -257,9 +259,8 @@ watch(
               </ProjectWrapper>
             </div>
           </template>
-        </Draggable>
+        </Draggable> -->
       </div>
-
       <WorkspaceEmptyPlaceholder v-else-if="!isWorkspaceLoading" />
     </div>
     <WorkspaceCreateProjectDlg v-model="baseCreateDlg" />

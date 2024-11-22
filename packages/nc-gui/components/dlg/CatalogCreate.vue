@@ -55,16 +55,16 @@ const _createCatalog = async () => {
     let lastCatalogChild = null
     let parentId = selectedCatalog.value ? selectedCatalog.value.id : null
     if (parentId) {
-      let findCatalog = findNodeById(chataiData.value.modelTree, parentId)
+      let findCatalog = findNodeById(chataiData.value.treeData, parentId)
       lastCatalogChild = findCatalog.children.findLast((item: any) => item.isCatalog)
     } else {
-      lastCatalogChild = chataiData.value.modelTree[0].children.findLast((item: any) => item.isCatalog)
+      // lastCatalogChild = chataiData.value.modelTree[0].children.findLast((item: any) => item.isCatalog)
     }
     let savedCatalog = {
       id: uuidv4(),
       name: formState.title,
       name_cn: formState.title,
-      parentId: parentId,
+      parentId: selectedCatalog.value?.isProject ? null : parentId,
       code: uuidv4(),
       orderNo: lastCatalogChild ? lastCatalogChild.orderNo + 1 : 1,
       catalogType: 'default',
@@ -72,8 +72,11 @@ const _createCatalog = async () => {
       customDateTime: getNowDateDetail(),
       isCatalog: true,
     }
-    await $api.smartData.saveCustomCatalog(savedCatalog)
-    createCatalog(savedCatalog)
+    let result = await $api.smartData.saveCustomCatalog(savedCatalog)
+    if (result?.success) createCatalog(savedCatalog, selectedCatalog.value?.isProject ? selectedCatalog.value.id : null)
+    else if (result?.msg) {
+      message.error(result?.msg)
+    }
   } catch (e: any) {
     console.error(e)
   } finally {

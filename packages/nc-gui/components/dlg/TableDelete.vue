@@ -1,11 +1,13 @@
 <script lang="ts" setup>
 import type { LinkToAnotherRecordType, TableType } from 'nocodb-sdk'
-import { isSystemColumn, UITypes } from 'nocodb-sdk'
+import { UITypes, isSystemColumn } from 'nocodb-sdk'
 
 const props = defineProps<{
   visible: boolean
   tableId: string
   baseId: string
+  deleteTable: (tableInfo: any) => void
+  deleteTableInfo: any
 }>()
 
 const emits = defineEmits(['update:visible'])
@@ -61,7 +63,7 @@ const onDelete = async () => {
     }
     await $api.smartData.retraining({ isUpdate: false, entityId: toBeDeletedTable.id })
     await $api.dbTable.delete(toBeDeletedTable.id as string)
-
+    props.deleteTable(props.deleteTableInfo)
     await closeTab({
       type: TabType.TABLE,
       id: toBeDeletedTable.id,

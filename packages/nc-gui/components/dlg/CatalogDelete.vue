@@ -8,7 +8,7 @@ const props = defineProps<{
 const { $api } = useNuxtApp()
 const isLoading = ref(false)
 const store = useChatPlaygroundViewStore()
-const { getCustomCatalogEntityTree } = store
+const { getCustomCatalogEntityTree, deleteCatalog } = store
 const onDelete = async () => {
   isLoading.value = true
   try {
@@ -21,6 +21,7 @@ const onDelete = async () => {
       return
     }
     await $api.smartData.delEntityCatalogCustom({ id: props.catalog.id })
+    deleteCatalog(props.catalog)
     await getCustomCatalogEntityTree()
   } catch (e: any) {
     message.error(await extractSdkResponseErrorMsg(e))

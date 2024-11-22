@@ -10,6 +10,7 @@ const { activeTable } = storeToRefs(useTablesStore())
 const { tableUrl } = useTablesStore()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
+const { findNodeById } = store
 const { isLeftSidebarOpen } = storeToRefs(useSidebarStore())
 const intelligentImportPreviewVisible = ref(false)
 const columns = ref([])

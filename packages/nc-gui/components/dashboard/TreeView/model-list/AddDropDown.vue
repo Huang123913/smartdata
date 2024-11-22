@@ -7,6 +7,7 @@ import Icon from '@ant-design/icons-vue'
 const props = defineProps<{
   item: any
   base: BaseType
+  createTableToTreeData: (tableInfo: any) => void
 }>()
 const { $api } = useNuxtApp()
 const clicked = ref<boolean>(false)
@@ -25,10 +26,11 @@ const openTableCreateDialog = (catalog: any) => {
   const { close } = useDialog(resolveComponent('DlgTableCreate'), {
     'modelValue': isOpen,
     sourceId,
-    'baseId': props.base.id,
+    'baseId': props.base?.isProject ? props.base.id : props.base.projectId,
     'onCreate': closeDialog,
     'onUpdate:modelValue': () => closeDialog(),
     'catalog': catalog,
+    'createTableToTreeData': props.createTableToTreeData,
   })
 
   function closeDialog(table?: TableType) {
@@ -123,6 +125,12 @@ const setCreateCatalogDialogShow = (value: boolean) => {
 .add-catalog-dropdown {
   .ant-dropdown-menu {
     min-width: 200px;
+  }
+}
+.hover-set,
+.hover-project-set {
+  &:hover .nc-sidebar-node-btn {
+    opacity: 1;
   }
 }
 </style>

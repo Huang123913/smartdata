@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { RuleObject } from 'ant-design-vue/es/form'
 import type { Form, Input } from 'ant-design-vue'
-import type { VNodeRef } from '@vue/runtime-core'
+import type { RuleObject } from 'ant-design-vue/es/form'
+
 import { computed } from '@vue/reactivity'
+import type { VNodeRef } from '@vue/runtime-core'
 
 const props = defineProps<{
   modelValue: boolean
@@ -100,7 +101,7 @@ const typeLabel = computed(() => {
   switch (baseType.value) {
     case NcProjectType.DB:
     default:
-      return 'Base'
+      return '项目'
   }
 })
 </script>

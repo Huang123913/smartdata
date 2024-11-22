@@ -8,7 +8,7 @@ export const useTablesStore = defineStore('tablesStore', () => {
   const { $e, $api } = useNuxtApp()
   const { addUndo, defineProjectScope } = useUndoRedo()
   const { refreshCommandPalette } = useCommandPalette()
-  const { getCustomCatalogEntityTree } = useChatPlaygroundViewStore()
+
   const router = useRouter()
   const route = router.currentRoute
 
@@ -18,7 +18,6 @@ export const useTablesStore = defineStore('tablesStore', () => {
 
   const workspaceStore = useWorkspace()
   const chatPlaygroundViewStore = useChatPlaygroundViewStore()
-
   const activeTableId = computed(() => route.value.params.viewId as string | undefined)
 
   const activeTables = computed(() => {
@@ -57,17 +56,17 @@ export const useTablesStore = defineStore('tablesStore', () => {
     if (existingTables && !force) {
       return
     }
-
     // const tables = await api.dbTable.list(baseId, {
     //   includeM2M: includeM2M.value,
     // })
-
     const tables: { list: any[] } = { list: [] }
-    await getCustomCatalogEntityTree()
-    if (chatPlaygroundViewStore.chataiData.modelData)
-      chatPlaygroundViewStore.chataiData.modelData.map((item) => {
+    let findProject = chatPlaygroundViewStore.findNodeById(chatPlaygroundViewStore.chataiData.treeData, baseId)
+    if (!findProject.isInit) {
+      await chatPlaygroundViewStore.getEntityCustomByBaseId(baseId)
+    }
+    if (chatPlaygroundViewStore.chataiData.projectMap[baseId] && chatPlaygroundViewStore.chataiData.projectMap[baseId].length > 0)
+      chatPlaygroundViewStore.chataiData.projectMap[baseId].map((item) => {
         if (!item.isCatalog) {
-          let parent = chatPlaygroundViewStore.chataiData.modelData.find((item1) => item1.id === item.parentId)
           tables.list.push({
             ...item,
             base_id: baseId,
@@ -76,7 +75,6 @@ export const useTablesStore = defineStore('tablesStore', () => {
             title: item.name_cn,
             type: 'table',
             source_id: `${item.parentId}`,
-            parentCatalog: parent.name_cn !== '模型目录' ? parent.name_cn : '',
             isModel: true,
             created_at: item.customDateTime,
           })

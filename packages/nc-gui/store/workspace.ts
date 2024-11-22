@@ -1,8 +1,9 @@
+import { message } from 'ant-design-vue'
 import type { AuditType, BaseType } from 'nocodb-sdk'
 import { acceptHMRUpdate, defineStore } from 'pinia'
-import { message } from 'ant-design-vue'
-import { isString } from '@vue/shared'
 import type { AuditLogsQuery } from '~/lib/types'
+
+import { isString } from '@vue/shared'
 
 const defaultAuditLogsQuery = {
   baseId: undefined,

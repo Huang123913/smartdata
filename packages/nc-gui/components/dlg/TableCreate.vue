@@ -3,6 +3,7 @@ const props = defineProps<{
   modelValue: boolean
   sourceId: string
   baseId: string
+  createTableToTreeData: (tableInfo: any) => void
   catalog?: any
 }>()
 const labelCol = { style: { width: '56px', position: 'relative', top: '3px' } }
@@ -36,7 +37,7 @@ const { table, createTable, generateUniqueTitle, tables, base } = useTableNew({
 
     addTable(props.baseId, table)
     await loadProjectTables(props.baseId, true)
-
+    await props.createTableToTreeData({ projectId: props.baseId })
     emit('create', table)
     dialogShow.value = false
   },

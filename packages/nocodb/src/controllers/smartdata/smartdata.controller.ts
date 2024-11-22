@@ -21,6 +21,16 @@ export class SmartDataController {
     private readonly mcdm: MCDMService,
   ) {}
 
+  @Get(['/api/v2/smartdata/getProjects'])
+  async getProjects() {
+    return await this.mcdm.getProjects();
+  }
+
+  @Get(['/api/v2/smartdata/getGroupList'])
+  async getGroupList() {
+    return await this.mcdm.getGroupList();
+  }
+
   @Get(['/api/v2/smartdata/entity'])
   async getEntity(@Query('entityId') entityId: string) {
     return await this.mcdm.getEntity(entityId);

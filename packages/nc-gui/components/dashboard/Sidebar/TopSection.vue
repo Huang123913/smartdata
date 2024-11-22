@@ -29,6 +29,15 @@ const navigateToSettings = () => {
 }
 
 const { navigateToComingSoon } = useSmartDataStore()
+const store1 = useChatPlaygroundViewStore()
+const { chataiData } = storeToRefs(store1)
+const groupName = computed(() => {
+  if (chataiData.value.groupList.length) {
+    let firstData = chataiData.value.groupList[0]
+    return firstData.groupName_cn
+  }
+  return ''
+})
 </script>
 
 <template>
@@ -70,6 +79,7 @@ const { navigateToComingSoon } = useSmartDataStore()
           <GeneralIcon icon="cloud" class="!h-4" />
           <div>企业控制台</div>
         </div>
+        <div class="groupName">{{ groupName }}</div>
       </NcButton>
 
       <NcButton
@@ -97,7 +107,6 @@ const { navigateToComingSoon } = useSmartDataStore()
         </div>
       </NcButton>
       <WorkspaceCreateProjectBtn
-        disabled
         v-model:is-open="isCreateProjectOpen"
         modal
         type="text"
@@ -117,5 +126,10 @@ const { navigateToComingSoon } = useSmartDataStore()
 <style lang="scss" scoped>
 .nc-sidebar-top-button {
   @apply w-full !rounded-md !font-normal !px-3;
+}
+.groupName {
+  position: absolute;
+  right: 0.625rem;
+  color: rgba(154, 162, 175, var(--tw-text-opacity));
 }
 </style>

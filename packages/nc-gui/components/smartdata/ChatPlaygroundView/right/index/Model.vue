@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ChatPlaygroundViewStoreEvents, ref } from '#imports'
 
-import { CloseOutlined, DownOutlined, SearchOutlined } from '@ant-design/icons-vue'
+import { CloseOutlined, SearchOutlined } from '@ant-design/icons-vue'
 
 import catalog from '../../../../../assets/img/catalog.svg'
 import model from '../../../../../assets/img/model.svg'
@@ -11,7 +11,7 @@ import { useChatPlaygroundViewStore } from '../../../../../store/chatPlaygroundV
 
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
-const { getCheckedModelData, setChataiDataIsOpenMode, eventBus, buildTree } = store
+const { getCheckedModelData, setChataiDataIsOpenMode, eventBus, buildTree, findNodeById } = store
 const searchModelText = ref<string>('') //搜索模型文本
 const isShowModelResult = ref<boolean>(false) //是否显示搜索模型的结果
 const searchModelResult = ref<any[]>([]) //搜索模型的结果
@@ -20,26 +20,45 @@ const checkedKeys = ref<string[]>([]) //勾选的模型
 const expandedKeys = ref<string[]>(['0-0', 'catalog'])
 const elementATree = ref(null)
 const scrollYHeight = ref(0)
+const route = useRoute()
 onMounted(() => {
   getCheckedModelData(checkedKeys.value)
   if (elementATree.value) scrollYHeight.value = parseInt(elementATree.value?.clientHeight) - 2
 })
 
 const showTableTree = computed(() => {
-  let data = chataiData.value.modelData
-    .filter((item) => item.key !== '0-0')
-    .map((item) => ({ ...item, parantId: item.parantId ? item.parantId : null }))
-  return [
-    {
-      id: null,
-      name_cn: '模型目录',
-      parentId: 'add-catalog',
-      isCatalog: true,
-      children: buildTree(data, false),
-      title: '模型目录',
-      key: '0-0',
-    },
-  ]
+  if (route?.params?.baseId) {
+    let datas = chataiData.value.projectMap[route?.params?.baseId as string]
+    if (!datas) return []
+    console.log('datas', datas)
+    return [
+      {
+        id: null,
+        name_cn: '模型目录',
+        parentId: 'add-catalog',
+        isCatalog: true,
+        children: buildTree(datas, false, route?.params?.baseId as string),
+        title: '模型目录',
+        key: '0-0',
+      },
+    ]
+  }
+  return []
+
+  // let data = chataiData.value.modelData
+  //   .filter((item) => item.key !== '0-0')
+  //   .map((item) => ({ ...item, parantId: item.parantId ? item.parantId : null }))
+  // return [
+  //   {
+  //     id: null,
+  //     name_cn: '模型目录',
+  //     parentId: 'add-catalog',
+  //     isCatalog: true,
+  //     children: buildTree(data, false),
+  //     title: '模型目录',
+  //     key: '0-0',
+  //   },
+  // ]
 })
 
 watch(elementATree, () => {
@@ -138,6 +157,7 @@ function searchNodes(nodeModel: any, results: any[]) {
       }
     }
   } else {
+    console.log('nodeModel', nodeModel)
     nodeModel.name_cn.indexOf(searchModelText.value) > -1 && results.push({ ...nodeModel })
   }
 }

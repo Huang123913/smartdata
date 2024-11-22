@@ -1,30 +1,21 @@
 <script lang="ts" setup>
 import type { BaseType } from 'nocodb-sdk'
 
+import { LoadingOutlined } from '@ant-design/icons-vue'
+
 import catalog from '../../../assets/img/catalog.svg'
 import { useChatPlaygroundViewStore } from '../../../store/chatPlaygroundView'
 
-const props = defineProps<{
-  base: BaseType
-  setIsLoadingModel: (value: boolean) => void
-}>()
-
-onMounted(async () => {
-  layoutLfetHeaderElem.value = document.querySelector('.layout-left-header')
-  layoutLfetFooterElem.value = document.querySelector('.layout-left-footer')
-  props.setIsLoadingModel(true)
-  props.base && (await loadProjectTables(props.base.id as string))
-  props.setIsLoadingModel(false)
-})
-
 const { loadProjectTables } = useTablesStore()
-const { openTable: _openTable } = useTableNew({ baseId: props.base.id! })
+const { openTable: _openTable } = useTableNew({ baseId: 'pp669ipc2spbhtl' })
 const { $api } = useNuxtApp()
 const route = useRoute()
+const router = useRouter()
+const route1 = router.currentRoute
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
-const { moveModel, moveCatalog } = store
-const expandedKeys = ref([])
+const { moveModel, moveCatalog, modifyProjectTitle, createTableToTreeData, getEntityCustomByBaseId, findNodeById } = store
+const expandedKeys = ref<string[]>([])
 const isShowLoading = ref(false)
 const modelTreeRef = ref<any>(null)
 const layoutLfetHeaderElem = ref<any>(null)
@@ -32,15 +23,54 @@ const layoutLfetFooterElem = ref<any>(null)
 const { isLeftSidebarOpen } = storeToRefs(useSidebarStore())
 const scrollYHeight = ref(0)
 const { search } = useFieldQuery()
+const basesStore = useBases()
+const { $e } = useNuxtApp()
+const { refreshCommandPalette } = useCommandPalette()
+const { meta: metaKey, control } = useMagicKeys()
+const { isMobileMode } = useGlobal()
+const { baseUrl } = useBase()
+const { isSharedBase } = storeToRefs(useBase())
+const indicator = h(LoadingOutlined, {
+  class: '!text-gray-400',
+  style: {
+    fontSize: '0.85rem',
+  },
+  spin: true,
+})
+const tempTitle = ref<string>('')
+const editModeId = ref<string>('')
+const { createProject: _createProject, updateProject } = basesStore
+const { refreshViewTabTitle } = useViewsStore()
+const { activeProjectId } = storeToRefs(useBases())
+const input = ref<HTMLInputElement>()
+const loadingProject = ref<string>('')
+
+onMounted(async () => {
+  layoutLfetHeaderElem.value = document.querySelector('.layout-left-header')
+  layoutLfetFooterElem.value = document.querySelector('.layout-left-footer')
+  if (route?.params?.baseId) {
+    // loadingProject.value = route?.params?.baseId as string
+    // await loadProjectTables(route?.params?.baseId as string)
+    handleClickCatalog(route?.params?.baseId as string)
+    // loadingProject.value = ''
+  }
+})
+
 const modelTreeData = computed(() => {
   if (modelTreeRef.value) resizeObserver.observe(modelTreeRef.value)
   if (!layoutLfetHeaderElem.value) layoutLfetHeaderElem.value = document.querySelector('.layout-left-header')
   if (!layoutLfetFooterElem.value) layoutLfetFooterElem.value = document.querySelector('.layout-left-footer')
-  return chataiData.value.modelTree.length ? chataiData.value.modelTree[0].children : []
+  return chataiData.value.treeData
 })
 
 const openedTableId = computed(() => {
-  return route && route?.params && route.params?.viewId ? route.params?.viewId : ''
+  if (route && route?.params && route.params?.viewId) {
+    return route.params?.viewId
+  } else if (route && route?.params && route.params?.baseId) {
+    return route.params?.baseId
+  } else {
+    return ''
+  }
 })
 
 const otherContentHeight = computed(() => {
@@ -63,7 +93,7 @@ const onClickToTableView = (item: any) => {
   search.value.queryModelSearchParams = []
   _openTable({
     ...item,
-    base_id: props.base.id,
+    base_id: item.projectId,
     id: item.id,
     title: item.name_cn,
     table_name: item.name,
@@ -73,17 +103,18 @@ const onClickToTableView = (item: any) => {
 
 const handleExpand = (expandedKeys1: any, e: any) => {
   if (e.expanded) {
-    expandedKeys.value.push(e.node.id)
+    expandedKeys.value = [...expandedKeys.value, e.node.id]
   } else {
     expandedKeys.value = expandedKeys.value.filter((item) => item !== e.node.id)
   }
 }
 
-const handleClickCatalog = (catalog: any) => {
-  if (expandedKeys.value.includes(catalog.id)) {
-    expandedKeys.value = expandedKeys.value.filter((item) => item !== catalog.id)
+const handleClickCatalog = (catalogId: string) => {
+  if (expandedKeys.value.includes(catalogId)) {
+    console.log('点击目录')
+    expandedKeys.value = expandedKeys.value.filter((item) => item !== catalogId)
   } else {
-    expandedKeys.value.push(catalog.id)
+    expandedKeys.value = [...expandedKeys.value, catalogId]
   }
 }
 
@@ -109,7 +140,6 @@ const onDrop = async (info: any) => {
 }
 
 const dropModel = async (info: any) => {
-  console.log('info', info)
   const dropPosition = info.dropPosition
   //拖拽节点
   const dragNode = info.dragNode
@@ -119,6 +149,9 @@ const dropModel = async (info: any) => {
   const dragNodeParentId = dragNode.parentId
   //目标节点
   let dropNode = info.node
+  if (dragNode.projectId !== dropNode.projectId) {
+    return
+  }
   //模型新的父级id
   let newParentId = dropNode.parentId
   console.log('newParentId', newParentId)
@@ -128,17 +161,16 @@ const dropModel = async (info: any) => {
   let prependToTableId = dropNode.isCatalog ? '' : dropNode.key
   if (Number(dropPosition) < 0 || prependToTableId.indexOf('Empty') > -1) prependToTableId = ''
   let params = {
-    baseId: props.base.id,
+    baseId: dragNode.projectId,
     catalogId: newParentId, //调整到哪个目录ID下，若传空则认为在原目录下调整位置
     tableId: dragNodeKey, //要调整位置的表ID
     prependToTableId, //要插入到哪个表ID前，若传空则插入到目录的最后
   }
-  moveModel(dragNodeKey, dragNodeParentId, newParentId === '__root__' ? null : newParentId, prependToTableId)
+  moveModel(dragNode.projectId, dragNodeKey, dragNodeParentId, newParentId === '__root__' ? null : newParentId, prependToTableId)
   await $api.smartData.moveModel(params)
 }
 
 const dropCatalog = async (info: any) => {
-  console.log('info', info)
   const dropPosition = info.dropPosition
   //拖拽对象
   const dragNode = info.dragNode
@@ -148,6 +180,9 @@ const dropCatalog = async (info: any) => {
   const dragNodeParentId = dragNode.parentId
   //目标节点
   let dropNode = info.node
+  if (dragNode.projectId !== dropNode.projectId) {
+    return
+  }
   //目录新的父级id
   let newParentId = dropNode.parentId
   newParentId = info.dropPosition < 0 ? null : newParentId
@@ -161,13 +196,133 @@ const dropCatalog = async (info: any) => {
   await $api.smartData.moveCatalog(params)
   moveCatalog(dragNodeKey, dragNodeParentId, newParentId, prependToTableId)
 }
+
+//设置项目logo颜色
+const setColor = async (color: string, base: BaseType) => {
+  try {
+    const meta = {
+      ...parseProp(base.meta),
+      iconColor: color,
+    }
+    basesStore.updateProject(base.id!, { meta: JSON.stringify(meta) })
+    $e('a:base:icon:color:navdraw', { iconColor: color })
+  } catch (e: any) {
+    message.error(await extractSdkResponseErrorMsg(e))
+  } finally {
+    refreshCommandPalette()
+  }
+}
+
+const setLoadingProject = (value: string) => {
+  loadingProject.value = value
+}
+
+const handleProject = async (base: NcProject, ignoreNavigation?: boolean, toggleIsExpanded?: boolean) => {
+  const cmdOrCtrl = isMac() ? metaKey.value : control.value
+
+  if (!toggleIsExpanded && !cmdOrCtrl) $e('c:base:open')
+
+  ignoreNavigation = isMobileMode.value || ignoreNavigation
+
+  await getEntityCustomByBaseId(base.id!, false, setLoadingProject)
+
+  if (cmdOrCtrl && !ignoreNavigation) {
+    await navigateTo(
+      `${cmdOrCtrl ? '#' : ''}${baseUrl({
+        id: base.id!,
+        type: 'database',
+        isSharedBase: isSharedBase.value,
+      })}`,
+      cmdOrCtrl
+        ? {
+            open: navigateToBlankTargetOpenOption,
+          }
+        : undefined,
+    )
+    return
+  }
+
+  const isProjectPopulated = basesStore.isProjectPopulated(base.id!)
+
+  if (!ignoreNavigation) {
+    await navigateTo(
+      baseUrl({
+        id: base.id!,
+        type: 'database',
+        isSharedBase: isSharedBase.value,
+      }),
+    )
+  }
+
+  if (!isProjectPopulated) {
+    await loadProjectTables(base.id!)
+  }
+  if (!expandedKeys.value.includes(base.id!)) expandedKeys.value = [...expandedKeys.value, base.id!]
+  if (loadingProject.value) setLoadingProject('')
+}
+
+const updateProjectTitle = async (baseId: string) => {
+  if (tempTitle.value) {
+    tempTitle.value = tempTitle.value.trim()
+  }
+
+  if (!tempTitle.value) return
+
+  try {
+    modifyProjectTitle(baseId, tempTitle.value)
+    await updateProject(baseId, {
+      title: tempTitle.value,
+    })
+    editModeId.value = ''
+    tempTitle.value = ''
+    $e('a:base:rename')
+
+    refreshViewTabTitle?.()
+  } catch (e: any) {
+    message.error(await extractSdkResponseErrorMsg(e))
+  }
+}
+
+const baseViewOpen = computed(() => {
+  const routeNameSplit = String(route1.value?.name).split('baseId-index-index')
+  if (routeNameSplit.length <= 1) return false
+
+  const routeNameAfterProjectView = routeNameSplit[routeNameSplit.length - 1]
+  return routeNameAfterProjectView.split('-').length === 2 || routeNameAfterProjectView.split('-').length === 1
+})
+
+const reName = (editModeIdNew: string, tempTitleNew: string) => {
+  editModeId.value = editModeIdNew
+  tempTitle.value = tempTitleNew
+  nextTick(() => {
+    input.value?.focus()
+    input.value?.select()
+    input.value?.scrollIntoView()
+  })
+}
+
+const handleProjectDrownDone = (base: any) => {
+  let findProject = findNodeById(chataiData.value.treeData, base.key)
+  if (!findProject.isInit) {
+    handleProject(base)
+    return
+  }
+  handleClickCatalog(base.key)
+}
+
+watch(
+  () => route.params?.baseId,
+  (baseId) => {
+    if (baseId && !expandedKeys.value.includes(baseId as string)) expandedKeys.value = [...expandedKeys.value, baseId as string]
+  },
+)
 </script>
 
 <template>
   <div
     ref="modelTreeRef"
     class="model-list rounded-md w-full"
-    :style="{ height: `calc(${isLeftSidebarOpen ? '100vh' : '79vh'}  - ${otherContentHeight}px)` }"
+    :style="{ height: `calc(${isLeftSidebarOpen ? '100vh' : '79vh'}  - ${otherContentHeight}px)`, padding: '0 .25rem' }"
   >
     <a-tree
       :height="scrollYHeight"
@@ -180,16 +335,76 @@ const dropCatalog = async (info: any) => {
     >
       <template #title="item">
         <a-tooltip :title="item.title">
-          <div v-if="item.isCatalog" class="model-text-content pr-1 hover-set" @click="handleClickCatalog(item)">
+          <!-- 项目 -->
+          <div
+            v-if="item.isProject"
+            class="project-content model-text-content pr-1 hover-project-set"
+            :class="{
+              'background-set': openedTableId === item.id,
+            }"
+            @click="handleProject(item)"
+          >
+            <div class="project-name">
+              <a-spin v-if="loadingProject === item.id" class="!flex !flex-row !items-center w-5" :indicator="indicator" />
+              <div v-else>
+                <GeneralBaseIconColorPicker
+                  :key="`${item.id}_${parseProp(item.meta).iconColor}`"
+                  :type="item?.type"
+                  :model-value="parseProp(item.meta).iconColor"
+                  size="small"
+                  @update:model-value="setColor($event, item)"
+                />
+              </div>
+
+              <div class="mode-text">
+                <input
+                  v-if="editModeId === item.id"
+                  ref="input"
+                  v-model="tempTitle"
+                  class="flex-grow leading-1 outline-0 ring-none capitalize !text-inherit !bg-transparent flex-1 mr-4"
+                  :class="activeProjectId === item.id && baseViewOpen ? '!text-brand-600 !font-semibold' : '!text-gray-700'"
+                  @click.stop
+                  @keyup.enter="updateProjectTitle(item.id)"
+                  @keyup.esc="updateProjectTitle(item.id)"
+                  @blur="updateProjectTitle(item.id)"
+                />
+                <span v-else> {{ item.title }}</span>
+              </div>
+            </div>
+            <div class="flex">
+              <DashboardTreeViewModelListProjectDropDown :reName="reName" :item="item" />
+              <DashboardTreeViewModelListAddDropDown :item="item" :base="item" :createTableToTreeData="createTableToTreeData" />
+              <NcButton
+                v-e="['c:base:expand']"
+                type="text"
+                size="xxsmall"
+                class="opacity-0 nc-sidebar-expand project-btn"
+                @click=" (e:any) => {
+                     e.stopPropagation()
+                     handleProjectDrownDone(item)
+
+              }"
+              >
+                <GeneralIcon
+                  icon="chevronRight"
+                  class="group-hover:visible cursor-pointer transform transition-transform duration-200 text-[20px]"
+                  :class="{ '!rotate-90': expandedKeys.includes(item.id) }"
+                />
+              </NcButton>
+            </div>
+          </div>
+          <!-- 目录 -->
+          <div v-else-if="item.isCatalog" class="model-text-content pr-1 hover-set" @click="handleClickCatalog(item.key)">
             <div class="table-name">
               <img :src="catalog" width="16" height="16" class="catlog-img" />
               <span class="mode-text"> {{ item.title }}</span>
             </div>
             <div class="flex more-action-btn more-acttion-btn-to-catalog">
-              <DashboardTreeViewModelListDropDown :item="item" :base="base" :isCatalogDropDown="true" />
-              <DashboardTreeViewModelListAddDropDown :item="item" :base="base" />
+              <DashboardTreeViewModelListDropDown :item="item" :projectList="chataiData.projectList" :isCatalogDropDown="true" />
+              <DashboardTreeViewModelListAddDropDown :item="item" :base="item" :createTableToTreeData="createTableToTreeData" />
             </div>
           </div>
+          <!-- 表 -->
           <div
             v-else
             class="model-text-content pr-1"
@@ -255,15 +470,15 @@ const dropCatalog = async (info: any) => {
               <DashboardTreeViewModelListDropDown
                 :item="{
                   ...item,
-                  base_id: props.base.id,
+                  base_id: item.projectId,
                   id: item.id,
                   title: item.name_cn,
                   table_name: item.name,
                   type: 'table',
                   source_id: item.parentId,
                 }"
-                :base="base"
                 :isCatalogDropDown="false"
+                :projectList="chataiData.projectList"
               />
             </div>
           </div>
@@ -304,12 +519,30 @@ const dropCatalog = async (info: any) => {
       background-color: rgba(231, 231, 233, var(--tw-bg-opacity));
     }
   }
+
+  ::v-deep .ant-tree-treenode:has(.hover-project-set) {
+    &:hover {
+      --tw-bg-opacity: 1;
+      background-color: rgba(231, 231, 233, var(--tw-bg-opacity));
+    }
+  }
+
+  ::v-deep .ant-tree-treenode:has(.project-name) {
+    .ant-tree-switcher {
+      display: none !important;
+    }
+  }
+
   .nc-sidebar-node-btn {
     @apply !opacity-100 !inline-block;
-    opacity: 0;
+    opacity: 1;
   }
-  .hover-set {
+  .hover-set,
+  .hover-project-set {
     &:hover .nc-sidebar-node-btn {
+      opacity: 1 !important;
+    }
+    &:hover .nc-sidebar-expand {
       opacity: 1 !important;
     }
   }
@@ -373,6 +606,26 @@ const dropCatalog = async (info: any) => {
     .emty-style {
       color: #6a7184;
     }
+  }
+  .project-content {
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    position: relative;
+    padding: 2px 0;
+    justify-content: space-between;
+  }
+}
+.project-name {
+  display: flex;
+}
+.project-btn {
+  &:hover {
+    --tw-bg-opacity: 1;
+    background-color: rgba(154, 162, 175, var(--tw-bg-opacity));
+    --tw-bg-opacity: 0.2;
+    --tw-text-opacity: 1;
+    color: rgba(16, 16, 21, var(--tw-text-opacity));
   }
 }
 </style>

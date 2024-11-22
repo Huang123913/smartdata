@@ -12059,6 +12059,36 @@ export class Api<
   };
   smartData = {
     /**
+     * @description getGroupList MCDM
+     *
+     * @tags SmartData
+     * @name GetGroupList
+     * @summary getGroupList MCDM
+     * @request GET:/api/v2/smartdata/getGroupList
+     */
+    getGroupList: (params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/getGroupList`,
+        method: 'GET',
+        ...params,
+      }),
+
+    /**
+     * @description getProjects MCDM
+     *
+     * @tags SmartData
+     * @name GetProjects
+     * @summary getProjects MCDM
+     * @request GET:/api/v2/smartdata/getProjects
+     */
+    getProjects: (params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/getProjects`,
+        method: 'GET',
+        ...params,
+      }),
+
+    /**
      * @description Train LLM
      *
      * @tags SmartData

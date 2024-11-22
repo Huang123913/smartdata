@@ -1,10 +1,15 @@
-import { acceptHMRUpdate, defineStore } from 'pinia'
 import type { BaseType, OracleUi, ProjectUserReqType, RequestParams, SourceType } from 'nocodb-sdk'
 import { SqlUiFactory } from 'nocodb-sdk'
+import { acceptHMRUpdate, defineStore } from 'pinia'
+
 import { isString } from '@vue/shared'
 
 // todo: merge with base store
 export const useBases = defineStore('basesStore', () => {
+  const store = useChatPlaygroundViewStore()
+  const { findNodeById, getEntityCustomByBaseId, deleteProjectByBaseId, addProject, getTreeData } = store
+  const { chataiData } = storeToRefs(store)
+
   const { $api } = useNuxtApp()
 
   const { isUIAllowed } = useRoles()
@@ -95,7 +100,10 @@ export const useBases = defineStore('basesStore', () => {
     await api.auth.baseUserRemove(baseId, user.id)
   }
 
-  const loadProjects = async (page: 'recent' | 'shared' | 'starred' | 'workspace' = 'recent') => {
+  const loadProjects = async (
+    page: 'recent' | 'shared' | 'starred' | 'workspace' = 'recent',
+    type: 'delete' | 'get' | 'add' = 'get',
+  ) => {
     // if shared base then get the shared base and create a list
     if (route.value.params.typeOrId === 'base' && route.value.params.baseId) {
       try {
@@ -137,9 +145,17 @@ export const useBases = defineStore('basesStore', () => {
 
     isProjectsLoading.value = true
     try {
-      const { list } = await $api.base.list({
-        baseURL: getBaseUrl(activeWorkspace?.id ?? workspace?.id),
+      const projectList = await $api.smartData.getProjects()
+      console.log('projectList', projectList)
+      let list = projectList.map((item) => {
+        return {
+          ...item,
+          title: item.name,
+        }
       })
+      // await $api.base.list({
+      //   baseURL: getBaseUrl(activeWorkspace?.id ?? workspace?.id),
+      // })
       _projects = list
 
       bases.value = _projects.reduce((acc, base) => {
@@ -154,6 +170,7 @@ export const useBases = defineStore('basesStore', () => {
       }, new Map())
 
       await updateIfBaseOrderIsNullOrDuplicate()
+      if (type === 'get') await getTreeData(list, route.value.params.baseId)
     } catch (e) {
       console.error(e)
       message.error(e.message)
@@ -256,18 +273,29 @@ export const useBases = defineStore('basesStore', () => {
         baseURL: getBaseUrl('nc'),
       },
     )
-
-    await loadProjects()
-
+    await loadProjects('recent', 'add')
+    addProject(result)
     return result
   }
 
   const deleteProject = async (baseId: string) => {
+    //暂时注释
+    // let findProject = findNodeById(chataiData.value.treeData, baseId)
+    // if (findProject && findProject?.children.length) {
+    //   message.warning('项目内存在实体，无法删除！')
+    //   return
+    // } else {
+    //   let data = await getEntityCustomByBaseId(baseId)
+    //   if (data.length) {
+    //     message.warning('项目内存在实体，无法删除！')
+    //     return
+    //   }
+    // }
     await api.base.delete(baseId)
     bases.value.delete(baseId)
     tableStore.baseTables.delete(baseId)
-
-    await loadProjects()
+    deleteProjectByBaseId(baseId)
+    await loadProjects('recent', 'delete')
   }
 
   const getProjectMeta = (baseId: string) => {

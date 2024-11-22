@@ -4,13 +4,13 @@ import type { BaseType } from 'nocodb-sdk'
 
 const props = defineProps<{
   item: any
-  base: BaseType
+  projectList: any[]
   isCatalogDropDown: boolean
 }>()
 const { $api } = useNuxtApp()
 const store = useChatPlaygroundViewStore()
 const { chataiData } = storeToRefs(store)
-const { moveCatalog, moveModel } = store
+const { moveCatalog, moveModel, deleteTable } = store
 const { isUIAllowed } = useRoles()
 const { openRenameTableDialog, duplicateTable } = inject(TreeViewInj)!
 const baseRole = inject(ProjectRoleInj)
@@ -22,6 +22,7 @@ const updatedModel = ref(null)
 const isShowLoading = ref(false)
 const modelPath = ref('')
 const isShowCatalogRenameDialog = ref(false)
+const base = ref<any>(null)
 const selectCatalogModelTitle = computed(() => {
   return props.isCatalogDropDown ? '移动目录' : '移动表格'
 })
@@ -38,7 +39,6 @@ const handleTableDelete = () => {
   clicked.value = false
   if (props.isCatalogDropDown) {
     isCatalogDeleteDialogVisible.value = true
-    console.log('isCatalogDeleteDialogVisible', isCatalogDeleteDialogVisible.value)
   } else {
     isTableDeleteDialogVisible.value = true
   }
@@ -67,7 +67,7 @@ const handleShowSelectCatalog = (value: boolean, item?: any) => {
       let findCatalog = chataiData.value.modelData.find((model) => model.id == item.parentId)
       modelPath.value = `${findCatalog.name_cn} / ${item.name_cn}`
     } else {
-      modelPath.value = `${props.base.title} / ${item.name_cn}`
+      modelPath.value = `${base.value.title} / ${item.name_cn}`
     }
   }
 }
@@ -107,17 +107,28 @@ const moveCatalogTo = async (selectedCatalogParam: any) => {
 
 const moveModelTo = async (selectedCatalogParam: any) => {
   let params = {
-    baseId: props.base.id,
+    baseId: base.value.id,
     catalogId: selectedCatalogParam ? selectedCatalogParam.id : '__root__', //调整到哪个目录ID下，若传空则认为在原目录下调整位置
     tableId: updatedModel.value?.id, //要调整位置的表ID
     prependToTableId: '', //要插入到哪个表ID前，若传空则插入到目录的最后
   }
-  moveModel(params.tableId, updatedModel.value?.parentId, selectedCatalogParam ? selectedCatalogParam.id : null, '')
+  moveModel(
+    updatedModel.value?.projectId,
+    params.tableId,
+    updatedModel.value?.parentId,
+    selectedCatalogParam ? selectedCatalogParam.id : null,
+    '',
+  )
   await $api.smartData.moveModel(params)
 }
 
 const handleSetIsCatalogDeleteDialogVisible = (value: boolean) => {
   isCatalogDeleteDialogVisible.value = value
+}
+
+const setBase = () => {
+  let findItem = props.projectList.find((project) => project.id === props.item.projectId)
+  if (findItem) base.value = findItem
 }
 </script>
 <template>
@@ -134,6 +145,7 @@ const handleSetIsCatalogDeleteDialogVisible = (value: boolean) => {
           (e:any) => {
             e.stopPropagation()
             clicked = true
+            setBase()
           }
         "
       data-testid="nc-sidebar-table-context-menu"
@@ -192,6 +204,8 @@ const handleSetIsCatalogDeleteDialogVisible = (value: boolean) => {
     v-model:visible="isTableDeleteDialogVisible"
     :table-id="item.id"
     :base-id="base.id"
+    :deleteTable="deleteTable"
+    :deleteTableInfo="item"
   />
 
   <DlgCatalogDelete
@@ -213,10 +227,7 @@ const handleSetIsCatalogDeleteDialogVisible = (value: boolean) => {
   <SmartdataChatPlaygroundViewCommonLoading :isShow="isShowLoading" />
 </template>
 
-<style lang="scss">
-.nc-sidebar-node-btn {
-  opacity: 0;
-}
+<style lang="scss" scoped>
 .table-action-content {
   .ant-dropdown-menu {
     min-width: 200px;
