@@ -151,6 +151,26 @@ export const useBases = defineStore('basesStore', () => {
         return {
           ...item,
           title: item.name,
+          sources: [
+            {
+              id: item.id,
+              base_id: item.id,
+              config: 'U2FsdGVkX18GHjP5OMoPeWeTNauCPujQYXudpF5Uj5k=',
+              deleted: 0,
+              description: null,
+              enabled: 1,
+              erd_uuid: null,
+              id: item.id,
+              inflection_column: 'camelize',
+              inflection_table: 'camelize',
+              is_data_readonly: 0,
+              is_meta: 1,
+              is_schema_readonly: 0,
+              meta: null,
+              order: 1,
+              type: 'sqlite3',
+            },
+          ],
         }
       })
       // await $api.base.list({
