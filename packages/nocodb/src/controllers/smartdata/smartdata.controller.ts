@@ -349,7 +349,7 @@ export class SmartDataController {
     @Body()
     data: {
       entityId: string;
-      datafiles: string;
+      submitdataData: string;
       isUpdateSession?: boolean;
       isOnlySubmitdata?: boolean;
     },
@@ -364,6 +364,7 @@ export class SmartDataController {
       conversation_id: string;
       datatype: string;
       question: string;
+      datacontents: string;
     },
   ) {
     return await this.llm.talktodata(data);
@@ -386,5 +387,17 @@ export class SmartDataController {
     data: object,
   ) {
     return await this.llm.createQueryModel(data);
+  }
+
+  @Post(['/api/v2/smartdata/saveCard'])
+  async saveCard(
+    @Body()
+    data: {
+      ipValue: string;
+      ownerId;
+      saveValue: any;
+    },
+  ) {
+    return await this.mcdm.saveCard(data);
   }
 }

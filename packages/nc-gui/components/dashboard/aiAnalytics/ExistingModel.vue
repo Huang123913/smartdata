@@ -37,7 +37,15 @@ const startIndex = ref(0) // 当前滚动的起始索引
 const offsetY = ref(0) // 滚动偏移量
 
 const existingModelData = computed(() => {
-  return chataiData.value.modelData.filter((item) => !item.isCatalog)
+  let projectMap = chataiData.value.projectMap
+  let data: any[] = []
+  for (const key in projectMap) {
+    if (projectMap[key]) {
+      data = projectMap[key]
+      console.log('data1', projectMap[key])
+    }
+  }
+  return data
 })
 
 const columns = computed(() => {

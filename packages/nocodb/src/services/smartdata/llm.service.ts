@@ -599,12 +599,13 @@ export class LLMService {
   //创建会话
   async createSession(params: {
     entityId: string;
-    datafiles: string;
+    submitdataData: string;
     isUpdateSession?: boolean;
     isOnlySubmitdata?: boolean;
   }) {
-    let { entityId, datafiles, isUpdateSession, isOnlySubmitdata } = params;
-    let submitdataRes = await this.submitdata('json', datafiles);
+    let { entityId, isUpdateSession, isOnlySubmitdata, submitdataData } =
+      params;
+    let submitdataRes = await this.submitdata(submitdataData);
     if (!isOnlySubmitdata) {
       let updateId = '';
       if (isUpdateSession) {
@@ -637,14 +638,18 @@ export class LLMService {
     return submitdataRes;
   }
 
-  async submitdata(datatype: string, datafiles: string) {
+  async submitdata(submitdataData: string) {
+    let submitdataDataObj = JSON.parse(submitdataData);
     let orgid = process.env.LLM_ORGID ?? '2';
     let projectid = process.env.LLM_PROJECTID ?? '2';
     const formData = new FormData();
-    formData.append('datatype', datatype);
-    formData.append('datafiles', datafiles);
-    formData.append('projectid', projectid);
+    formData.append('conversation_id,', submitdataDataObj.conversation_id);
     formData.append('orgid', orgid);
+    formData.append('projectid', projectid);
+    formData.append(
+      'datacontents',
+      JSON.stringify(submitdataDataObj.datacontents),
+    );
     return await this.llm({
       method: 'POST',
       url: `/submitdata_new`,
@@ -659,8 +664,9 @@ export class LLMService {
     conversation_id: string;
     datatype: string;
     question: string;
+    datacontents: string;
   }) {
-    let { conversation_id, datatype, question } = params;
+    let { conversation_id, datatype, question, datacontents } = params;
     let orgid = process.env.LLM_ORGID ?? '2';
     let projectid = process.env.LLM_PROJECTID ?? '2';
     const formData = new FormData();
@@ -669,6 +675,9 @@ export class LLMService {
     formData.append('question', question);
     formData.append('projectid', projectid);
     formData.append('orgid', orgid);
+    if (datacontents) {
+      formData.append('datacontents', datacontents);
+    }
     return await this.llm({
       method: 'POST',
       url: `/talktodata_new`,

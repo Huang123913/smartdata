@@ -11,9 +11,10 @@ const isShowLoading = ref(false)
 const handleClick = async () => {
   try {
     isShowLoading.value = true
+    let submitdataData = { conversation_id: '', datacontents: [] }
     let createSessionRes = await $api.smartData.createSession({
       entityId: activeTableId.value,
-      datafiles: JSON.stringify([]),
+      submitdataData: JSON.stringify(submitdataData),
       isUpdateSession: true,
     })
     if (createSessionRes?.conversation_id) {

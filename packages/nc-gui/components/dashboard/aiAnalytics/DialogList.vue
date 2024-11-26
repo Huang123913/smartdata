@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { ArrowRightOutlined } from '@ant-design/icons-vue'
 
 const props = defineProps<{
-  handleSend: (value: string, isAdd: boolean, callback: () => void) => void
+  handleSend: (value: string, isAdd: boolean, isGenerateCharts: boolean, callback: () => void) => void
   isSending: boolean
   rephrasequestion: (value: string, callback: () => void) => void
   deleteMessage: (item: any) => void
@@ -12,6 +12,10 @@ const props = defineProps<{
   runManualSql: (item: any) => void
   contentWidth?: number
 }>()
+
+const store = useaiAnalyticsStore()
+// const {  } = storeToRefs(store)
+const { getTableDataForChart } = store
 
 const { t } = useI18n()
 
@@ -84,13 +88,13 @@ const downloadImage = (base64Data: string[] | object[]) => {
 
 const handleConfirm = (item: any) => {
   console.log('item', item)
-  props.handleSend('正确', true, () => {})
+  props.handleSend('正确', true, false, () => {})
 }
 
 const handleFixed = (item: any) => {
   const parts = item.tableRes.content.split('[')
   const lastContent = parts.pop().replace(']', '')
-  props.handleSend(`不正确,${lastContent}`, false, () => {})
+  props.handleSend(`不正确,${lastContent}`, false, false, () => {})
 }
 
 const isCreateQueryModel = ref(false)
@@ -113,6 +117,16 @@ const isShowCorrectIcon = (item: any) => {
   let result1 = item.data.indexOf('正确') > -1 && item.data.indexOf('?') > -1
   let result2 = item.data.indexOf('对吗') > -1 && item.data.indexOf('?') > -1
   return result || result1 || result2
+}
+const showSaveCardModel = ref(false)
+const currentSavedHtml = ref('')
+
+const saveCard = (htmlContent: string) => {
+  currentSavedHtml.value = htmlContent
+  showSaveCardModel.value = true
+}
+const handleClose = () => {
+  showSaveCardModel.value = false
 }
 </script>
 
@@ -206,6 +220,66 @@ const isShowCorrectIcon = (item: any) => {
           <DashboardAiAnalyticsSaveData :item="item" v-model:showAction="showAction" />
         </div>
 
+        <div v-if="item.isShowSaveBtn" class="generate-charts" @click="getTableDataForChart(item)">
+          <svg
+            t="1729147397562"
+            class="icon"
+            viewBox="0 0 1024 1024"
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            p-id="9987"
+            width="20"
+            height="20"
+          >
+            <path
+              d="M114.039467 830.481067h94.9248a41.361067 41.361067 0 0 0 41.3184-41.3184V222.557867a41.361067 41.361067 0 0 0-41.3184-41.3184H114.039467a41.361067 41.361067 0 0 0-41.3184 41.3184V789.162667a41.361067 41.361067 0 0 0 41.3184 41.3184z m-15.7184-607.9232c0-8.669867 7.048533-15.7184 15.7184-15.7184h94.9248c8.669867 0 15.7184 7.048533 15.7184 15.7184V789.162667a15.735467 15.735467 0 0 1-15.7184 15.7184H114.039467a15.735467 15.735467 0 0 1-15.7184-15.7184V222.557867zM352.426667 830.481067h94.9248a41.361067 41.361067 0 0 0 41.3184-41.3184V411.3152a41.361067 41.361067 0 0 0-41.3184-41.3184H352.426667a41.361067 41.361067 0 0 0-41.3184 41.3184V789.162667a41.378133 41.378133 0 0 0 41.3184 41.3184z m-15.709867-419.165867c0-8.669867 7.048533-15.7184 15.7184-15.7184h94.9248c8.669867 0 15.7184 7.048533 15.7184 15.7184V789.162667a15.735467 15.735467 0 0 1-15.7184 15.7184H352.426667a15.735467 15.735467 0 0 1-15.7184-15.7184l0.008533-377.847467zM562.312533 548.352a12.8 12.8 0 0 0-12.8 12.8v227.6608a41.6768 41.6768 0 0 0 41.6768 41.6768h94.199467a41.6768 41.6768 0 0 0 41.6768-41.6768V631.722667a12.8 12.8 0 0 0-25.6 0v157.0816c0 8.874667-7.1936 16.0768-16.0768 16.0768H591.189333a16.0768 16.0768 0 0 1-16.0768-16.0768V561.152a12.8 12.8 0 0 0-12.8-12.8zM795.7504 925.866667H89.6768a12.8 12.8 0 0 0 0 25.6h706.065067a12.8 12.8 0 0 0 0.008533-25.6zM766.7712 76.100267c-126.976 0-230.272 103.304533-230.272 230.280533s103.296 230.280533 230.272 230.280533 230.280533-103.304533 230.280533-230.280533-103.304533-230.280533-230.280533-230.280533z m0 25.6c6.818133 0 13.550933 0.349867 20.189867 1.006933l-17.911467 179.2a22.033067 22.033067 0 0 1-9.1392 15.863467 22.135467 22.135467 0 0 1-17.954133 3.677866l-174.9504-39.466666c20.334933-91.579733 102.152533-160.2816 199.765333-160.2816z m0 409.3696c-112.861867 0-204.672-91.818667-204.672-204.680534 0-6.4256 0.3328-12.782933 0.9216-19.063466l173.303467 39.0912a47.889067 47.889067 0 0 0 58.197333-41.966934l17.749333-177.5872c91.025067 20.753067 159.1808 102.2976 159.1808 199.5264 0 112.861867-91.810133 204.680533-204.680533 204.680534z"
+              fill="#231815"
+              p-id="9988"
+            ></path>
+            <path
+              d="M950.0416 771.729067h-41.002667v-41.002667a12.8 12.8 0 0 0-25.6 0v41.002667h-41.002666a12.8 12.8 0 0 0 0 25.6h41.002666v41.002666a12.8 12.8 0 0 0 25.6 0v-41.002666h41.002667a12.8 12.8 0 0 0 0-25.6z"
+              fill="#231815"
+              p-id="9989"
+            ></path>
+          </svg>
+          <span>图表生成</span>
+        </div>
+
+        <div
+          style="margin-top: -2px"
+          v-if="item.htmlContent"
+          class="generate-charts save-card"
+          @click="saveCard(item.htmlContent)"
+        >
+          <svg
+            t="1729243625754"
+            class="icon"
+            viewBox="0 0 1024 1024"
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            p-id="20985"
+            width="16"
+            height="16"
+          >
+            <path
+              d="M928.774707 187.553607 94.112959 187.553607c-15.363919 0-27.821649 12.489452-27.821649 27.895327l0 585.789587c0 15.405875 12.45773 27.895327 27.821649 27.895327l834.661747 0c15.362896 0 27.821649-12.489452 27.821649-27.895327L956.596356 215.448934C956.596356 200.044082 944.137603 187.553607 928.774707 187.553607zM893.005039 764.981758 129.881604 764.981758 129.881604 251.705696l763.123434 0L893.005039 764.981758z"
+              fill="#737384"
+              p-id="20986"
+            ></path>
+            <path
+              d="M808.546461 380.025223 214.352461 380.025223c-11.532661 0-20.865213 9.370415-20.865213 20.921495l0 22.323425c0 11.550057 9.332553 20.921495 20.865213 20.921495l594.194 0c11.521404 0 20.866237-9.371438 20.866237-20.921495l0-22.323425C829.411675 389.396661 820.067866 380.025223 808.546461 380.025223z"
+              fill="#737384"
+              p-id="20987"
+            ></path>
+            <path
+              d="M363.379613 636.662231 214.352461 636.662231c-11.532661 0-20.865213 9.356089-20.865213 20.920472l0 22.311145c0 11.564383 9.332553 20.921495 20.865213 20.921495L363.379613 700.815343c11.534707 0 20.866237-9.358135 20.866237-20.921495l0-22.311145C384.246873 646.01832 374.91432 636.662231 363.379613 636.662231z"
+              fill="#737384"
+              p-id="20988"
+            ></path>
+          </svg>
+          <span>保存成卡片</span>
+        </div>
+
         <div @click="deleteMessage(item)">
           <NcTooltip>
             <template #title>
@@ -291,7 +365,7 @@ const isShowCorrectIcon = (item: any) => {
     </div>
 
     <div class="recommend" v-if="item.questions">
-      <div class="recommend-list" @click="handleSend(recommend, true, () => {})" v-for="recommend in item.questions">
+      <div class="recommend-list" @click="handleSend(recommend, true, false, () => {})" v-for="recommend in item.questions">
         <div class="text">
           {{ recommend }}
         </div>
@@ -302,6 +376,13 @@ const isShowCorrectIcon = (item: any) => {
   <DashboardAiAnalyticsLoading :isSending="isSending" />
   <SmartdataChatPlaygroundViewCommonLoading :isShow="isShowLoading" />
   <DashboardAiAnalyticsQueryModel v-model:visible="isCreateQueryModel" :item="createQueryModelInfo" />
+  <!--   saveContent: string
+  visible: boolean -->
+  <DashboardAiAnalyticsCardInfoSetModel
+    v-model:visible="showSaveCardModel"
+    :handleClose="handleClose"
+    :saveContent="currentSavedHtml"
+  />
 </template>
 
 <style lang="scss" scoped>
@@ -381,5 +462,25 @@ const isShowCorrectIcon = (item: any) => {
 }
 .all-action {
   display: flex;
+}
+.generate-charts {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  white-space: nowrap;
+  box-sizing: border-box;
+  justify-content: space-between;
+  margin-right: 20px;
+  margin-top: -1px;
+
+  span {
+    margin-left: 2px;
+  }
+}
+.save-card {
+  svg {
+    position: relative;
+    top: 1px;
+  }
 }
 </style>

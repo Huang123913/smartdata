@@ -31,6 +31,7 @@ const tableName = ref<string>('Table')
 const customStyle = 'background: #fff;border: 0;overflow: hidden'
 const isEdited = ref<boolean>(false)
 const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
+const iframeRef = ref(null)
 onMounted(() => {
   tableName.value = tableNameList.value[props.item.id] || 'Table'
 })
@@ -71,6 +72,7 @@ const handleSearch = () => {
     }
   }
   if (!isChecked) return
+  console.log('查询', props.item.parameters)
   props.runManualSql({ ...props.item, parametersObj: { ...parameters.value } })
 }
 
@@ -81,6 +83,22 @@ const onCopyToClipboard = async (text: string) => {
     message.info(t('msg.info.copiedToClipboard'))
   } catch (e: any) {
     message.error(e.message)
+  }
+}
+
+const resizeIframe = () => {
+  const iframe = iframeRef.value
+  if (iframe) {
+    try {
+      const iframeDocument = iframe.contentDocument || iframe.contentWindow.document
+      if (iframeDocument) {
+        let height = iframeDocument.body.scrollHeight
+        height = +height + 16
+        iframe.style.height = height + 'px'
+      }
+    } catch (error) {
+      console.error('无法访问 iframe 内容，可能是跨域问题', error)
+    }
   }
 }
 </script>
@@ -118,7 +136,10 @@ const onCopyToClipboard = async (text: string) => {
                   </code>
                 </div>
               </div>
-              <span v-else class="markdown-content" v-html="marked(detailItem.content)"></span>
+              <div v-else>
+                <span v-if="detailItem.content" class="markdown-content" v-html="marked(detailItem.content)"></span>
+                <span v-else>暂无数据</span>
+              </div>
             </li>
           </ul>
           <template v-else>
@@ -150,14 +171,17 @@ const onCopyToClipboard = async (text: string) => {
       <h4 class="additional-info">{{ '查询条件' }}:</h4>
       <div v-for="parameterItem in item?.parameters" class="search-condition-item">
         <span class="title">{{ parameterItem.name }}：</span>
-        <div class="value" v-if="parameterItem.type === 'VARCHAR'">
+        <div class="value" v-if="parameterItem.type.indexOf('VARCHAR') > -1">
           <a-input v-model:value="parameters[parameterItem.name]" />
         </div>
-        <div v-if="parameterItem.type === 'INT'">
-          <a-input-number v-model:value="parameters[parameterItem.name]" :precision="0" :min="1" :max="10" />
+        <div v-if="parameterItem.type.indexOf('INT') > -1">
+          <a-input-number :style="{ width: '100%' }" v-model:value="parameters[parameterItem.name]" :precision="0" :min="1" />
         </div>
         <div v-if="parameterItem.type === 'BOOLEAN'">
           <a-switch v-model:checked="parameters[parameterItem.name]" />
+        </div>
+        <div v-if="parameterItem.type === 'DATE'">
+          <LazyCellDatePicker v-model="parameters[parameterItem.name]" :is-pk="false" />
         </div>
       </div>
       <div class="search-sql-btn" @click="handleSearch">
@@ -189,6 +213,13 @@ const onCopyToClipboard = async (text: string) => {
         <div class="markdown-content" v-else v-html="marked(item.tableRes.content)"></div>
       </template>
       <a-empty v-else description="输入查询条件进行查询" :image="simpleImage" />
+    </div>
+    <!-- //v-html="item?.htmlContent"  {{ item?.htmlContent }}-->
+    <div v-if="item?.htmlContent">
+      <h4 class="additional-info">{{ '图表预览' }}:</h4>
+      <div style="margin-top: 10px">
+        <iframe :srcdoc="item.htmlContent" ref="iframeRef" frameborder="0" style="width: 100%" @load="resizeIframe"></iframe>
+      </div>
     </div>
   </div>
 </template>

@@ -685,4 +685,25 @@ export class MCDMService {
       return r.data;
     });
   }
+
+  async saveCard(objData: { ipValue: string; ownerId; saveValue: any }) {
+    let { ipValue, ownerId, saveValue } = objData;
+    return await axios
+      .post(
+        `${ipValue}/webapi/vbase_prd_united_login_api/API_SavePersonalizedInfo`,
+        {
+          personalizedInfo: [
+            {
+              personalType: 'card', //类型
+              paramKey: uuidv4(), // 属性名
+              paramValue: JSON.stringify(saveValue), //属性值
+              ownerId: ownerId, // 拥有者ID,
+            },
+          ],
+        },
+      )
+      .then((r) => {
+        return r.data;
+      });
+  }
 }

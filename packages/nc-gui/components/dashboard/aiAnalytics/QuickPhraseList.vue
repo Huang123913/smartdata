@@ -2,7 +2,7 @@
 import { ref } from '#imports'
 
 const props = defineProps<{
-  handleSend: (value: string, isAdd: boolean, callback: () => void) => void
+  handleSend: (value: string, isAdd: boolean, isGenerateCharts: boolean, callback: () => void) => void
 }>()
 const clicked = ref<boolean>(false)
 
@@ -11,7 +11,7 @@ const handleClickChange = (visible: boolean) => {
   if (!visible) clicked.value = visible
 }
 const handleSelect = (item: any) => {
-  props.handleSend(item, true, () => {})
+  props.handleSend(item, true, false, () => {})
   console.log(item)
   clicked.value = false
 }

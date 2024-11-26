@@ -51,14 +51,18 @@ const createNewSessionInTable = async () => {
     //     name: activeTable.value?.name,
     //   },
     // ]
+    // console.log('datafiles', datafiles)
+    // console.log('tableData', tableData)
+
     // let createSessionRes = await $api.smartData.createSession({
     //   entityId: activeTableId.value,
     //   datafiles: JSON.stringify(datafiles),
     //   isUpdateSession: true,
     // })
+    let submitdataData = { conversation_id: '', datacontents: [] }
     let createSessionRes = await $api.smartData.createSession({
       entityId: activeTableId.value,
-      datafiles: JSON.stringify([]),
+      submitdataData: JSON.stringify(submitdataData),
       isUpdateSession: true,
     })
     if (createSessionRes?.conversation_id) {

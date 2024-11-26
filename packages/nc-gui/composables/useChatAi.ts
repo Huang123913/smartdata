@@ -4,6 +4,7 @@ function useChatAi() {
   const exeSql = async (sql: string) => {
     try {
       let result: any = await $api.smartData.exeSql({ sql })
+      console.log('执行结果', result)
       if (result?.success && result?.data.success) {
         let fields = result?.data?.fields ?? []
         let datas = result?.data?.datas ?? []

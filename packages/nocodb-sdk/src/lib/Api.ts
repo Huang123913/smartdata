@@ -12655,5 +12655,22 @@ export class Api<
         type: ContentType.Json,
         ...params,
       }),
+
+    /**
+     * @description saveCard MCDM
+     *
+     * @tags SmartData
+     * @name SaveCard
+     * @summary saveCard MCDM
+     * @request POST:/api/v2/smartdata/saveCard
+     */
+    saveCard: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/saveCard`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
   };
 }

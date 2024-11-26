@@ -2,7 +2,7 @@
 import _ from 'lodash'
 import { v4 as uuidv4 } from 'uuid'
 
-import Icon from '@ant-design/icons-vue'
+import Icon, { CloseOutlined } from '@ant-design/icons-vue'
 
 import { useaiAnalyticsStore } from '../../store/aiAnalytics'
 
@@ -14,14 +14,25 @@ const filterType = [
   'init_plan',
   'plan',
   'current_plan_step',
+  'vega_lite_json',
+  'vega_lite_html',
 ]
 const { $api } = useNuxtApp()
 
 const { activeTableId } = storeToRefs(useTablesStore())
 const isOverSession = ref(false)
 const store = useaiAnalyticsStore()
-const { dialogList, conversationId, sendingTable, savedConversations } = storeToRefs(store)
-const { setSendingTable, setDialogList, deleteDialogList, setTableNameList, updateDialogListItem, setSavedConversations } = store
+const { dialogList, conversationId, sendingTable, savedConversations, tableDataForChart, isCurentDataForChart } =
+  storeToRefs(store)
+const {
+  setSendingTable,
+  setDialogList,
+  deleteDialogList,
+  setTableNameList,
+  updateDialogListItem,
+  setSavedConversations,
+  getTableDataForChart,
+} = store
 
 const isSending = ref<{ [key: string]: any }>({})
 const scrollContainer = ref(null)
@@ -45,7 +56,7 @@ const resizeObserver = new ResizeObserver((entries) => {
 })
 
 //发送
-const handleSend = async (searchValue: string, isAdd: boolean, callback: () => void) => {
+const handleSend = async (searchValue: string, isAdd: boolean, isGenerateCharts: boolean, callback: () => void) => {
   if (conversationId.value[activeTableId.value!] === '') {
     message.warning('会话已结束，请重新创建会话')
     return
@@ -70,10 +81,25 @@ const handleSend = async (searchValue: string, isAdd: boolean, callback: () => v
     })
     scrollToBottom()
     setSendingTable(conversationId.value[activeTableId.value!], activeTableId.value!)
+    let datacontents: any[] = []
+    console.log('isGenerateCharts', isGenerateCharts)
+    console.log('tableDataForChart', tableDataForChart.value)
+    if (isGenerateCharts) {
+      if (!isCurentDataForChart.value && !tableDataForChart.value.length) await getTableDataForChart()
+      let data = tableDataForChart.value.length > 5 ? tableDataForChart.value.slice(0, 5) : tableDataForChart.value
+      datacontents = [
+        {
+          datatype: 'dataframe',
+          content: data,
+        },
+      ]
+    }
+
     res = await $api.smartData.talktodata({
       conversation_id: conversationId.value[activeTableId.value!],
       datatype: 'text',
       question: searchValue,
+      datacontents: JSON.stringify(datacontents),
     })
     console.log('res', res)
     if (res?.errormsg) {
@@ -94,25 +120,12 @@ const handleSend = async (searchValue: string, isAdd: boolean, callback: () => v
       let errText = ''
       let parameters: any[] = []
       let sql = ''
+      let htmlContent: string = ''
       let attachments = res.attachments.filter((item: any) => !filterType.includes(item.type))
       let findSqlItem = res.attachments.find((item: any) => item.type === 'sql')
       let findErrorItem = res.attachments.find((item: any) => item.type === 'error')
       let findDataMeta = res.attachments.find((item: any) => item.type === 'data_meta')
-      let findInitPlay = res.attachments.find((item: any) => item.type === 'init_plan')
-      let findPlay = res.attachments.find((item: any) => item.type === 'plan')
-      let findCurrentPlay = res.attachments.find((item: any) => item.type === 'current_plan_step')
-
-      // if (
-      //   res.attachments.length === 3 &&
-      //   findInitPlay &&
-      //   findPlay &&
-      //   findCurrentPlay &&
-      //   (res.message.indexOf('会话') > -1 || res.message.indexOf('对话') > -1) &&
-      //   res.message.indexOf('结束') > -1
-      // ) {
-      //   isOverSessionToItem = true
-      //   isOverSession.value = true
-      // }
+      let findHtml = res.attachments.find((item: any) => item.type === 'vega_lite_html')
       if (findDataMeta) {
         findDataMeta.content = JSON.parse(findDataMeta.content)
         findDataMeta.fields = Object.keys(findDataMeta.content.fields[0])
@@ -133,13 +146,43 @@ const handleSend = async (searchValue: string, isAdd: boolean, callback: () => v
         let exeRes =
           (!findDataMeta || !findDataMeta.content?.parameters || !findDataMeta.content?.parameters.length) && (await exeSql(sql))
         if (exeRes) {
+          let fields = []
+          if (exeRes.success) {
+            fields = exeRes?.fields.map((fieldItem: any) => {
+              if (fieldItem?.name_cn) {
+                return fieldItem
+              }
+              console.log('findDataMeta', findDataMeta)
+              console.log('findDataMeta', findDataMeta?.content?.fields?.length)
+              if (findDataMeta?.content?.fields?.length) {
+                let findField = findDataMeta.content.fields.find((findFieldItem: any) => findFieldItem.name === fieldItem.name)
+                console.log('findField', findField)
+                return { ...fieldItem, name_cn: findField ? findField.chinese_name : fieldItem.name }
+              }
+              return { ...fieldItem, name_cn: fieldItem.name }
+            })
+          }
           tableRes = {
-            content: exeRes.success ? exeRes : exeRes.errorDetail,
+            content: exeRes.success ? { ...exeRes, fields } : exeRes.errorDetail,
             isExeSuccess: exeRes.success,
           }
           isShowSaveBtn = exeRes.success
           isRepair = exeRes.isRepair as boolean
           if (exeRes.success) setTableNameList(id, tableName)
+        }
+      }
+      if (findHtml) {
+        console.log('替换的数据', tableDataForChart.value)
+        if (!tableDataForChart.value.length) {
+          message.warn('注入图表的数据为空')
+        }
+        const regex = /"data":\s*\{[^}]*"values":\s*\[[^\]]*\]\s*\}/
+        const match = findHtml.content.match(regex)
+        if (match) {
+          const replacement = `"data": ${JSON.stringify({ values: tableDataForChart.value }, null, 2)}`
+          htmlContent = findHtml.content.replace(regex, replacement)
+        } else {
+          console.log('No match found for values.')
         }
       }
 
@@ -159,15 +202,15 @@ const handleSend = async (searchValue: string, isAdd: boolean, callback: () => v
         parameters,
         sql,
         isOverSession: isOverSessionToItem,
+        htmlContent,
       })
       setSavedConversations(sendingTable.value[res.conversationId], {
         type: 'received',
         id: id,
         content: res,
       })
-      if (isOverSessionToItem) conversationId.value = { key: activeTableId.value, value: '' }
       console.log('继续', dialogList.value[sendingTable.value[res.conversationId]])
-      console.log('保存', savedConversations.value[sendingTable.value[res.conversationId]])
+      if (isOverSessionToItem) conversationId.value = { key: activeTableId.value, value: '' }
     }
     // if (res?.errormsg) {
     //   message.warning(res.errormsg)
@@ -234,7 +277,7 @@ const rephrasequestion = async (message: string, callback: () => void) => {
     question: message,
   })
   callback()
-  res?.question && handleSend(res.question, true, () => {})
+  res?.question && handleSend(res.question, true, false, () => {})
 }
 
 //删除会话
@@ -272,9 +315,10 @@ const createNewSessionInTable = async () => {
   try {
     showNewCreateBtn.value = false
     isShowLoading.value = true
+    let submitdataData = { conversation_id: '', datacontents: [] }
     let createSessionRes = await $api.smartData.createSession({
       entityId: activeTableId.value,
-      datafiles: JSON.stringify([]),
+      submitdataData: JSON.stringify(submitdataData),
       isUpdateSession: true,
     })
     if (createSessionRes?.conversation_id) {
@@ -324,6 +368,10 @@ const runManualSql = async (item: any) => {
     isShowLoading.value = false
   }
 }
+
+const handleCloseToTip = () => {
+  showNewCreateBtn.value = false
+}
 </script>
 
 <template>
@@ -350,6 +398,7 @@ const runManualSql = async (item: any) => {
     </div>
   </div>
   <div class="analytics-tip-content" :class="{ anite: showNewCreateBtn }">
+    <close-outlined class="colse-btn-to-tip" @click="handleCloseToTip" />
     <icon>
       <template #component>
         <svg
@@ -429,5 +478,13 @@ const runManualSql = async (item: any) => {
 .anite {
   top: 20px;
   opacity: 1;
+}
+.colse-btn-to-tip {
+  position: absolute;
+  right: 8px;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  cursor: pointer;
 }
 </style>

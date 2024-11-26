@@ -28,7 +28,7 @@ const columns = computed(() => {
           : '180px'
     }
     let returnFields = props.item.fields.map((item) => ({
-      title: item.name,
+      title: item.name_cn || item.name,
       name_en: item.name,
       width: tdWidth.value,
       value: item.name,

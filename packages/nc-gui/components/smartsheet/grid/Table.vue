@@ -257,6 +257,7 @@ const getAllSemanticsSearchedFields = async () => {
         let queryModelParams: any[] = []
         if (findQueryModelParams && findQueryModelParams?.jsonValue) {
           queryModelParams = JSON.parse(findQueryModelParams.jsonValue).queryParams as any[]
+          console.log('queryModelParams', queryModelParams)
           setTableViewInfo({ isQuery: tableInfo[0].isQuery, queryModelParams })
         } else {
           setTableViewInfo({ isQuery: tableInfo[0].isQuery, queryModelParams: [] })

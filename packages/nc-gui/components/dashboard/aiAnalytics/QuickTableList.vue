@@ -6,6 +6,7 @@ import { CloseOutlined, SearchOutlined } from '@ant-design/icons-vue'
 const props = defineProps<{
   handleSelectExistingModel: (item: any) => void
   show: boolean
+  isGenerateEcharts: boolean
 }>()
 const store = useaiAnalyticsStore()
 const { isIntelligentQuestionOpen } = storeToRefs(store)
@@ -22,9 +23,18 @@ const buffer = 5 // 缓冲区行数
 const startIndex = ref(0) // 当前滚动的起始索引
 const offsetY = ref(0) // 滚动偏移量
 
+const input = ref<HTMLInputElement>()
+
 const existingModelData = computed(() => {
   if (isIntelligentQuestionOpen.value) {
-    let data = chataiData.value.modelData.filter((item) => !item?.isCatalog)
+    let projectMap = chataiData.value.projectMap
+    let data: any[] = []
+    for (const key in projectMap) {
+      if (projectMap[key]) {
+        data = projectMap[key]
+        console.log('data', projectMap[key])
+      }
+    }
     return data
   }
   return []
@@ -86,15 +96,26 @@ watch(
   () => props.show,
   (newVal, oldVal) => {
     newVal && handleClickCleanBtn()
+    if (newVal) {
+      nextTick(() => {
+        input.value?.focus()
+      })
+    }
   },
 )
 </script>
 
 <template>
-  <div class="quick-table-list" v-if="isIntelligentQuestionOpen && show">
+  <div
+    class="quick-table-list"
+    v-if="isIntelligentQuestionOpen && show"
+    :style="{
+      bottom: isGenerateEcharts ? '91%' : '66%',
+    }"
+  >
     <!-- 搜索框 -->
     <div class="search-quick-table-list">
-      <a-input placeholder="搜索表格" v-model:value="searchModel" @keyup.enter="handleSearchModel()">
+      <a-input ref="input" placeholder="搜索表格" v-model:value="searchModel" @keyup.enter="handleSearchModel()">
         <template #suffix>
           <CloseOutlined @click="handleClickCleanBtn()" v-show="searchModel?.trim()" style="margin-right: 5px" />
           <search-outlined @click="handleSearchModel()" />
@@ -140,7 +161,6 @@ watch(
 <style lang="scss" scoped>
 .quick-table-list {
   position: absolute;
-  bottom: 92%;
   width: 93%;
   border-radius: 10px;
   background-color: #fff;

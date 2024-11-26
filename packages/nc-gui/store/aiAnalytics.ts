@@ -7,6 +7,9 @@ export const useaiAnalyticsStore = defineStore('useaiAnalyticsStore', () => {
   const { width } = useWindowSize()
   const { isMobileMode } = useGlobal()
   const tablesStore = useTablesStore()
+  const { base } = storeToRefs(useBase())
+  const tableDataForChart = ref<any[]>([])
+  const tableForChart = ref<any>(null)
 
   //会话id
   const _conversationId = ref<{ [key: string]: any }>({})
@@ -115,6 +118,54 @@ export const useaiAnalyticsStore = defineStore('useaiAnalyticsStore', () => {
     },
   })
 
+  const _isCurentDataForChart = ref<boolean>(false)
+  const isCurentDataForChart = computed({
+    get() {
+      return _isCurentDataForChart.value
+    },
+    set(value) {
+      _isCurentDataForChart.value = value
+    },
+  })
+
+  const getTableDataForChart: any = async (item?: any) => {
+    if (item) {
+      console.log('item', item)
+      tableDataForChart.value = item.tableRes.content.datas
+      isCurentDataForChart.value = true
+    } else {
+      let tableData: any[] = []
+      let fieldDescriptions: { [key: string]: any } = {}
+      console.log('tableForChart.value', tableForChart.value)
+      let response = await $api.dbViewRow.list('noco', base.value.id!, tableForChart.value.id!, tableForChart.value.id!)
+      let tableDataRes = response?.list
+      const columnResponse = await $api.dbViewColumn.list(tableForChart.value.id)
+      let columns = columnResponse?.list
+      columns?.map((item) => {
+        fieldDescriptions[item.title] = item.column_name
+      })
+      tableDataRes.map((item) => {
+        let tableItemObj = {}
+        for (const key in item) {
+          tableItemObj[fieldDescriptions[key] || key] = item[key]
+        }
+        tableData.push(tableItemObj)
+      })
+      console.log('columns', columns)
+      console.log('fieldDescriptions', fieldDescriptions)
+
+      tableDataForChart.value = tableData
+    }
+  }
+
+  const setTableForChart = (item) => {
+    tableForChart.value = item
+  }
+
+  const setTableDataForChart = (item) => {
+    tableDataForChart.value = item
+  }
+
   return {
     dialogList,
     intelligentQuestionWidth,
@@ -134,5 +185,10 @@ export const useaiAnalyticsStore = defineStore('useaiAnalyticsStore', () => {
     updateDialogListItem,
     setSavedConversations,
     savedConversations,
+    tableDataForChart,
+    getTableDataForChart,
+    setTableForChart,
+    isCurentDataForChart,
+    setTableDataForChart,
   }
 })
