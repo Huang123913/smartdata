@@ -29,12 +29,11 @@ const navigateToSettings = () => {
 }
 
 const { navigateToComingSoon } = useSmartDataStore()
-const store1 = useChatPlaygroundViewStore()
-const { chataiData } = storeToRefs(store1)
+const store = useGroupList()
+const { group } = storeToRefs(store)
 const groupName = computed(() => {
-  if (chataiData.value.groupList.length) {
-    let firstData = chataiData.value.groupList[0]
-    return firstData.groupName_cn
+  if (group.value.currentGroup) {
+    return group.value.currentGroup.groupName_cn
   }
   return ''
 })
@@ -79,7 +78,10 @@ const groupName = computed(() => {
           <GeneralIcon icon="cloud" class="!h-4" />
           <div>企业控制台</div>
         </div>
-        <div class="groupName">{{ groupName }}</div>
+        <div class="groupName">
+          <span class="group-name-text"> {{ groupName }}</span>
+          <DashboardSidebarTopSectionGroupSwitch />
+        </div>
       </NcButton>
 
       <NcButton
@@ -130,6 +132,12 @@ const groupName = computed(() => {
 .groupName {
   position: absolute;
   right: 0.625rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
   color: rgba(154, 162, 175, var(--tw-text-opacity));
+  .group-name-text {
+    margin-right: 2px;
+  }
 }
 </style>

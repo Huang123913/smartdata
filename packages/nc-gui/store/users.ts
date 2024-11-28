@@ -5,6 +5,7 @@ export const useUsers = defineStore('userStore', () => {
   const { user } = useGlobal()
   const { loadRoles } = useRoles()
   const basesStore = useBases()
+  const { getGroupList } = useGroupList()
 
   const updateUserProfile = async ({
     attrs,
@@ -29,11 +30,11 @@ export const useUsers = defineStore('userStore', () => {
 
   watch(
     () => user.value?.id,
-    (newId, oldId) => {
+    async (newId, oldId) => {
       if (!newId) return
       if (newId === oldId) return
-
-      loadCurrentUser()
+      let user = await loadCurrentUser()
+      getGroupList()
     },
     {
       immediate: true,

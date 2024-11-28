@@ -9,6 +9,7 @@ const props = defineProps<{
 
 function handleClick(event: MouseEvent) {
   if (props.onClick) {
+    event.stopPropagation()
     props.onClick()
   }
 }

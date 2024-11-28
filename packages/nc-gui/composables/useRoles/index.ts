@@ -1,14 +1,8 @@
-import type { MaybeRef } from 'vue';
+import type { MaybeRef } from 'vue'
 
-import {
-  extractRolesObj,
-  type Roles,
-  type RolesObj,
-  type SourceType,
-  type WorkspaceUserRoles,
-} from 'nocodb-sdk';
+import { type Roles, type RolesObj, type SourceType, type WorkspaceUserRoles, extractRolesObj } from 'nocodb-sdk'
 
-import { isString } from '@vue/shared';
+import { isString } from '@vue/shared'
 
 const hasPermission = (role: Exclude<Roles, WorkspaceUserRoles>, hasRole: boolean, permission: Permission | string) => {
   const rolePermission = rolePermissions[role]
@@ -133,6 +127,7 @@ export const useRolesShared = createSharedComposable(() => {
         display_name: res.display_name,
       } as User
     }
+    return user.value
   }
 
   const isUIAllowed = (

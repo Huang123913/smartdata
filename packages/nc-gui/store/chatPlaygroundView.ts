@@ -15,6 +15,9 @@ export interface SessionItem {
   tip: string
 }
 
+/**
+ * 提问建表
+ */
 export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore', () => {
   const { $api } = useNuxtApp()
   const { loadProjectTables } = useTablesStore()
@@ -40,7 +43,6 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     }
     isInit: boolean
     projectList: any[]
-    groupList: any[]
   }>({
     treeData: [], //控制台左侧树数据
     projectMap: {}, //项目对应的目录、表格
@@ -64,7 +66,6 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     isOpenModel: false,
     isInit: false,
     projectList: [],
-    groupList: [],
   })
 
   // 事件总线
@@ -72,7 +73,6 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
 
   //控制台左侧树
   const getTreeData = async (projectList: any[], baseId: string) => {
-    getGroupList()
     chataiData.projectList = projectList
     chataiData.treeData = []
     projectList.map((item) => {
@@ -122,14 +122,9 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
     chataiData.projectMapCatalogTree[baseId].forEach((node) => sortTreeNodesByOrderNo(node)) //排序
     chataiData.isInit = true
   }
-  const getGroupList = async () => {
-    let groupList = await $api.smartData.getGroupList()
-    console.log('获取企业', groupList)
-    chataiData.groupList = groupList
-  }
+
   //获取模型数据
   const getCustomCatalogEntityTree = async () => {
-    // getGroupList()
     try {
       let bizCatalogEntityCustom = await $api.smartData.entities()
       if (!bizCatalogEntityCustom.length) return
@@ -182,7 +177,6 @@ export const useChatPlaygroundViewStore = defineStore('chatPlaygroundViewStore',
       chataiData.isInit = false
       await getCustomCatalogEntityTree()
       await getAllModel()
-      await getGroupList()
     } catch (error) {
       console.error(error)
     } finally {
