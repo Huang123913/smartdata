@@ -1,11 +1,6 @@
-import { promisify } from 'util';
-import { Injectable } from '@nestjs/common';
-import { AppEvents, OrgUserRoles, validatePassword } from 'nocodb-sdk';
-import { v4 as uuidv4 } from 'uuid';
-import isEmail from 'validator/lib/isEmail';
-import { T } from 'nc-help';
-import * as ejs from 'ejs';
 import bcrypt from 'bcryptjs';
+import * as ejs from 'ejs';
+import { T } from 'nc-help';
 import type {
   PasswordChangeReqType,
   PasswordForgotReqType,
@@ -13,20 +8,26 @@ import type {
   SignUpReqType,
   UserType,
 } from 'nocodb-sdk';
-import type { NcRequest } from '~/interface/config';
-import { genJwt, setTokenCookie } from '~/services/users/helpers';
+import { AppEvents, OrgUserRoles, validatePassword } from 'nocodb-sdk';
+import { promisify } from 'util';
+import { v4 as uuidv4 } from 'uuid';
+import isEmail from 'validator/lib/isEmail';
 import { NC_APP_SETTINGS } from '~/constants';
-import { AppHooksService } from '~/services/app-hooks/app-hooks.service';
 import { validatePayload } from '~/helpers';
-import { MetaService } from '~/meta/meta.service';
-import { MetaTable, RootScopes } from '~/utils/globals';
-import Noco from '~/Noco';
-import { Store, User, UserRefreshToken } from '~/models';
-import { randomTokenString } from '~/helpers/stringHelpers';
-import NcPluginMgrv2 from '~/helpers/NcPluginMgrv2';
 import { NcError } from '~/helpers/catchError';
-import { BasesService } from '~/services/bases.service';
 import { extractProps } from '~/helpers/extractProps';
+import NcPluginMgrv2 from '~/helpers/NcPluginMgrv2';
+import { randomTokenString } from '~/helpers/stringHelpers';
+import type { NcRequest } from '~/interface/config';
+import { MetaService } from '~/meta/meta.service';
+import { Store, User, UserRefreshToken } from '~/models';
+import Noco from '~/Noco';
+import { AppHooksService } from '~/services/app-hooks/app-hooks.service';
+import { BasesService } from '~/services/bases.service';
+import { genJwt, setTokenCookie } from '~/services/users/helpers';
+import { MetaTable, RootScopes } from '~/utils/globals';
+
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class UsersService {
@@ -90,9 +91,20 @@ export class UsersService {
     params: {
       display_name?: string;
       avatar?: string;
+      project_id?: string;
+      project_name?: string;
+      group_id?: string;
+      group_name?: string;
     };
   }) {
-    const updateObj = extractProps(params, ['display_name', 'avatar']);
+    const updateObj = extractProps(params, [
+      'display_name',
+      'avatar',
+      'project_id',
+      'project_name',
+      'group_id',
+      'group_name',
+    ]);
 
     return await User.update(id, updateObj);
   }

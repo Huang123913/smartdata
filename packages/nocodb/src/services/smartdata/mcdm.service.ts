@@ -81,10 +81,33 @@ export class MCDMService {
           'display_name',
           'user_name',
           'email',
+          'group_id',
+          'group_name',
+          'project_id',
+          'project_name',
         ]),
       },
     };
     return await this.mcdm(config).then((r) => r.data);
+  }
+
+  async createProject(data: any) {
+    return await this.mcdm({
+      url: `/restapi/bizentity/data/InternalBATable/BA_BizCustomProject/batchCreate`,
+      data: { datas: data.datas },
+      headers: data.headers,
+    }).then((r) => {
+      return r.data;
+    });
+  }
+
+  async deleteProject(data: any) {
+    return await this.mcdm({
+      url: `/restapi/bizentity/data/InternalBATable/BA_BizCustomProject/batchDelete`,
+      data,
+    }).then((r) => {
+      return r.data;
+    });
   }
 
   async getProjects() {
@@ -92,6 +115,15 @@ export class MCDMService {
       url: `/restapi/bizentity/data/InternalBATable/BA_BizCustomProject/find`,
     }).then((r) => {
       return r.data.data.datas ?? [];
+    });
+  }
+
+  async updateProject(data: any) {
+    return await this.mcdm({
+      url: `/restapi/bizentity/data/InternalBATable/BA_BizCustomProject/batchUpdate`,
+      data,
+    }).then((r) => {
+      return r.data;
     });
   }
 

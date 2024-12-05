@@ -268,9 +268,15 @@ export const useBases = defineStore('basesStore', () => {
     }
 
     bases.value.set(baseId, { ...base, meta: parseProp(base.meta) })
-
-    await api.base.update(baseId, baseUpdatePayload)
-
+    // await api.base.update(baseId, baseUpdatePayload)
+    await api.smartData.updateProject({
+      datas: [
+        {
+          name: baseUpdatePayload.title,
+          id: baseId,
+        },
+      ],
+    })
     await loadProject(baseId, true)
   }
 
@@ -281,21 +287,37 @@ export const useBases = defineStore('basesStore', () => {
     linkedDbProjectIds?: string[]
     meta?: Record<string, unknown>
   }) => {
-    const result = await api.base.create(
-      {
+    // const result = await api.base.create(
+    //   {
+    //     title: basePayload.title,
+    //     linked_db_project_ids: basePayload.linkedDbProjectIds,
+    //     meta: JSON.stringify({
+    //       ...(basePayload.meta || {}),
+    //     }),
+    //   },
+    //   {
+    //     baseURL: getBaseUrl('nc'),
+    //   },
+    // )
+    const result = await api.smartData.createProject({
+      datas: [
+        {
+          name: basePayload.title,
+        },
+      ],
+      headers: {},
+    })
+    let newProject = {}
+    if (result?.success) {
+      newProject = {
+        name: basePayload.title,
         title: basePayload.title,
-        linked_db_project_ids: basePayload.linkedDbProjectIds,
-        meta: JSON.stringify({
-          ...(basePayload.meta || {}),
-        }),
-      },
-      {
-        baseURL: getBaseUrl('nc'),
-      },
-    )
-    await loadProjects('recent', 'add')
-    addProject(result)
-    return result
+        id: result.data.datas[0].id,
+      }
+      await loadProjects('recent', 'add')
+      addProject(newProject)
+    }
+    return newProject
   }
 
   const deleteProject = async (baseId: string) => {
@@ -311,7 +333,8 @@ export const useBases = defineStore('basesStore', () => {
     //     return
     //   }
     // }
-    await api.base.delete(baseId)
+    // await api.base.delete(baseId)
+    await api.smartData.deleteProject({ datas: [{ id: baseId }] })
     bases.value.delete(baseId)
     tableStore.baseTables.delete(baseId)
     deleteProjectByBaseId(baseId)

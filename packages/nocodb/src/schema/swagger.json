@@ -13762,7 +13762,11 @@
                           "description": "bar",
                           "details": null,
                           "created_at": "2023-03-13T09:39:14.225Z",
-                          "updated_at": "2023-03-13T09:39:14.225Z"
+                          "updated_at": "2023-03-13T09:39:14.225Z",
+                          "group_id": "test",
+                          "group_name": "test2",
+                          "project_id": "test5",
+                          "project_name": "test7"
                         },
                         {
                           "id": "adt_fezs668qbxj8gc",
@@ -13779,7 +13783,11 @@
                           "description": "foo",
                           "details": null,
                           "created_at": "2023-03-13T09:39:13.321Z",
-                          "updated_at": "2023-03-13T09:39:13.321Z"
+                          "updated_at": "2023-03-13T09:39:13.321Z",
+                          "group_id": "test",
+                          "group_name": "test2",
+                          "project_id": "test5",
+                          "project_name": "test7"
                         }
                       ]
                     }
@@ -18252,6 +18260,72 @@
         "summary": "updateModelCatalog MCDM",
         "operationId": "updateModelCatalog",
         "description": "updateModelCatalog MCDM",
+        "tags": ["SmartData"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/xc-auth"
+        }
+      ]
+    },
+    "/api/v2/smartdata/createProject":{
+      "post": {
+        "summary": "createProject MCDM",
+        "operationId": "createProject",
+        "description": "createProject MCDM",
+        "tags": ["SmartData"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/xc-auth"
+        }
+      ]
+    },
+    "/api/v2/smartdata/deleteProject":{
+      "post": {
+        "summary": "deleteProject MCDM",
+        "operationId": "deleteProject",
+        "description": "deleteProject MCDM",
+        "tags": ["SmartData"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/xc-auth"
+        }
+      ]
+    },
+    "/api/v2/smartdata/updateProject":{
+      "post": {
+        "summary": "updateProject MCDM",
+        "operationId": "updateProject",
+        "description": "updateProject MCDM",
         "tags": ["SmartData"],
         "requestBody": {
           "content": {
@@ -25693,7 +25767,11 @@
             "bio": "foo",
             "location": "Istanbul",
             "created_at": "2019-08-24",
-            "avatar": "https://dummyimage.com/300.png"
+            "avatar": "https://dummyimage.com/300.png",
+            "group_id": "test",
+            "group_name": "test2",
+            "project_id": "test5",
+            "project_name": "test7"
           }
         ],
         "title": "User Model",
@@ -25745,6 +25823,18 @@
           },
           "token_version": {
             "description": "Access token version",
+            "type": "string"
+          },
+          "group_id": {
+            "type": "string"
+          },
+          "group_name": {
+            "type": "string"
+          },
+          "project_id": {
+            "type": "string"
+          },
+          "project_name": {
             "type": "string"
           }
         },

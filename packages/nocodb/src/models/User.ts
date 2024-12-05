@@ -1,9 +1,18 @@
-import { extractRolesObj, type UserType } from 'nocodb-sdk';
-import type { NcContext } from '~/interface/config';
-import { NcError } from '~/helpers/catchError';
-import Noco from '~/Noco';
-import { extractProps } from '~/helpers/extractProps';
+import {
+  extractRolesObj,
+  type UserType,
+} from 'nocodb-sdk';
 import NocoCache from '~/cache/NocoCache';
+import { NcError } from '~/helpers/catchError';
+import { extractProps } from '~/helpers/extractProps';
+import type { NcContext } from '~/interface/config';
+import {
+  Base,
+  BaseUser,
+  UserRefreshToken,
+} from '~/models';
+import Noco from '~/Noco';
+import { sanitiseUserObj } from '~/utils';
 import {
   CacheDelDirection,
   CacheGetType,
@@ -11,8 +20,6 @@ import {
   MetaTable,
   RootScopes,
 } from '~/utils/globals';
-import { Base, BaseUser, UserRefreshToken } from '~/models';
-import { sanitiseUserObj } from '~/utils';
 
 export default class User implements UserType {
   id: string;
@@ -36,6 +43,10 @@ export default class User implements UserType {
 
   blocked?: boolean;
   blocked_reason?: string;
+  group_id?: string;
+  group_name?: string;
+  project_id?: string;
+  project_name?: string;
 
   constructor(data: User) {
     Object.assign(this, data);
@@ -59,6 +70,10 @@ export default class User implements UserType {
       'email_verified',
       'roles',
       'token_version',
+      'group_id',
+      'group_name',
+      'project_id',
+      'project_name',
     ]);
 
     if (insertObj.email) {
@@ -101,6 +116,10 @@ export default class User implements UserType {
       'token_version',
       'display_name',
       'avatar',
+      'group_id',
+      'group_name',
+      'project_id',
+      'project_name',
     ]);
 
     if (updateObj.email) {

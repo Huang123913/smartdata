@@ -1,3 +1,5 @@
+import type { UploadFile } from 'ant-design-vue'
+import type { Theme as AntTheme } from 'ant-design-vue/es/config-provider'
 import type {
   AuditOperationTypes,
   BaseType,
@@ -11,10 +13,9 @@ import type {
   ViewTypes,
 } from 'nocodb-sdk'
 import type { I18n } from 'vue-i18n'
-import type { Theme as AntTheme } from 'ant-design-vue/es/config-provider'
-import type { UploadFile } from 'ant-design-vue'
-import type { AuditLogsDateRange, ImportSource, ImportType, PreFilledMode, TabType } from './enums'
+
 import type { rolePermissions } from './acl'
+import type { AuditLogsDateRange, ImportSource, ImportType, PreFilledMode, TabType } from './enums'
 
 interface User {
   id: string
@@ -28,6 +29,10 @@ interface User {
   base_id?: string
   display_name?: string | null
   featureFlags?: Record<string, boolean>
+  group_id?: string | null
+  group_name?: string | null
+  project_id?: string | null
+  project_name?: string | null
 }
 
 interface ProjectMetaInfo {
@@ -255,34 +260,34 @@ interface AuditLogsQuery {
 }
 
 export type {
-  User,
-  ProjectMetaInfo,
+  AuditLogsQuery,
+  CalendarRangeType,
+  CommandPaletteType,
   Field,
   Filter,
-  NocoI18n,
-  ThemeConfig,
-  Row,
-  RolePermissions,
-  Permission,
-  TabItem,
-  SharedView,
-  SharedViewMeta,
-  importFileList,
-  streamImportFileList,
-  Nullable,
-  NcProject,
-  UndoRedoAction,
-  ImportWorkerPayload,
+  FormFieldsLimitOptionsType,
   Group,
   GroupNestedIn,
-  Users,
-  ViewPageType,
-  NcButtonSize,
-  SidebarTableNode,
-  UsersSortType,
-  CommandPaletteType,
-  CalendarRangeType,
-  FormFieldsLimitOptionsType,
   ImageCropperConfig,
-  AuditLogsQuery,
+  ImportWorkerPayload,
+  NcButtonSize,
+  NcProject,
+  NocoI18n,
+  Nullable,
+  Permission,
+  ProjectMetaInfo,
+  RolePermissions,
+  Row,
+  SharedView,
+  SharedViewMeta,
+  SidebarTableNode,
+  TabItem,
+  ThemeConfig,
+  UndoRedoAction,
+  User,
+  Users,
+  UsersSortType,
+  ViewPageType,
+  importFileList,
+  streamImportFileList,
 }

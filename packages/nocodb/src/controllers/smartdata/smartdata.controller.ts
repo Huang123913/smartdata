@@ -21,9 +21,39 @@ export class SmartDataController {
     private readonly mcdm: MCDMService,
   ) {}
 
+  @Post(['/api/v2/smartdata/createProject'])
+  async createProject(
+    @Body()
+    data: {
+      datas: any[];
+    },
+  ) {
+    return await this.mcdm.createProject(data);
+  }
+
+  @Post(['/api/v2/smartdata/deleteProject'])
+  async deleteProject(
+    @Body()
+    data: {
+      datas: any[];
+    },
+  ) {
+    return await this.mcdm.deleteProject(data);
+  }
+
   @Get(['/api/v2/smartdata/getProjects'])
   async getProjects() {
     return await this.mcdm.getProjects();
+  }
+
+  @Post(['/api/v2/smartdata/updateProject'])
+  async updateProject(
+    @Body()
+    data: {
+      datas: any[];
+    },
+  ) {
+    return await this.mcdm.updateProject(data);
   }
 
   @Get(['/api/v2/smartdata/getGroupList'])

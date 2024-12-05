@@ -2593,6 +2593,10 @@ export interface UserType {
   avatar?: string;
   /** Access token version */
   token_version?: string;
+  group_id?: string;
+  group_name?: string;
+  project_id?: string;
+  project_name?: string;
 }
 
 /**
@@ -12202,6 +12206,57 @@ export class Api<
     updateModelCatalog: (data: object, params: RequestParams = {}) =>
       this.request<any, any>({
         path: `/api/v2/smartdata/updateModelCatalog`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description createProject MCDM
+     *
+     * @tags SmartData
+     * @name CreateProject
+     * @summary createProject MCDM
+     * @request POST:/api/v2/smartdata/createProject
+     */
+    createProject: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/createProject`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description deleteProject MCDM
+     *
+     * @tags SmartData
+     * @name DeleteProject
+     * @summary deleteProject MCDM
+     * @request POST:/api/v2/smartdata/deleteProject
+     */
+    deleteProject: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/deleteProject`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description updateProject MCDM
+     *
+     * @tags SmartData
+     * @name UpdateProject
+     * @summary updateProject MCDM
+     * @request POST:/api/v2/smartdata/updateProject
+     */
+    updateProject: (data: object, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/v2/smartdata/updateProject`,
         method: 'POST',
         body: data,
         type: ContentType.Json,
