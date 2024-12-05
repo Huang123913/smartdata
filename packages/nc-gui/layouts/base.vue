@@ -40,7 +40,7 @@ onMounted(() => {
 
     <a-layout class="!flex-col h-screen">
       <a-layout-header
-        v-if="!route.meta.public && signedIn && !route.meta.hideHeader && route.name !== 'chat-ai'"
+        v-if="!route.meta.public && signedIn && !route.meta.hideHeader && !['chat-ai', 'generate-component'].includes(route.name)"
         class="nc-navbar"
       >
         <div

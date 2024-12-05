@@ -1,0 +1,297 @@
+<script lang="ts" setup>
+/**
+ *
+ * 创建api-预览步骤条的内容
+ */
+import { Empty } from 'ant-design-vue'
+
+const props = defineProps<{
+  propsColumns: any[]
+  propsTableData: any[]
+  handleOk: () => void
+  handleCancel: () => void
+  heightData: any
+}>()
+const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE
+const tableContainerHeight = computed(() => {
+  return props.heightData - 50
+})
+let frame: number | null = null
+const itemHeight = 32 // 每个数据项的高度
+const buffer = 5 // 缓冲区行数
+const startIndex = ref(0) // 当前滚动的起始索引
+const offsetY = ref(0) // 滚动偏移量
+const columns = computed(() => {
+  if (!props.propsColumns.length) return []
+  let fileds = props.propsColumns.filter((item) => item.name !== 'id')
+  let newFileds = fileds.map((item) => {
+    return {
+      ...item,
+      title: item.name_cn ?? item.name ?? item.code,
+      dataIndex: item.name ?? item.code,
+      name_en: item.name ?? item.code,
+      width: '180px',
+      value: item.name,
+      label: item.name_cn ?? item.name ?? item.code,
+    }
+  })
+  return newFileds
+})
+
+const tableData = computed(() => {
+  if (!props.propsTableData.length) return []
+  let newDatas = props.propsTableData.map((item: any, index: number) => {
+    let newItem = { ...item, indexItem: index + 1 }
+    return newItem
+  })
+  return newDatas
+})
+
+//可见行数
+const visibleCount = computed(() => {
+  return Math.ceil(tableContainerHeight.value / itemHeight)
+})
+
+// 数据总高度
+const totalHeight = computed(() => {
+  return tableData.value.length * itemHeight
+})
+
+const visibleItems = computed(() => {
+  const end = startIndex.value + visibleCount.value + buffer
+  return tableData.value.slice(startIndex.value, end)
+})
+
+// 滚动事件处理程序
+const onScroll = (event: any) => {
+  if (frame) {
+    cancelAnimationFrame(frame)
+  }
+  frame = requestAnimationFrame(() => {
+    const scrollTop = event.target.scrollTop
+    startIndex.value = Math.max(0, Math.floor(scrollTop / itemHeight))
+    offsetY.value = scrollTop - (scrollTop % itemHeight)
+  })
+}
+
+const handleModalOk = async () => {
+  props.handleOk()
+}
+
+const handleCancel = () => {
+  props.handleCancel()
+}
+</script>
+
+<template>
+  <div class="api-create-result-preview">
+    <div
+      class="api-create-result-preview-table nc-grid-wrapper min-h-0 flex-1 relative nc-scrollbar-x-lg !overflow-auto"
+      @scroll="onScroll"
+    >
+      <table class="xc-row-table nc-grid backgroundColorDefault !h-auto bg-white sticky top-0 z-5 bg-white">
+        <thead>
+          <tr class="!h-auto bg-white sticky top-0 z-5 bg-white desktop">
+            <th
+              class="caption nc-grid-cell w-[64px] min-w-[64px] text-gray-500"
+              data-testid="grid-id-column"
+              :style="{
+                'border-right-width': '1px',
+              }"
+            >
+              <div class="nc-no-label text-gray-500">#</div>
+            </th>
+            <th
+              v-for="col in columns"
+              :key="col.title"
+              v-xc-ver-resize
+              :data-col="col.id"
+              :data-title="col.title"
+              class="nc-grid-column-header text-gray-500 header-title"
+              :style="{
+                'min-width': '180px',
+                'max-width': '180px',
+                'width': '180px',
+              }"
+            >
+              <NcTooltip class="truncate text" show-on-truncate-only :style="{ 'text-align': 'left' }">
+                <template #title>
+                  {{ col.title }}
+                </template>
+                <span
+                  class="text-ellipsis overflow-hidden text-gray-500"
+                  :style="{
+                    'wordBreak': 'keep-all',
+                    'whiteSpace': 'nowrap',
+                    'font-size': '13px',
+                  }"
+                  >{{ col.title }}</span
+                >
+              </NcTooltip>
+            </th>
+          </tr>
+        </thead>
+      </table>
+      <div
+        class="table-overlay"
+        :style="{
+          height: `${totalHeight}px`,
+        }"
+      >
+        <table
+          :style="{
+            transform: `translateY(${offsetY}px)`,
+          }"
+          class="xc-row-table nc-grid backgroundColorDefault !h-auto bg-white relative pr-1 pb-1"
+        >
+          <tbody>
+            <tr v-for="(row, rowIndex) of visibleItems" class="!xs:h-14" :style="{ height: `32px` }">
+              <td
+                :key="rowIndex"
+                class="caption nc-grid-cell w-[64px] min-w-[64px] text-gray-500"
+                :style="{
+                  'min-width': '64px',
+                  'max-width': '64px',
+                  'width': '64px',
+                }"
+              >
+                {{ row.indexItem }}
+              </td>
+              <td
+                v-for="(columnObj, colIndex) of columns"
+                :key="columnObj.id"
+                class="caption nc-grid-cell w-[64px] min-w-[64px]"
+                :style="{
+                  'min-width': '180px',
+                  'max-width': '180px',
+                  'width': '180px',
+                }"
+              >
+                <NcTooltip class="truncate" show-on-truncate-only>
+                  <template #title>
+                    {{ row[columnObj.name] }}
+                  </template>
+                  <span
+                    class="text-ellipsis overflow-hidden"
+                    :style="{
+                      'wordBreak': 'keep-all',
+                      'whiteSpace': 'nowrap',
+                      'display': 'inline',
+                      'color': '#4A5268',
+                      'font-size': '13px',
+                    }"
+                  >
+                    {{ row[columnObj.name] }}
+                  </span>
+                </NcTooltip>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="right-btn">
+      <NcButton type="secondary" @click="handleCancel">{{ '返回' }}</NcButton>
+      <NcButton class="create" key="submit" type="primary" @click="handleModalOk">创建 </NcButton>
+    </div>
+    <div v-if="tableData.length === 0" class="no-data">
+      <a-empty :description="'暂无数据'" :image="simpleImage" />
+    </div>
+  </div>
+</template>
+
+<style lang="scss">
+.api-create-result-preview {
+  height: 100%;
+  width: 100%;
+  .right-btn {
+    height: 50px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    .create {
+      margin-left: 1rem;
+    }
+    .ant-btn {
+      border-radius: 0.5rem;
+      color: rgb(55, 65, 81);
+      font-weight: 550;
+      &:hover {
+        background-color: rgba(244, 244, 245);
+        border-color: rgba(231, 231, 233);
+      }
+    }
+    .ant-btn-primary {
+      color: white;
+      border: none;
+      &:hover {
+        background-color: rgba(41, 82, 204);
+      }
+    }
+  }
+
+  .no-data {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+</style>
+
+<style lang="scss" scoped>
+.api-create-result-preview-table {
+  height: calc(100% - 50px) !important;
+  overflow: hidden;
+}
+.nc-grid-wrapper {
+  position: relative;
+  @apply w-full;
+
+  td,
+  th {
+    @apply border-gray-100 border-solid border-r bg-gray-100 p-0;
+    min-height: 32px !important;
+    height: 32px !important;
+    position: relative;
+    font-size: 13px;
+    @apply px-3;
+    & > div {
+      overflow: hidden;
+      @apply flex h-auto;
+    }
+  }
+
+  th {
+    @apply border-b-1 border-gray-200;
+    @apply border-t-1 border-gray-200;
+  }
+
+  td {
+    @apply bg-white border-b;
+    text-overflow: ellipsis;
+  }
+
+  table {
+    background-color: var(--nc-grid-bg);
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  thead th:nth-child(1) {
+    position: sticky !important;
+    left: 0;
+    z-index: 5;
+    @apply border-l-1 border-gray-200;
+  }
+
+  tbody td:nth-child(1) {
+    position: sticky !important;
+    left: 0;
+    z-index: 4;
+    background: white;
+    @apply border-l-1;
+    border-color: rgb(244, 244, 245);
+  }
+}
+</style>
