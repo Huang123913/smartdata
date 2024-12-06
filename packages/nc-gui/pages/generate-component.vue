@@ -1,9 +1,12 @@
 <script setup lang="ts">
+/**
+ * 创建构件页面
+ */
 definePageMeta({
   requiresAuth: localStorage.getItem('nocodb-gui-v2') ? JSON.parse(localStorage.getItem('nocodb-gui-v2'))?.token : false,
 })
 
-const selectedType = ref('api')
+const selectedType = ref('api') //创建的构件类型
 const current = ref<number>(0)
 const steps = ['选择', '创建', '预览', '完成']
 const divRef = ref(null)
@@ -30,7 +33,7 @@ const setisNewSelected = (value) => {
   isNewSelected.value = value
 }
 
-//监听模型树内容高度变化
+//监听高度变化
 const resizeObserver = new ResizeObserver((entries) => {
   for (const entry of entries) {
     if (entry.target === divRef.value) {
