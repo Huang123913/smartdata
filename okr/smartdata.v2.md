@@ -2,22 +2,24 @@
 
 ## 问题修复
   1. [完成] `优先` 规则: 从数据库获取数据到界面实体, 配置多个实体时运行报错问题
+  1. [测试中] `优先` 规则: 配置中心打开部分窗体, 域报错问题
 
 ## 控件需求
-  1. [未开始] 控件: 列表&树表: 支持操作列
+  1. [进行中] 控件: 列表&树表: 支持操作列
   2. [未开始] 控件: 列表&树表: 工具条 
   3. [未开始] 控件: UI风格: 减少与特区建工的差异
   4. [未开始] 控件: UI风格: 表单类控件标题对对齐方式
   5. [未开始] 控件: UI风格: 输入框只读时配色优化
   6. [未开始] 基座: 待办列表体验优化
-  7. [进行中] 基座: 修改密码时要求输入原密码
-  8. [未开始] 控件: 弹出窗体: 禁用 ESC 退出
+  7. [完成] 基座: 修改密码时要求输入原密码
+  8. [完成] 控件: 弹出窗体: 禁用 ESC 退出
 
 ## HyperFormula
+  > 12/9: 目前已知问题已经修复完成
   1. [完成] Cannot convert undefined or null to object
   2. [完成] 规则【AddTableRecord】执行失败，错误原因：Cannot read properties of undefined (reading \'0')
-  3. [进行中] 函数【CopyEntityRecordToWinOut】执行失败，错误原因：Cannot set properties of null (setting \'id')
-  4. [进行中] 实体【bizCol_67a5e4f616dc4b48afb8452】存在重复的记录id
+  3. [完成] 函数【CopyEntityRecordToWinOut】执行失败，错误原因：Cannot set properties of null (setting \'id')
+  4. [完成] 实体【bizCol_67a5e4f616dc4b48afb8452】存在重复的记录id
 
 ## 清理前端资产清单
   > 保留 smartclient 和 v-act
