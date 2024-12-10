@@ -1,11 +1,17 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios';
+import axios, {
+  type AxiosInstance,
+  type AxiosRequestConfig,
+} from 'axios';
 import { Request } from 'express';
 import FormData from 'form-data';
 import * as fs from 'fs';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 
 interface RewriteOptions {
   req: Request;
@@ -95,7 +101,6 @@ export class MCDMService {
     return await this.mcdm({
       url: `/restapi/bizentity/data/InternalBATable/BA_BizCustomProject/batchCreate`,
       data: { datas: data.datas },
-      headers: data.headers,
     }).then((r) => {
       return r.data;
     });

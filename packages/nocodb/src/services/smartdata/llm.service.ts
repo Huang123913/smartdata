@@ -6,8 +6,6 @@ import { MCDMService } from '~/services/smartdata/mcdm.service';
 
 import { Injectable, Logger } from '@nestjs/common';
 
-const fs = require('fs').promises;
-const path = require('path');
 @Injectable()
 export class LLMService {
   protected logger = new Logger(LLMService.name);
