@@ -60,11 +60,7 @@ export const useTablesStore = defineStore('tablesStore', () => {
     //   includeM2M: includeM2M.value,
     // })
     const tables: { list: any[] } = { list: [] }
-    let findProject = chatPlaygroundViewStore.findNodeById(chatPlaygroundViewStore.chataiData.treeData, baseId)
-    if (!findProject.isInit) {
-      await chatPlaygroundViewStore.getEntityCustomByBaseId(baseId)
-    }
-    if (chatPlaygroundViewStore.chataiData.projectMap[baseId] && chatPlaygroundViewStore.chataiData.projectMap[baseId].length > 0)
+    if (chatPlaygroundViewStore.chataiData.projectMap[baseId])
       chatPlaygroundViewStore.chataiData.projectMap[baseId].map((item) => {
         if (!item.isCatalog) {
           tables.list.push({
@@ -80,7 +76,6 @@ export const useTablesStore = defineStore('tablesStore', () => {
           })
         }
       })
-
     tables.list?.forEach((t) => {
       let meta = t.meta
       if (typeof meta === 'string') {
@@ -95,7 +90,6 @@ export const useTablesStore = defineStore('tablesStore', () => {
 
       t.meta = meta
     })
-
     baseTables.value.set(baseId, tables.list || [])
   }
 

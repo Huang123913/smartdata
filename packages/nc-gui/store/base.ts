@@ -1,7 +1,8 @@
 import type { BaseType, OracleUi, SourceType, TableType } from 'nocodb-sdk'
 import { SqlUiFactory } from 'nocodb-sdk'
-import { isString } from '@vue/shared'
 import { acceptHMRUpdate, defineStore } from 'pinia'
+
+import { isString } from '@vue/shared'
 
 export const useBase = defineStore('baseStore', () => {
   const { $e } = useNuxtApp()
@@ -144,12 +145,10 @@ export const useBase = defineStore('baseStore', () => {
       }
     } else if (baseId.value) {
       await basesStore.loadProject(baseId.value)
-      // base.value = basesStore.bases[baseId.value] // await api.base.read(baseId.value)
     } else {
       console.warn('Base id not found')
       return
     }
-
     if (isSharedBase.value) {
       await loadRoles(base.value.id || baseId.value, {
         isSharedBase: isSharedBase.value,
@@ -163,8 +162,7 @@ export const useBase = defineStore('baseStore', () => {
     } else {
       await loadRoles(base.value.id || baseId.value)
     }
-
-    await loadTables()
+    // await loadTables()
 
     await basesStore.getBaseUsers({
       baseId: base.value.id || baseId.value,
