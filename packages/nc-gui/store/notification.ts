@@ -191,7 +191,7 @@ export const useNotification = defineStore('notificationStore', () => {
     async (newToken, oldToken) => {
       try {
         if (newToken && newToken !== oldToken) {
-          await init()
+          // await init()
         } else if (!newToken) {
           clearPolling()
         }
