@@ -3,6 +3,7 @@
  * 创建构件页面
  */
 definePageMeta({
+  hideHeader: true,
   requiresAuth: localStorage.getItem('nocodb-gui-v2') ? JSON.parse(localStorage.getItem('nocodb-gui-v2'))?.token : false,
 })
 
