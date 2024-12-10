@@ -1,14 +1,13 @@
 <script lang="ts" setup>
-import dayjs from 'dayjs';
+import dayjs from 'dayjs'
 import type {
   SourceType,
   TableType,
-} from 'nocodb-sdk';
+} from 'nocodb-sdk'
 
 const { activeTables } = storeToRefs(useTablesStore())
 const { openTable } = useTablesStore()
 const { openedProject, isDataSourceLimitReached } = storeToRefs(useBases())
-
 
 const isNewBaseModalOpen = ref(false)
 const { base } = storeToRefs(useBase())
@@ -79,7 +78,6 @@ const onCreateClick = () => {
 
 const onCreateBaseClick = () => {
   if (isDataSourceLimitReached.value) return
-
   isNewBaseModalOpen.value = true
 }
 </script>
@@ -92,8 +90,8 @@ const onCreateBaseClick = () => {
         'pointer-events-none': base?.isLoading,
       }"
     >
+      <!--  v-if="isUIAllowed('tableCreate', { source: base?.sources?.[0] })" -->
       <div
-        v-if="isUIAllowed('tableCreate', { source: base?.sources?.[0] })"
         role="button"
         class="nc-base-view-all-table-btn"
         data-testid="proj-view-btn__add-new-table"
@@ -102,18 +100,13 @@ const onCreateBaseClick = () => {
         <GeneralIcon icon="addOutlineBox" />
         <div class="label">{{ $t('general.new') }} {{ $t('objects.table') }}</div>
       </div>
-      <div
-        v-if="isUIAllowed('tableCreate', { source: base?.sources?.[0] })"
-        role="button"
-        class="nc-base-view-all-table-btn"
-        data-testid="proj-view-btn__add-new-table"
-        @click="onCreateClick()"
-      >
+      <!--       v-if="isUIAllowed('tableCreate', { source: base?.sources?.[0] })" -->
+      <div role="button" class="nc-base-view-all-table-btn" data-testid="proj-view-btn__add-new-table" @click="onCreateClick()">
         <GeneralIcon icon="magic1" />
         <div class="label">提问 建表</div>
       </div>
+      <!--  v-if="isUIAllowed('tableCreate', { source: base?.sources?.[0] })" -->
       <div
-        v-if="isUIAllowed('tableCreate', { source: base?.sources?.[0] })"
         v-e="['c:table:import']"
         role="button"
         class="nc-base-view-all-table-btn"
