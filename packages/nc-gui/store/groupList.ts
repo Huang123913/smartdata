@@ -22,7 +22,7 @@ export const useGroupList = defineStore('groupListStore', () => {
   const switchGroup = (switchId: string) => {
     if (switchId === group.currentGroup.id) return
     group.currentGroup = group.groupList.find((item) => item.id === switchId)
-    // navigateTo('/')
+    navigateTo('/')
   }
 
   return {
