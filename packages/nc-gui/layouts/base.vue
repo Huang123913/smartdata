@@ -27,22 +27,17 @@ hooks.hook('page:finish', () => {
   }
 })
 
-onMounted(() => {
-  console.log('route', route)
-})
+onMounted(() => {})
 </script>
 
 <template>
-  <a-layout id="nc-app" class="nc-app" has-sider>
+  <a-layout id="nc-app" class="nc-app base-view" has-sider>
     <Transition name="slide">
       <div v-show="hasSider" id="nc-sidebar-left" ref="sidebar" />
     </Transition>
 
     <a-layout class="!flex-col h-screen">
-      <a-layout-header
-        v-if="!route.meta.public && signedIn && !route.meta.hideHeader && !['chat-ai', 'generate-component'].includes(route.name)"
-        class="nc-navbar"
-      >
+      <a-layout-header v-if="!route.meta.public && signedIn && !route.meta.hideHeader" class="nc-navbar">
         <div
           v-if="!route.params.baseType"
           v-e="['c:navbar:home']"
